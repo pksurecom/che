@@ -21,7 +21,7 @@
     <inherits name="com.google.gwt.inject.Inject"/>
     <inherits name="org.eclipse.che.ide.Core"/>
     <inherits name="org.eclipse.che.ide.ext.java.Java"/>
-    <inherits name="org.eclipse.che.ide.extension.maven.Maven"/>
+    <inherits name="org.eclipse.che.ide.ext.maven.Maven"/>
 
     <source path="client"/>
     <source path=""/>

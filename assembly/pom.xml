@@ -28,6 +28,7 @@
         <module>assembly-machine-war</module>
         <module>assembly-machine-server</module>
         <module>assembly-ide-war</module>
+        <module>assembly-platform-api-war</module>
         <module>assembly-main</module>
     </modules>
 </project>

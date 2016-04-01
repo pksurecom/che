@@ -131,7 +131,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-maven</artifactId>
+            <artifactId>che-plugin-java-ext-maven-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -155,7 +155,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-sdk-env-local</artifactId>
+            <artifactId>che-plugin-sdk-env-local-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.everrest</groupId>

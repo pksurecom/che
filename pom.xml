@@ -49,6 +49,12 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
+                <artifactId>assembly-platform-api-war</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
                 <artifactId>assembly-machine-server</artifactId>
                 <version>${project.version}</version>
                 <type>zip</type>
@@ -426,7 +432,17 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-java-ext-maven</artifactId>
+                <artifactId>che-plugin-java-ext-maven-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-java-ext-maven-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-java-ext-maven-shared</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -501,7 +517,12 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-sdk-env-local</artifactId>
+                <artifactId>che-plugin-sdk-env-local-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-sdk-env-local-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

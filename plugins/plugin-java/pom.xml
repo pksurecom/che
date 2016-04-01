@@ -25,7 +25,6 @@
     <modules>
         <module>che-plugin-java-maven-tools</module>
         <module>che-plugin-java-generator-archetype</module>
-        <module>che-plugin-java-ext-maven</module>
         <module>che-plugin-java-ext-jdt</module>
         <module>che-plugin-java-ext-lang-shared</module>
         <module>che-plugin-java-ext-lang-server</module>
@@ -33,6 +32,9 @@
         <module>che-plugin-java-ext-debugger-java-server</module>
         <module>che-plugin-java-ext-debugger-java-client</module>
         <module>che-plugin-java-ext-debugger-java-shared</module>
+        <module>che-plugin-java-ext-maven-client</module>
+        <module>che-plugin-java-ext-maven-server</module>
+        <module>che-plugin-java-ext-maven-shared</module>
     </modules>
     <build>
         <pluginManagement>

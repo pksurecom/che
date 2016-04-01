@@ -32,6 +32,15 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>tomcat/webapps</outputDirectory>
+            <outputFileNameMapping>api.war</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che:assembly-platform-api-war</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>dashboard.war</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che.dashboard:che-dashboard-war</include>
