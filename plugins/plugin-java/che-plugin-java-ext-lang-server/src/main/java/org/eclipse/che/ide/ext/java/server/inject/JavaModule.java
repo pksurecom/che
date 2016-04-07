@@ -17,6 +17,7 @@ import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.ide.ext.java.server.generator.SimpleJavaProjectGenerator;
 import org.eclipse.che.ide.ext.java.server.projecttype.JavaProjectType;
+import org.eclipse.che.ide.ext.java.server.projecttype.SimpleJavaInitHandler;
 import org.eclipse.che.ide.ext.java.server.projecttype.SimpleJavaProjectType;
 import org.eclipse.che.inject.DynaModule;
 
@@ -36,5 +37,6 @@ public class JavaModule extends AbstractModule {
 
         Multibinder<ProjectHandler> projectHandlerMultibinder = newSetBinder(binder(), ProjectHandler.class);
         projectHandlerMultibinder.addBinding().to(SimpleJavaProjectGenerator.class);
+        projectHandlerMultibinder.addBinding().to(SimpleJavaInitHandler.class);
     }
 }

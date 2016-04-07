@@ -14,16 +14,9 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.FolderEntry;
-import org.eclipse.che.api.project.server.ProjectRegistry;
-import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
-import org.eclipse.che.ide.extension.maven.server.core.EclipseWorkspaceProvider;
+import org.eclipse.che.ide.ext.java.server.projecttype.AbstractJavaInitHandler;
 import org.eclipse.che.ide.extension.maven.server.core.MavenWorkspace;
-import org.eclipse.core.resources.IProject;
+import org.eclipse.jdt.core.IJavaProject;
 
 import java.util.Collections;
 
@@ -33,14 +26,12 @@ import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.MAVEN_I
  * @author Vitaly Parfonov
  */
 @Singleton
-public class ProjectBecomeMavenHandler implements ProjectInitHandler {
+public class ProjectBecomeMavenHandler extends AbstractJavaInitHandler {
 
-    private final EclipseWorkspaceProvider provider;
     private final Provider<MavenWorkspace>           mavenWorkspace;
 
     @Inject
-    public ProjectBecomeMavenHandler(EclipseWorkspaceProvider provider, Provider<MavenWorkspace> mavenWorkspace) {
-        this.provider = provider;
+    public ProjectBecomeMavenHandler(Provider<MavenWorkspace> mavenWorkspace) {
         this.mavenWorkspace = mavenWorkspace;
     }
 
@@ -50,12 +41,9 @@ public class ProjectBecomeMavenHandler implements ProjectInitHandler {
         return MAVEN_ID;
     }
 
+
     @Override
-    public void onProjectInitialized(ProjectRegistry projectRegistry, FolderEntry projectFolder)
-            throws ServerException, ForbiddenException, ConflictException, NotFoundException {
-
-        IProject project = provider.get().getRoot().getProject(projectFolder.getPath().toString());
-        mavenWorkspace.get().update(Collections.singletonList(project));
-
+    protected void initializeClasspath(IJavaProject javaProject) {
+        mavenWorkspace.get().update(Collections.singletonList(javaProject.getProject()));
     }
 }
