@@ -8,9 +8,10 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.java.server.projecttype;
+package org.eclipse.che.plugin.java.plain.server.projecttype;
 
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.ide.ext.java.server.projecttype.AbstractJavaInitHandler;
 import org.eclipse.che.jdt.core.launching.JREContainerInitializer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.Path;
@@ -24,8 +25,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.eclipse.che.ide.ext.java.shared.Constants.DEFAULT_SOURCE_FOLDER_VALUE;
-import static org.eclipse.che.ide.ext.java.shared.Constants.SIMPLE_JAVA_PROJECT_ID;
+import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
+import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.PLAIN_JAVA_PROJECT_ID;
 
 /**
  * Init handler for simple java project.
@@ -33,9 +34,9 @@ import static org.eclipse.che.ide.ext.java.shared.Constants.SIMPLE_JAVA_PROJECT_
  *
  * @author Evgen Vidolob
  */
-public class SimpleJavaInitHandler extends AbstractJavaInitHandler {
+public class PlainJavaInitHandler extends AbstractJavaInitHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SimpleJavaInitHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PlainJavaInitHandler.class);
 
     @Override
     protected void initializeClasspath(IJavaProject javaProject) throws ServerException {
@@ -62,6 +63,6 @@ public class SimpleJavaInitHandler extends AbstractJavaInitHandler {
 
     @Override
     public String getProjectType() {
-        return SIMPLE_JAVA_PROJECT_ID;
+        return PLAIN_JAVA_PROJECT_ID;
     }
 }

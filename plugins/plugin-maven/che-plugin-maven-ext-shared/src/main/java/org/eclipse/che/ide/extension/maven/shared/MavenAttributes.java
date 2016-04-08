@@ -35,9 +35,7 @@ public interface MavenAttributes {
     String PARENT_ARTIFACT_ID = "maven.parent.artifactId";
     String PARENT_VERSION     = "maven.parent.version";
 
-    String SOURCE_FOLDER      = "maven.source.folder";
     String TEST_SOURCE_FOLDER = "maven.test.source.folder";
-
     String RESOURCE_FOLDER = "maven.resource.folder";
 
     String DEFAULT_SOURCE_FOLDER         = "src/main/java";

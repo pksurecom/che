@@ -15,7 +15,7 @@ import com.google.inject.Singleton;
 
 import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
 
-import static org.eclipse.che.ide.ext.java.shared.Constants.DEFAULT_SOURCE_FOLDER;
+import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 
 /**
  * Interceptor for showing only java source folder.
@@ -32,7 +32,7 @@ public class JavaContentRootInterceptor extends AbstractJavaContentRootIntercept
 
     @Override
     public String getSrcFolderAttribute() {
-        return DEFAULT_SOURCE_FOLDER;
+        return SOURCE_FOLDER;
     }
 
     @Override

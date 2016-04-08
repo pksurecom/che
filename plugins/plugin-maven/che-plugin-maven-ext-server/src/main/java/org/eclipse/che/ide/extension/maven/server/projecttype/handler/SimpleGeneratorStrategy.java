@@ -20,6 +20,7 @@ import org.eclipse.che.ide.maven.tools.Model;
 
 import java.util.Map;
 
+import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.ARTIFACT_ID;
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.DEFAULT_SOURCE_FOLDER;
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.DEFAULT_TEST_SOURCE_FOLDER;
@@ -29,7 +30,6 @@ import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.PARENT_
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.PARENT_GROUP_ID;
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.PARENT_VERSION;
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.SIMPLE_GENERATION_STRATEGY;
-import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.SOURCE_FOLDER;
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.TEST_SOURCE_FOLDER;
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.VERSION;
 

@@ -24,7 +24,6 @@ import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
 import org.junit.Assert;
@@ -44,6 +43,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -86,7 +86,7 @@ public class SimpleGeneratorStrategyTest {
         attributeValues.put(MavenAttributes.GROUP_ID, new AttributeValue("my_group"));
         attributeValues.put(MavenAttributes.PACKAGING, new AttributeValue("jar"));
         attributeValues.put(MavenAttributes.VERSION, new AttributeValue("1.0-SNAPSHOT"));
-        attributeValues.put(MavenAttributes.SOURCE_FOLDER, new AttributeValue("src/main/java"));
+        attributeValues.put(SOURCE_FOLDER, new AttributeValue("src/main/java"));
         attributeValues.put(MavenAttributes.TEST_SOURCE_FOLDER, new AttributeValue("src/test/java"));
 
         FolderEntry folder = pm.getProject("my_project").getBaseFolder();

@@ -10,22 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.shared;
 
-/** @author Artem Zatsarynnyi */
-public interface Constants {
+/**
+ * @author Artem Zatsarynnyi
+ * @author Valeriy Svydenko
+ */
+public final class Constants {
     // project categories
-    final String JAVA_CATEGORY       = "Java";
+    public static String JAVA_CATEGORY               = "Java";
+    public static String JAVA_ID                     = "java";
     // project attribute names
-    final String LANGUAGE            = "language";
-    final String LANGUAGE_VERSION    = "languageVersion";
-    final String FRAMEWORK           = "framework";
-    final String CONTAINS_JAVA_FILES = "containsJavaFiles";
-    final String JAVA_ID             = "java";
+    public static String LANGUAGE                    = "language";
+    public static String LANGUAGE_VERSION            = "languageVersion";
+    public static String FRAMEWORK                   = "framework";
+    public static String CONTAINS_JAVA_FILES         = "containsJavaFiles";
+    public static String SOURCE_FOLDER               = "java.source.folder";
+    public static String OUTPUT_FOLDER               = "java.output.folder";
 
-    // simple java project
-    String SIMPLE_JAVA_PROJECT_ID      = "simpleJava";
-    String SIMPLE_JAVA_PROJECT_NAME    = "Simple Java Project";
-    String LIBRARY_FOLDER              = "lib";
-    //simple java project attributes
-    String DEFAULT_SOURCE_FOLDER       = "java.source.folder";
-    String DEFAULT_SOURCE_FOLDER_VALUE = "src";
+    private Constants() {
+        throw new UnsupportedOperationException("Unused constructor.");
+    }
 }

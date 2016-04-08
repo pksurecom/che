@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.JavaCore;
  * </pre>
  *
  * This configuration just add classpath container for JRE(rt.jar).
- * For more details see {@link SimpleJavaInitHandler}
+ * For more details see {@link PlainJavaInitHandler}
  *
  * @author Evgen Vidolob
  */

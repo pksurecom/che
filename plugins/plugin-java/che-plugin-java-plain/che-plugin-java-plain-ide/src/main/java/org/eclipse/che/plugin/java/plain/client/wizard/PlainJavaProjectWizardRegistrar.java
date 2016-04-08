@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.java.client.project.wizard;
+package org.eclipse.che.plugin.java.plain.client.wizard;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -22,24 +22,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVA_CATEGORY;
-import static org.eclipse.che.ide.ext.java.shared.Constants.SIMPLE_JAVA_PROJECT_ID;
+import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.PLAIN_JAVA_PROJECT_ID;
 
 /**
- * Provides information for registering Simple Java project type into project wizard.
+ * Provides information for registering Plain Java project type into project wizard.
  *
  * @author Valeriy Svydenko
  */
-public class SimpleJavaProjectWizardRegistrar implements ProjectWizardRegistrar {
+public class PlainJavaProjectWizardRegistrar implements ProjectWizardRegistrar {
     private final List<Provider<? extends WizardPage<ProjectConfigDto>>> wizardPages;
 
     @Inject
-    public SimpleJavaProjectWizardRegistrar() {
+    public PlainJavaProjectWizardRegistrar() {
         wizardPages = new ArrayList<>();
     }
 
     @NotNull
     public String getProjectTypeId() {
-        return SIMPLE_JAVA_PROJECT_ID;
+        return PLAIN_JAVA_PROJECT_ID;
     }
 
     @NotNull

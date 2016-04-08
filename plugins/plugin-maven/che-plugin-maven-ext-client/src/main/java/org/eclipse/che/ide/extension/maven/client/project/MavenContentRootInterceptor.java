@@ -16,7 +16,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.ext.java.client.project.interceptor.AbstractJavaContentRootInterceptor;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
 
-import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.SOURCE_FOLDER;
+import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
 import static org.eclipse.che.ide.extension.maven.shared.MavenAttributes.TEST_SOURCE_FOLDER;
 
 /**

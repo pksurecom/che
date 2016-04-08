@@ -16,6 +16,10 @@ import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
 
 import javax.inject.Singleton;
 
+import static org.eclipse.che.ide.ext.java.shared.Constants.JAVA_ID;
+import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
+import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
+
 /**
  * @author Evgen Vidolob
  * @author Dmitry Shnurenko
@@ -36,10 +40,12 @@ public class MavenProjectType extends ProjectTypeDef {
         addVariableDefinition(MavenAttributes.PARENT_ARTIFACT_ID, "", false, mavenValueProviderFactory);
         addVariableDefinition(MavenAttributes.PARENT_GROUP_ID, "", false, mavenValueProviderFactory);
         addVariableDefinition(MavenAttributes.PACKAGING, "", false, mavenValueProviderFactory);
-        addVariableDefinition(MavenAttributes.SOURCE_FOLDER, "", false, mavenValueProviderFactory);
         addVariableDefinition(MavenAttributes.TEST_SOURCE_FOLDER, "", false, mavenValueProviderFactory);
         addVariableDefinition(MavenAttributes.RESOURCE_FOLDER, "", false, mavenValueProviderFactory);
 
-        addParent("java");
+        setValueProviderFactory(SOURCE_FOLDER, mavenValueProviderFactory);
+        setValueProviderFactory(OUTPUT_FOLDER, mavenValueProviderFactory);
+
+        addParent(JAVA_ID);
     }
 }
