@@ -73,7 +73,7 @@ public class ConfigTest {
         connection.getConfig().add(INVALID_PROPERTY_NAME, PROPERTY_VALUE);
     }
 
-    @Test(expectedExceptions = GitException.class, expectedExceptionsMessageRegExp = "",
+    @Test(expectedExceptions = GitException.class, expectedExceptionsMessageRegExp = "Unknown configuration key difftool.prompt",
             dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
     public void testShouldReturnEmptyValueForParameter(GitConnectionFactory connectionFactory) throws Exception {
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);

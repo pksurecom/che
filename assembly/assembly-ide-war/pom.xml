@@ -455,6 +455,7 @@
                         **/junit*.html,
                         WEB-INF/lib/che-core-api-git-*.jar,
                         WEB-INF/lib/che-core-git-impl-native-*.jar,
+                        WEB-INF/lib/che-core-git-impl-jgit-*.jar,
                         WEB-INF/lib/che-plugin-java-*.jar,
                         WEB-INF/lib/che-jdt-ext-machine-*.jar,
                         WEB-INF/lib/che-plugin-machine-ext-client*.jar,

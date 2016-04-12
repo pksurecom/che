@@ -52,6 +52,7 @@ public class IsInsideWorkTreeTest {
     @AfterMethod
     public void cleanUp() {
         cleanupTestRepo(repository);
+        cleanupTestRepo(regularDir);
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class)
@@ -59,7 +60,6 @@ public class IsInsideWorkTreeTest {
         throws ServerException, IOException, UnauthorizedException, URISyntaxException {
         // given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);
-        Path internalDir = connection.getWorkingDir().toPath().resolve("new_directory");
 
         // add new dir into working tree
         addFile(connection.getWorkingDir().toPath().resolve("new_directory"), "a", "content of a");
@@ -67,8 +67,7 @@ public class IsInsideWorkTreeTest {
         connection.commit(newDto(CommitRequest.class).withMessage("test"));
 
         // when
-        GitConnection internalDirConnection = connectionFactory.getConnection(internalDir.toFile());
-        boolean isInsideWorkingTree = internalDirConnection.isInsideWorkTree();
+        boolean isInsideWorkingTree = connection.isInsideWorkTree();
 
         // then
         assertTrue(isInsideWorkingTree);
