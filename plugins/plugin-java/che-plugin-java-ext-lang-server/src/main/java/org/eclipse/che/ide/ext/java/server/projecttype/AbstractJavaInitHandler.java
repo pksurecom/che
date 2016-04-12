@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.che.ide.ext.java.server.projecttype;
 
+import com.google.inject.Inject;
+
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -41,6 +43,14 @@ import org.eclipse.jdt.core.JavaCore;
  * @author Evgen Vidolob
  */
 public abstract class AbstractJavaInitHandler implements ProjectInitHandler {
+
+
+    private ResourcesPlugin plugin;
+
+    @Inject
+    void init(ResourcesPlugin plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public final void onProjectInitialized(ProjectRegistry registry, FolderEntry projectFolder)
