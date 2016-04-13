@@ -56,7 +56,7 @@ public class JGitConfigImpl extends Config {
 
     @Override
     public List<String> getList() throws GitException {
-        List<String> results = new ArrayList<String>();
+        List<String> results = new ArrayList<>();
         // Iterate all sections and subsections, printing all values
         StoredConfig config = _repository.getConfig();
         for (String section : config.getSections()) {
@@ -85,7 +85,7 @@ public class JGitConfigImpl extends Config {
             String firstPart = builder.toString();
             String[] values = _repository.getConfig().getStringList(section, subsection, name);
             for (String value : values) {
-                output.add(firstPart + " " + value);
+                output.add(firstPart + value);
             }
         }
     }

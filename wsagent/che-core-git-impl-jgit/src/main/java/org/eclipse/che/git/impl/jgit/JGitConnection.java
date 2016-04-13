@@ -467,9 +467,7 @@ public class JGitConnection implements GitConnection {
 
     @Override
     public ShowFileContentResponse showFileContent(ShowFileContentRequest request) throws GitException {
-//        ShowFileContentCommand showCommand = nativeGit.createShowFileContentCommand().withFile(request.getFile())
-//                                                      .withVersion(request.getVersion());
-//        return showCommand.execute();
+        getGit().diff();
         return null;
     }
 
@@ -478,10 +476,10 @@ public class JGitConnection implements GitConnection {
         String remote = request.getRemote();
 
         try {
-            List<RefSpec> fetchRefSpecs = null;
+            List<RefSpec> fetchRefSpecs;
             List<String> refSpec = request.getRefSpec();
             if (refSpec != null && refSpec.size() > 0) {
-                fetchRefSpecs = new ArrayList<RefSpec>(refSpec.size());
+                fetchRefSpecs = new ArrayList<>(refSpec.size());
                 for (String refSpecItem : refSpec) {
                     RefSpec fetchRefSpec = (refSpecItem.indexOf(':') < 0) //
                             ? new RefSpec(Constants.R_HEADS + refSpecItem + ":") //
@@ -993,8 +991,8 @@ public class JGitConnection implements GitConnection {
         tmp = request.getBranches();
         if (tmp != null && tmp.size() > 0) {
             if (!request.isAddBranches()) {
-                remoteConfig.setFetchRefSpecs(new ArrayList<RefSpec>());
-                remoteConfig.setPushRefSpecs(new ArrayList<RefSpec>());
+                remoteConfig.setFetchRefSpecs(new ArrayList<>());
+                remoteConfig.setPushRefSpecs(new ArrayList<>());
             } else {
                 // Replace wildcard refspec if any.
                 remoteConfig.removeFetchRefSpec(
@@ -1131,22 +1129,22 @@ public class JGitConnection implements GitConnection {
             throw new GitException(e.getMessage(), e);
         }
 
-        List<String> untrackedFolders = new ArrayList<String>(gitStatus.getUntrackedFolders());
-        List<String> untrackedFiles = new ArrayList<String>(gitStatus.getUntracked());
+        List<String> untrackedFolders = new ArrayList<>(gitStatus.getUntrackedFolders());
+        List<String> untrackedFiles = new ArrayList<>(gitStatus.getUntracked());
 
         // The Che result
         String currentBranch = getCurrentBranch();
         Status cheStatus = createDto(org.eclipse.che.api.git.shared.Status.class);
         cheStatus.setRepositoryState(repository.getRepositoryState().name());
-        cheStatus.setAdded(new ArrayList<String>(gitStatus.getAdded()));
+        cheStatus.setAdded(new ArrayList<>(gitStatus.getAdded()));
         cheStatus.setBranchName(currentBranch);
-        cheStatus.setChanged(new ArrayList<String>(gitStatus.getChanged()));
+        cheStatus.setChanged(new ArrayList<>(gitStatus.getChanged()));
         cheStatus.setClean(gitStatus.isClean());
-        cheStatus.setConflicting(new ArrayList<String>(gitStatus.getConflicting()));
+        cheStatus.setConflicting(new ArrayList<>(gitStatus.getConflicting()));
         cheStatus.setFormat(format);
-        cheStatus.setMissing(new ArrayList<String>(gitStatus.getMissing()));
-        cheStatus.setModified(new ArrayList<String>(gitStatus.getModified()));
-        cheStatus.setRemoved(new ArrayList<String>(gitStatus.getRemoved()));
+        cheStatus.setMissing(new ArrayList<>(gitStatus.getMissing()));
+        cheStatus.setModified(new ArrayList<>(gitStatus.getModified()));
+        cheStatus.setRemoved(new ArrayList<>(gitStatus.getRemoved()));
         cheStatus.setUntracked(untrackedFiles);
         cheStatus.setUntrackedFolders(untrackedFolders);
         return cheStatus;
@@ -1300,7 +1298,11 @@ public class JGitConnection implements GitConnection {
         try {
             refs = jgitCommand.call();
         } catch (GitAPIException e) {
-            throw new GitException(e.getMessage(), e);
+            if (e.getMessage().contains("Authentication is required but no CredentialsProvider has been registered")) {
+                throw new UnauthorizedException(e.getMessage());
+            } else {
+                throw new GitException(e.getMessage(), e);
+            }
         }
         // Translate the JGit result
         List<RemoteReference> remoteRefs = new ArrayList<RemoteReference>(refs.size());
