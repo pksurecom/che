@@ -21,7 +21,7 @@ export class CreateProjectCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, $q, $log, $document, routeHistory) {
+  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, cheNotification, $q, $log, $document, routeHistory) {
     this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheStack = cheStack;
@@ -33,6 +33,7 @@ export class CreateProjectCtrl {
     this.$rootScope = $rootScope;
     this.createProjectSvc = createProjectSvc;
     this.lodash = lodash;
+    this.cheNotification = cheNotification;
     this.$q = $q;
     this.$document = $document;
 
@@ -430,11 +431,15 @@ export class CreateProjectCtrl {
 
     let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
     startWorkspacePromise.then(() => {}, (error) => {
-      if (error.data.message) {
-        this.getCreationSteps()[this.getCurrentProgressStep()].logs = error.data.message;
+      let errorMessage = 'Unable to start this workspace. ';
+      if (error.data && error.data.message !== null) {
+        errorMessage += error.data.message;
       }
+      this.cheNotification.showError(errorMessage);
+      this.getCreationSteps()[this.getCurrentProgressStep()].logs = errorMessage;
       this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
     });
+    return  startWorkspacePromise;
   }
 
   createProjectInWorkspace(workspaceId, projectName, projectData, bus, websocketStream, workspaceBus) {
@@ -733,8 +738,7 @@ export class CreateProjectCtrl {
     if ('image' === recipeSource.type) {
       // needs to add recipe for that script
       promise = this.submitRecipe('generated-' + stack.name, 'FROM ' + recipeSource.origin);
-    } else if ('recipe' === recipeSource.type) {
-
+    } else if ('dockerfile' === recipeSource.type.toLowerCase()) {
       promise = this.submitRecipe('generated-' + stack.name, recipeSource.origin);
     } else {
       throw 'Not implemented';
@@ -971,6 +975,9 @@ export class CreateProjectCtrl {
   }
 
   resetCreateProgress() {
+    if (this.isResourceProblem()) {
+      this.$location.path('/workspaces');
+    }
     this.createProjectSvc.resetCreateProgress();
   }
 
@@ -1012,7 +1019,6 @@ export class CreateProjectCtrl {
     return this.createProjectSvc.getWorkspaceOfProject();
   }
 
-
   getIDELink() {
     return this.createProjectSvc.getIDELink();
   }
@@ -1030,6 +1036,10 @@ export class CreateProjectCtrl {
     return index <= maxVisibleElement;
   }
 
+  isResourceProblem() {
+    let currentCreationStep = this.getCreationSteps()[this.getCurrentProgressStep()];
+    return currentCreationStep.hasError && currentCreationStep.logs.includes('You can stop other workspaces');
+  }
 
   isvisible(elementName) {
     let element = angular.element(elementName);
