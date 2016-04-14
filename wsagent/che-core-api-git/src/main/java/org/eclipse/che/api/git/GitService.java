@@ -71,6 +71,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -210,7 +211,7 @@ public class GitService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-    public ShowFileContentResponse showFileContent(ShowFileContentRequest request) throws ApiException {
+    public ShowFileContentResponse showFileContent(ShowFileContentRequest request) throws ApiException, IOException {
         try (GitConnection gitConnection = getGitConnection()) {
             return gitConnection.showFileContent(request);
         }

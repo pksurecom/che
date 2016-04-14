@@ -61,7 +61,7 @@ public class TagCreateTest {
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
-    public void testCreateTagForce(GitConnectionFactory connectionFactory) throws GitException, IOException {
+    public void testCreateTagForce(GitConnectionFactory connectionFactory) throws GitException, IOException, InterruptedException {
         //given
         GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
         TagCreateRequest request = newDto(TagCreateRequest.class);
@@ -69,17 +69,23 @@ public class TagCreateTest {
         request.setMessage("first version");
         connection.tagCreate(request);
         //when
-        try {
-            //try add same tag
-            connection.tagCreate(request);
-            fail("It is not force, should be exception.");
-        } catch (GitException ignored) {
-        }
-        //try again with force
-        request.setMessage("first version");
+        Thread.sleep(1000);
         request.setForce(true);
         connection.tagCreate(request);
         //then
         assertTrue(connection.tagList(newDto(TagListRequest.class)).get(0).getName().equals("v1"));
+    }
+
+    @Test(expectedExceptions = GitException.class,
+          dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class)
+    public void testShouldFailOnCreatingTheSameTag(GitConnectionFactory connectionFactory)
+            throws GitException, IOException, InterruptedException {
+        GitConnection connection = connectToGitRepositoryWithContent(connectionFactory, repository);
+        TagCreateRequest request = newDto(TagCreateRequest.class);
+        request.setName("v1");
+        request.setMessage("first version");
+        connection.tagCreate(request);
+        Thread.sleep(1000);
+        connection.tagCreate(request);
     }
 }

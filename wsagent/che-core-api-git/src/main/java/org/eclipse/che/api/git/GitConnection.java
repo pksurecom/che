@@ -56,6 +56,7 @@ import org.eclipse.che.api.git.shared.TagListRequest;
 
 import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
 

@@ -107,6 +107,7 @@ import org.eclipse.jgit.errors.NoWorkTreeException;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.RefUpdate;
@@ -118,6 +119,7 @@ import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevTag;
+import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.PushResult;
@@ -126,9 +128,13 @@ import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.util.FS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 /**
  * @author <a href="mailto:andrey.parfonov@exoplatform.com">Andrey Parfonov</a>
@@ -467,8 +473,38 @@ public class JGitConnection implements GitConnection {
 
     @Override
     public ShowFileContentResponse showFileContent(ShowFileContentRequest request) throws GitException {
-        getGit().diff();
-        return null;
+        String content;
+        ObjectId revision;
+        try {
+            revision = getRepository().resolve(request.getVersion());
+            // a RevWalk allows to walk over commits based on some filtering that is defined
+            try (RevWalk revWalk = new RevWalk(getRepository())) {
+                RevCommit commit = revWalk.parseCommit(revision);
+                // and using commit's tree find the path
+                RevTree tree = commit.getTree();
+                System.out.println("Having tree: " + tree);
+
+                // now try to find a specific file
+                try (TreeWalk treeWalk = new TreeWalk(getRepository())) {
+                    treeWalk.addTree(tree);
+                    treeWalk.setRecursive(true);
+                    treeWalk.setFilter(PathFilter.create(request.getFile()));
+                    if (!treeWalk.next()) {
+                        throw new GitException("fatal: Path '" + request.getFile() + "' does not exist in '"
+                                               + request.getVersion() + "'\n");
+                    }
+
+                    ObjectId objectId = treeWalk.getObjectId(0);
+                    ObjectLoader loader = repository.open(objectId);
+
+                    content = new String(loader.getBytes());
+                }
+                revWalk.dispose();
+            }
+        } catch (IOException exception) {
+            throw new GitException(exception.getMessage());
+        }
+        return newDto(ShowFileContentResponse.class).withContent(content);
     }
 
     @Override
@@ -728,7 +764,7 @@ public class JGitConnection implements GitConnection {
                 }
             }
 
-            String remoteBranch = null;
+            String remoteBranch;
             RefSpec fetchRefSpecs = null;
             String refSpec = request.getRefSpec();
             if (refSpec != null) {
@@ -737,8 +773,9 @@ public class JGitConnection implements GitConnection {
                         : new RefSpec(refSpec);
                 remoteBranch = fetchRefSpecs.getSource();
             } else {
-                remoteBranch = config.getString(ConfigConstants.CONFIG_BRANCH_SECTION, branch,
-                        ConfigConstants.CONFIG_KEY_MERGE);
+                remoteBranch = config.getString(ConfigConstants.CONFIG_REMOTE_SECTION, remote,
+                        ConfigConstants.CONFIG_FETCH_SECTION);
+                remoteBranch = remoteBranch.substring(1, remoteBranch.indexOf(":"));
             }
 
             if (remoteBranch == null) {
@@ -848,9 +885,14 @@ public class JGitConnection implements GitConnection {
                     }
                 }
             }
-        } catch (GitAPIException e) {
-            throw new GitException(e.getMessage(), e);
-        } 
+        } catch (GitAPIException exception) {
+            if ("origin: not found.".equals(exception.getMessage())) {
+                throw new GitException("No remote repository specified.  Please, specify either a URL or a remote " +
+                                       "name from which new revisions should be fetched in request.", exception);
+            } else {
+                throw new GitException(exception.getMessage(), exception);
+            }
+        }
         return DtoFactory.getInstance().createDto(PushResponse.class);
     }
 
@@ -913,7 +955,7 @@ public class JGitConnection implements GitConnection {
         StoredConfig config = repository.getConfig();
         Set<String> remoteNames = config.getSubsections(ConfigConstants.CONFIG_KEY_REMOTE);
         if (!remoteNames.contains(name)) {
-            throw new GitException(Messages.getString("ERROR_DELETE_REMOTE_NAME_MISSING"));
+            throw new GitException("error: Could not remove config section 'remote." + name + "'");
         }
 
         config.unsetSection(ConfigConstants.CONFIG_REMOTE_SECTION, name);
