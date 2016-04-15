@@ -25,10 +25,12 @@ import org.eclipse.che.ide.extension.maven.server.core.project.MavenProject;
 import org.eclipse.che.ide.extension.maven.server.core.project.MavenProjectModifications;
 import org.eclipse.che.jdt.core.launching.JREContainerInitializer;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.jdom.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +52,7 @@ public class MavenWorkspace {
     private static final Logger LOG = LoggerFactory.getLogger(MavenWorkspace.class);
 
     private final MavenProjectManager manager;
-    private final ProjectManager projectManager;
+    private final ProjectManager      projectManager;
     private final ProjectRegistry     projectRegistry;
     private final MavenCommunication  communication;
     private final ClasspathManager    classpathManager;
@@ -95,8 +97,6 @@ public class MavenWorkspace {
 
                 addResolveProjects(needResolve);
 
-                //TODO schedule resolving tasks
-                List<MavenProject> updatedProjects = new ArrayList<>(updated.keySet());
                 communication.sendUpdateMassage(updated.keySet(), removed);
             }
         });
@@ -108,15 +108,9 @@ public class MavenWorkspace {
 
     private void createNewProjects(Set<MavenProject> mavenProjects) {
         mavenProjects.stream()
-//                     .filter(project -> projectRegistry.getProject(project.getProject().getFullPath().toOSString()) == null)
                      .forEach(project -> {
                          try {
-//                             ProjectConfigImpl config = new ProjectConfigImpl();
-//                             config.setType(MAVEN_ID);
                              String path = project.getProject().getFullPath().toOSString();
-//                             config.setPath(path);
-//                             config.setName(project.getProject().getFullPath().lastSegment());
-
                              projectRegistry.setProjectType(path, MAVEN_ID, false);
                          } catch (ConflictException | ServerException | NotFoundException e) {
                              LOG.error("Can't add new project: " + project.getProject().getFullPath(), e);
@@ -148,6 +142,7 @@ public class MavenWorkspace {
         for (MavenProject mavenProject : needResolve) {
 
             resolveExecutor.submitTask(new MavenProjectResolveTask(mavenProject, manager, () -> {
+                addSourcesFromBuildHelperPlugin(mavenProject);
                 classpathManager.updateClasspath(mavenProject);
             }));
         }
@@ -165,9 +160,42 @@ public class MavenWorkspace {
             //add JRE classpath container
             helper.addContainerEntry(new Path(JREContainerInitializer.JRE_CONTAINER));
 
+
             javaProject.setRawClasspath(helper.getEntries(), null);
         } catch (JavaModelException e) {
             LOG.error("Can't update Java project classpath", e);
+        }
+    }
+
+    private void addSourcesFromBuildHelperPlugin(MavenProject project) {
+        IJavaProject javaProject = JavaCore.create(project.getProject());
+        try {
+            ClasspathHelper helper = new ClasspathHelper(javaProject);
+
+            Element pluginConfigurationSource =
+                    project.getPluginConfiguration("org.codehaus.mojo", "build-helper-maven-plugin", "add-source");
+
+            Element pluginConfigurationTestSource =
+                    project.getPluginConfiguration("org.codehaus.mojo", "build-helper-maven-plugin", "add-test-source");
+
+            addSourcePathFromConfiguration(helper, project, pluginConfigurationSource);
+            addSourcePathFromConfiguration(helper, project, pluginConfigurationTestSource);
+            javaProject.setRawClasspath(helper.getEntries(), null);
+        } catch (JavaModelException e) {
+            LOG.error("Can't update Java project classpath with Maven build helper plugin configuration", e);
+        }
+    }
+
+    private void addSourcePathFromConfiguration(ClasspathHelper helper, MavenProject project, Element configuration) {
+        if (configuration != null) {
+            Element sources = configuration.getChild("sources");
+            if (sources != null) {
+                for (Object element : sources.getChildren()) {
+                    String path = ((Element)element).getTextTrim();
+                    IPath projectLocation = project.getProject().getLocation();
+                    helper.addSourceEntry(project.getProject().getFullPath().append(path.substring(projectLocation.toOSString().length())));
+                }
+            }
         }
     }
 

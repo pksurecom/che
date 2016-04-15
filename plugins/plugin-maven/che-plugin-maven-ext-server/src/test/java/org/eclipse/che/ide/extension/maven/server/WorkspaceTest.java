@@ -32,8 +32,10 @@ import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.fest.assertions.Condition;
@@ -516,6 +518,56 @@ public class WorkspaceTest extends BaseTest {
 
         assertThat(projectRegistry.getProjects()).hasSize(2).onProperty("path")
                                                  .containsOnly("/parent", "/parent/module1");
+    }
+
+    @Test
+    public void testWsShouldAddSourceFolderFromBuildHelperPlugin() throws Exception {
+        String pom = "<groupId>test</groupId>\n" +
+                     "<artifactId>testArtifact</artifactId>\n" +
+                     "<version>42</version>\n" +
+                     "<properties>\n"+
+                     "    <dto-generator-out-directory>${project.build.directory}/generated-sources/dto/</dto-generator-out-directory>\n" +
+                     "</properties>\n" +
+                     "<dependencies>\n" +
+                     "    <dependency>\n" +
+                     "        <groupId>junit</groupId>\n" +
+                     "        <artifactId>junit</artifactId>\n" +
+                     "        <version>4.12</version>\n" +
+                     "    </dependency>\n" +
+                     "</dependencies>\n" +
+                     "<build>\n" +
+                     "   <plugins>\n"+
+                     "       <plugin>\n"+
+                     "          <groupId>org.codehaus.mojo</groupId>\n" +
+                     "          <artifactId>build-helper-maven-plugin</artifactId>\n" +
+                     "              <executions>\n" +
+                     "                  <execution>\n"+
+                     "                      <id>add-source</id>\n"+
+                     "                      <phase>process-sources</phase>\n"+
+                     "                      <goals>\n"+
+                     "                          <goal>add-source</goal>\n"+
+                     "                      </goals>\n" +
+                     "                      <configuration>\n" +
+                     "                          <sources>\n" +
+                     "                              <source>${dto-generator-out-directory}</source>\n"+
+                     "                          </sources>\n"+
+                     "                      </configuration>\n"+
+                     "                  </execution>\n"+
+                     "              </executions>\n"+
+                     "       </plugin>\n" +
+                     "   </plugins>\n" +
+                     "</build>";
+
+        createTestProject("test", pom);
+
+        IProject test = ResourcesPlugin.getWorkspace().getRoot().getProject("test");
+        mavenWorkspace.update(Collections.singletonList(test));
+        mavenWorkspace.waitForUpdate();
+        MavenProject mavenProject = projectManager.findMavenProject(test);
+
+        IJavaProject javaProject = JavaCore.create(test);
+        IClasspathEntry[] rawClasspath = javaProject.getRawClasspath();
+        assertThat(rawClasspath).onProperty("path").contains(new Path("/test/target/generated-sources/dto/"));
     }
 
 }

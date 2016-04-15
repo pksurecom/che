@@ -98,4 +98,12 @@ public class MavenPlugin implements Serializable {
     }
 
 
+    public Element getGoalConfiguration(String goal) {
+        for (MavenPluginExecution execution : executions) {
+            if (execution.getGoals().contains(goal)) {
+                return execution.getConfiguration();
+            }
+        }
+        return null;
+    }
 }

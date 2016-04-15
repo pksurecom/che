@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
+import org.jdom.Element;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -303,6 +304,43 @@ public class MavenProject {
 
     public Collection<String> getModulesPath() {
         return info.modulesNameToPath.values();
+    }
+
+    public Element getPluginConfiguration(String groupId, String artifactId, String goal) {
+        MavenPlugin plugin = findPlugin(groupId, artifactId);
+        if (plugin == null) {
+            return null;
+        }
+
+        if (goal == null) {
+            return plugin.getConfiguration();
+        } else {
+            return plugin.getGoalConfiguration(goal);
+        }
+    }
+
+    public MavenPlugin findPlugin(String groupId, String artifactId) {
+        return findPlugin(groupId, artifactId, false);
+    }
+
+    private MavenPlugin findPlugin(String groupId, String artifactId, boolean declaredOnly) {
+        List<MavenPlugin> plugins;
+        if (declaredOnly) {
+            plugins = getDeclaredPlugins();
+        } else {
+            plugins = getPlugins();
+        }
+
+        for (MavenPlugin plugin : plugins) {
+            if (plugin.getGroupId().equals(groupId) && plugin.getArtifactId().equals(artifactId)) {
+                return plugin;
+            }
+        }
+        return null;
+    }
+
+    private List<MavenPlugin> getDeclaredPlugins() {
+        return info.plugins.stream().filter(plugin -> !plugin.isDefault()).collect(Collectors.toList());
     }
 
 
