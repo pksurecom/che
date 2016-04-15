@@ -60,6 +60,12 @@ public interface JavaLocalizationConstant extends Messages {
     @Key("action.quickdoc.description")
     String actionQuickdocDescription();
 
+    @Key("action.quick.fix.title")
+    String actionQuickFixTitle();
+
+    @Key("action.quick.fix.description")
+    String actionQuickFixDescription();
+
     @Key("action.openDeclaration.title")
     String actionOpenDeclarationTitle();
 
@@ -350,4 +356,10 @@ public interface JavaLocalizationConstant extends Messages {
 
     @Key("unable.to.load.java.compiler.errors.warnings.settings")
     String unableToLoadJavaCompilerErrorsWarningsSettings();
+
+    @Key("parameter.info")
+    String parameterInfo();
+
+    @Key("parameter.info.description")
+    String parameterInfoDescription();
 }

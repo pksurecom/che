@@ -12,6 +12,7 @@
 
 import {CheAccordion} from './accordion/che-accordion.directive';
 import {CheButtonPrimary} from './button/che-button-primary.directive';
+import {CheButtonPrimaryFlat} from './button/che-button-primary-flat.directive';
 import {CheButtonDanger} from './button/che-button-danger.directive';
 import {CheButtonDefault} from './button/che-button-default.directive';
 import {CheButtonNotice} from './button/che-button-notice.directive';
@@ -22,7 +23,6 @@ import {CheClipboard} from './copy-clipboard/che-clipboard.directive';
 import {CheDropZoneCtrl} from './dropzone/che-dropzone.controller';
 import {CheDropZone} from './dropzone/che-dropzone.directive';
 import {CheEmptyState} from './empty-state/che-empty-state.directive';
-import {CheEventLogger} from './event-logger/che-event-logger.directive';
 import {CheFrame} from './frame/che-frame.directive';
 import {CheFooter} from './footer/che-footer.directive';
 import {CheHtmlSource} from './html-source/che-html-source.directive';
@@ -66,6 +66,7 @@ export class WidgetConfig {
 
       // button
       .directive('cheButtonPrimary', CheButtonPrimary)
+      .directive('cheButtonPrimaryFlat', CheButtonPrimaryFlat)
       .directive('cheButtonDanger', CheButtonDanger)
       .directive('cheButtonDefault', CheButtonDefault)
       .directive('cheButtonNotice', CheButtonNotice)
@@ -79,7 +80,6 @@ export class WidgetConfig {
       .controller('CheDropZoneCtrl', CheDropZoneCtrl)
       .directive('cheDropzone', CheDropZone)
       .directive('cheEmptyState', CheEmptyState)
-      .directive('cheEventLogger', CheEventLogger)
       .directive('cheFrame', CheFrame)
       .directive('cheFooter', CheFooter)
       .directive('cheHtmlSource', CheHtmlSource)

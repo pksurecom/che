@@ -16,7 +16,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.ide.workspace.DefaultWorkspaceComponent;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.context.BrowserQueryFieldRenderer;
@@ -117,7 +116,7 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
 
             workspaceComponent.setCurrentWorkspace(workspace);
 
-            workspaceComponent.startWorkspaceById(workspace);
+            workspaceComponent.startWorkspaceById(workspace, callback);
 
             view.hide();
         }
@@ -136,7 +135,7 @@ public class StartWorkspacePresenter implements StartWorkspaceView.ActionDelegat
     public void onStartWorkspaceClicked() {
         DefaultWorkspaceComponent workspaceComponent = wsComponentProvider.get();
 
-        workspaceComponent.startWorkspaceById(selectedWorkspace);
+        workspaceComponent.startWorkspaceById(selectedWorkspace, callback);
 
         view.hide();
     }

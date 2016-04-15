@@ -398,14 +398,11 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
     @Key("importer.projectDescriptionPrompt")
     String importerProjectDescriptionPrompt();
 
-    @Key("importer.projectPrivacy")
-    String importerProjectPrivacy();
+    @Key("importer.default.relativePath")
+    String importerDefaultRelativePath();
 
-    @Key("importer.projectVisibilityPublic")
-    String importerProjectVisibilityPublic();
-
-    @Key("importer.projectVisibilityPrivate")
-    String importerProjectVisibilityPrivate();
+    @Key("importer.url.incorrect.message")
+    String importProjectUrlIncorrectMessage();
 
     @Key("status.successful")
     String statusSuccessful();
@@ -531,6 +528,18 @@ public interface SubversionExtensionLocalizationConstants extends Messages {
 
     @Key("export.successful")
     String exportSuccessful(String path);
+
+    @Key("export.fail.noprojectpath")
+    String exportFailedNoProjectPath();
+
+    @Key("export.fail.command.execution")
+    String exportCommandExecutionError();
+
+    @Key("export.fail.revision.donotexist")
+    String exportRevisionDoNotExistForPath(String givenRevision, String path);
+
+    @Key("export.fail.norevision")
+    String exportNoRevisionForPath(String path);
 
     /* Move dialog */
     @Key("move.fail.to.get.project")

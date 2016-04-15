@@ -26,6 +26,7 @@ import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.machine.server.exception.InvalidRecipeException;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.exception.SnapshotException;
+import org.eclipse.che.api.machine.server.exception.UnsupportedRecipeException;
 import org.eclipse.che.api.machine.server.spi.Instance;
 import org.eclipse.che.api.machine.server.spi.InstanceKey;
 import org.eclipse.che.api.machine.server.spi.InstanceProvider;
@@ -66,6 +67,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 
 /**
  * Docker implementation of {@link InstanceProvider}
@@ -80,6 +82,7 @@ public class DockerInstanceProvider implements InstanceProvider {
     private final DockerInstanceStopDetector       dockerInstanceStopDetector;
     private final WorkspaceFolderPathProvider      workspaceFolderPathProvider;
     private final boolean                          doForcePullOnBuild;
+    private final boolean                          privilegeMode;
     private final Set<String>                      supportedRecipeTypes;
     private final DockerMachineFactory             dockerMachineFactory;
     private final Map<String, Map<String, String>> devMachinePortsToExpose;
@@ -104,6 +107,7 @@ public class DockerInstanceProvider implements InstanceProvider {
                                   WorkspaceFolderPathProvider workspaceFolderPathProvider,
                                   @Named("che.machine.projects.internal.storage") String projectFolderPath,
                                   @Named("machine.docker.pull_image") boolean doForcePullOnBuild,
+                                  @Named("machine.docker.privilege_mode") boolean privilegeMode,
                                   @Named("machine.docker.dev_machine.machine_env") Set<String> devMachineEnvVariables,
                                   @Named("machine.docker.machine_env") Set<String> allMachinesEnvVariables)
             throws IOException {
@@ -113,7 +117,8 @@ public class DockerInstanceProvider implements InstanceProvider {
         this.dockerInstanceStopDetector = dockerInstanceStopDetector;
         this.workspaceFolderPathProvider = workspaceFolderPathProvider;
         this.doForcePullOnBuild = doForcePullOnBuild;
-        this.supportedRecipeTypes = Collections.singleton("Dockerfile");
+        this.privilegeMode = privilegeMode;
+        this.supportedRecipeTypes = Collections.singleton("dockerfile");
         this.projectFolderPath = projectFolderPath;
 
         if (SystemInfo.isWindows()) {
@@ -206,7 +211,7 @@ public class DockerInstanceProvider implements InstanceProvider {
     @Override
     public Instance createInstance(Recipe recipe,
                                    Machine machine,
-                                   LineConsumer creationLogsOutput) throws MachineException {
+                                   LineConsumer creationLogsOutput) throws MachineException, UnsupportedRecipeException {
         final Dockerfile dockerfile = parseRecipe(recipe);
 
         final String machineContainerName = generateContainerName(machine.getWorkspaceId(), machine.getConfig().getName());
@@ -273,7 +278,7 @@ public class DockerInstanceProvider implements InstanceProvider {
             return DockerfileParser.parse(recipe.getScript());
         } catch (DockerFileException e) {
             LOG.debug(e.getLocalizedMessage(), e);
-            throw new InvalidRecipeException(String.format("Unable build docker based machine. %s", e.getMessage()));
+            throw new InvalidRecipeException("Unable build docker based machine. " + e.getMessage());
         }
     }
 
@@ -393,9 +398,9 @@ public class DockerInstanceProvider implements InstanceProvider {
             if (machine.getConfig().isDev()) {
                 portsToExpose = new HashMap<>(devMachinePortsToExpose);
 
-                final String projectFolderVolume = String.format("%s:%s:Z",
-                                                                 workspaceFolderPathProvider.getPath(machine.getWorkspaceId()),
-                                                                 projectFolderPath);
+                final String projectFolderVolume = format("%s:%s:Z",
+                                                          workspaceFolderPathProvider.getPath(machine.getWorkspaceId()),
+                                                          projectFolderPath);
                 volumes = ObjectArrays.concat(devMachineSystemVolumes,
                                               SystemInfo.isWindows() ? escapePath(projectFolderVolume) : projectFolderVolume);
 
@@ -423,7 +428,8 @@ public class DockerInstanceProvider implements InstanceProvider {
                                                           .withExtraHosts(allMachinesExtraHosts)
                                                           .withPublishAllPorts(true)
                                                           .withMemorySwap(-1)
-                                                          .withMemory((long)machine.getConfig().getLimits().getRam() * 1024 * 1024);
+                                                          .withMemory((long)machine.getConfig().getLimits().getRam() * 1024 * 1024)
+                                                          .withPrivileged(privilegeMode);
             final ContainerConfig config = new ContainerConfig().withImage(imageName)
                                                                 .withExposedPorts(portsToExpose)
                                                                 .withHostConfig(hostConfig)

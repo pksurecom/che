@@ -15,7 +15,6 @@ import elemental.client.Browser;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.Window;
@@ -30,7 +29,6 @@ import org.eclipse.che.api.machine.gwt.client.events.WsAgentStateEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedEvent;
 import org.eclipse.che.api.workspace.gwt.client.event.WorkspaceStartedHandler;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-import org.eclipse.che.ide.api.ProductInfoDataProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.component.Component;
 import org.eclipse.che.ide.api.component.WsAgentComponent;
@@ -54,24 +52,19 @@ public class BootstrapController {
     private final Provider<WorkspacePresenter> workspaceProvider;
     private final ExtensionInitializer         extensionInitializer;
     private final EventBus                     eventBus;
-    private final ProductInfoDataProvider      productInfoDataProvider;
     private final Provider<AppStateManager>    appStateManagerProvider;
-    private final AppContext                   appContext;
 
     @Inject
     public BootstrapController(Provider<WorkspacePresenter> workspaceProvider,
                                ExtensionInitializer extensionInitializer,
                                EventBus eventBus,
-                               ProductInfoDataProvider productInfoDataProvider,
                                Provider<AppStateManager> appStateManagerProvider,
                                AppContext appContext,
                                DtoRegistrar dtoRegistrar) {
         this.workspaceProvider = workspaceProvider;
         this.extensionInitializer = extensionInitializer;
         this.eventBus = eventBus;
-        this.productInfoDataProvider = productInfoDataProvider;
         this.appStateManagerProvider = appStateManagerProvider;
-        this.appContext = appContext;
 
         appContext.setStartUpActions(StartUpActionsParser.getStartUpActions());
         dtoRegistrar.registerDtoProviders();
@@ -168,8 +161,6 @@ public class BootstrapController {
 
         // Display IDE
         workspacePresenter.go(mainPanel);
-
-        Document.get().setTitle(productInfoDataProvider.getDocumentTitle());
 
         // Bind browser's window events
         Window.addWindowClosingHandler(new Window.ClosingHandler() {

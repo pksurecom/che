@@ -94,8 +94,6 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
     /**
      * Shows special dialog window which allows set up workspace which will be created.
      *
-     * @param callback
-     *         callback which is necessary to notify that workspace component started or failed
      * @param workspaces
      *         list of existing workspaces
      */
@@ -214,7 +212,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
             @Override
             public void apply(WorkspaceDto workspace) throws OperationException {
                 DefaultWorkspaceComponent component = wsComponentProvider.get();
-                component.startWorkspaceById(workspace);
+                component.startWorkspaceById(workspace, callback);
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
@@ -232,7 +230,7 @@ public class CreateWorkspacePresenter implements CreateWorkspaceView.ActionDeleg
                                      .withName("ws-machine")
                                      .withType("docker")
                                      .withSource(dtoFactory.createDto(MachineSourceDto.class)
-                                                           .withType("recipe")
+                                                           .withType("dockerfile")
                                                            .withLocation(view.getRecipeUrl()))
                                      .withDev(true)
                                      .withLimits(dtoFactory.createDto(LimitsDto.class).withRam(2048)));

@@ -16,12 +16,12 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>4.1.0-RC1-SNAPSHOT</version>
+        <version>4.2.0-RC1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.plugin</groupId>
     <artifactId>che-plugin-parent</artifactId>
-    <version>4.1.0-RC1-SNAPSHOT</version>
+    <version>4.2.0-RC1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Plugin :: Parent</name>
     <modules>
@@ -29,8 +29,10 @@
         <module>plugin-docker</module>
         <module>plugin-web</module>
         <module>plugin-machine</module>
+        <module>plugin-debugger</module>
         <module>plugin-java</module>
         <module>plugin-maven</module>
+        <module>plugin-gdb</module>
         <module>plugin-sdk</module>
         <module>plugin-orion</module>
         <module>plugin-git</module>
@@ -41,5 +43,6 @@
         <module>plugin-svn</module>
         <module>plugin-cpp</module>
         <module>plugin-nodejs</module>
+        <module>plugin-ssh-machine</module>
     </modules>
 </project>

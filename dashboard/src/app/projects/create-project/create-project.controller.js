@@ -21,7 +21,7 @@ export class CreateProjectCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, $q, $log, $document) {
+  constructor(cheAPI, cheStack, $websocket, $routeParams, $filter, $timeout, $location, $mdDialog, $scope, $rootScope, createProjectSvc, lodash, cheNotification, $q, $log, $document, routeHistory) {
     this.$log = $log;
     this.cheAPI = cheAPI;
     this.cheStack = cheStack;
@@ -33,8 +33,19 @@ export class CreateProjectCtrl {
     this.$rootScope = $rootScope;
     this.createProjectSvc = createProjectSvc;
     this.lodash = lodash;
+    this.cheNotification = cheNotification;
     this.$q = $q;
     this.$document = $document;
+
+    if ($routeParams.resetProgress) {
+      this.resetCreateProgress();
+
+      routeHistory.popCurrentPath();
+
+      // remove param
+      $location.search({});
+      $location.replace();
+    }
 
     // JSON used for import data
     this.importProjectData = this.getDefaultProjectJson();
@@ -340,88 +351,95 @@ export class CreateProjectCtrl {
   startWorkspace(bus, workspace) {
     // then we've to start workspace
     this.createProjectSvc.setCurrentProgressStep(1);
-    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
-
-    startWorkspacePromise.then((workspace) => {
-      // get channels
-      let environments = workspace.config.environments;
-      let envName = workspace.config.defaultEnv;
-      let defaultEnvironment = this.lodash.find(environments, (environment) => {
-        return environment.name === envName;
-      });
-
-      let machineConfigsLinks = defaultEnvironment.machineConfigs[0].links;
-
-      let findStatusLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
-        return machineConfigsLink.rel === 'get machine status channel';
-      });
-
-      let findOutputLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
-        return machineConfigsLink.rel === 'get machine logs channel';
-      });
-
-      let workspaceId = workspace.id;
-
-      let agentChannel = 'workspace:' + workspace.id + ':ext-server:output';
-      let statusChannel = findStatusLink ? findStatusLink.parameters[0].defaultValue : null;
-      let outputChannel = findOutputLink ? findOutputLink.parameters[0].defaultValue : null;
-
-      this.listeningChannels.push(agentChannel);
-      bus.subscribe(agentChannel, (message) => {
-        if (this.createProjectSvc.getCurrentProgressStep() < 2) {
-          this.createProjectSvc.setCurrentProgressStep(2);
-        }
-        let agentStep = 2;
-        if (this.getCreationSteps()[agentStep].logs.length > 0) {
-          this.getCreationSteps()[agentStep].logs = this.getCreationSteps()[agentStep].logs + '\n' + message;
-        } else {
-          this.getCreationSteps()[agentStep].logs = message;
-        }
-      });
-
-      if (statusChannel) {
-        // for now, display log of status channel in case of errors
-        this.listeningChannels.push(statusChannel);
-        bus.subscribe(statusChannel, (message) => {
-          if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
-            this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-
-            // need to show the error
-            this.$mdDialog.show(
-              this.$mdDialog.alert()
-                .title('Unable to start workspace')
-                .content('Unable to start workspace. It may be linked to OutOfMemory or the container has been destroyed')
-                .ariaLabel('Workspace start')
-                .ok('OK')
-            );
-          }
-          if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
-            this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
-            // need to show the error
-            this.$mdDialog.show(
-              this.$mdDialog.alert()
-                .title('Error when starting workspace')
-                .content('Unable to start workspace. Error when trying to start the workspace: ' + message.error)
-                .ariaLabel('Workspace start')
-                .ok('OK')
-            );
-          }
-          this.$log.log('Status channel of workspaceID', workspaceId, message);
-        });
-      }
-
-      if (outputChannel) {
-        this.listeningChannels.push(outputChannel);
-        bus.subscribe(outputChannel, (message) => {
-          if (this.getCreationSteps()[this.getCurrentProgressStep()].logs.length > 0) {
-            this.getCreationSteps()[this.getCurrentProgressStep()].logs = this.getCreationSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
-          } else {
-            this.getCreationSteps()[this.getCurrentProgressStep()].logs = message;
-          }
-        });
-      }
-
+    // get channels
+    let environments = workspace.config.environments;
+    let envName = workspace.config.defaultEnv;
+    let defaultEnvironment = this.lodash.find(environments, (environment) => {
+      return environment.name === envName;
     });
+
+    let machineConfigsLinks = defaultEnvironment.machineConfigs[0].links;
+
+    let findStatusLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
+      return machineConfigsLink.rel === 'get machine status channel';
+    });
+
+    let findOutputLink = this.lodash.find(machineConfigsLinks, (machineConfigsLink) => {
+      return machineConfigsLink.rel === 'get machine logs channel';
+    });
+
+    let workspaceId = workspace.id;
+
+    let agentChannel = 'workspace:' + workspace.id + ':ext-server:output';
+    let statusChannel = findStatusLink ? findStatusLink.parameters[0].defaultValue : null;
+    let outputChannel = findOutputLink ? findOutputLink.parameters[0].defaultValue : null;
+
+    this.listeningChannels.push(agentChannel);
+    bus.subscribe(agentChannel, (message) => {
+      if (this.createProjectSvc.getCurrentProgressStep() < 2) {
+        this.createProjectSvc.setCurrentProgressStep(2);
+      }
+      let agentStep = 2;
+      if (this.getCreationSteps()[agentStep].logs.length > 0) {
+        this.getCreationSteps()[agentStep].logs = this.getCreationSteps()[agentStep].logs + '\n' + message;
+      } else {
+        this.getCreationSteps()[agentStep].logs = message;
+      }
+    });
+
+    if (statusChannel) {
+      // for now, display log of status channel in case of errors
+      this.listeningChannels.push(statusChannel);
+      bus.subscribe(statusChannel, (message) => {
+        if (message.eventType === 'DESTROYED' && message.workspaceId === workspace.id) {
+          this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+
+          // need to show the error
+          this.$mdDialog.show(
+              this.$mdDialog.alert()
+                  .title('Unable to start workspace')
+                  .content('Unable to start workspace. It may be linked to OutOfMemory or the container has been destroyed')
+                  .ariaLabel('Workspace start')
+                  .ok('OK')
+          );
+        }
+        if (message.eventType === 'ERROR' && message.workspaceId === workspace.id) {
+          this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+          // need to show the error
+          this.$mdDialog.show(
+              this.$mdDialog.alert()
+                  .title('Error when starting workspace')
+                  .content('Unable to start workspace. Error when trying to start the workspace: ' + message.error)
+                  .ariaLabel('Workspace start')
+                  .ok('OK')
+          );
+        }
+        this.$log.log('Status channel of workspaceID', workspaceId, message);
+      });
+    }
+
+    if (outputChannel) {
+      this.listeningChannels.push(outputChannel);
+      bus.subscribe(outputChannel, (message) => {
+        if (this.getCreationSteps()[this.getCurrentProgressStep()].logs.length > 0) {
+          this.getCreationSteps()[this.getCurrentProgressStep()].logs = this.getCreationSteps()[this.getCurrentProgressStep()].logs + '\n' + message;
+        } else {
+          this.getCreationSteps()[this.getCurrentProgressStep()].logs = message;
+        }
+      });
+    }
+
+    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
+    startWorkspacePromise.then(() => {}, (error) => {
+      let errorMessage = 'Unable to start this workspace. ';
+      if (error.data && error.data.message !== null) {
+        errorMessage += error.data.message;
+      }
+      this.cheNotification.showError(errorMessage);
+      this.getCreationSteps()[this.getCurrentProgressStep()].logs = errorMessage;
+      this.getCreationSteps()[this.getCurrentProgressStep()].hasError = true;
+    });
+    return  startWorkspacePromise;
   }
 
   createProjectInWorkspace(workspaceId, projectName, projectData, bus, websocketStream, workspaceBus) {
@@ -476,77 +494,7 @@ export class CreateProjectCtrl {
 
       // now, resolve the project
       deferredImportPromise.then(() => {
-        let resolvePromise = this.cheAPI.getProject().fetchResolve(workspaceId, projectName);
-        resolvePromise.then(() => {
-          let resultResolve = this.cheAPI.getProject().getResolve(workspaceId, projectName);
-          // get project-types
-          let fetchTypePromise = this.cheAPI.getProjectType().fetchTypes(workspaceId);
-          fetchTypePromise.then(() => {
-            let projectTypesByCategory = this.cheAPI.getProjectType().getProjectTypesIDs(workspaceId);
-            // now try the estimate for each source
-            let deferredEstimate = this.$q.defer();
-            let deferredEstimatePromise = deferredResolve.promise;
-
-            let projectDetails = projectData.project;
-            if (!projectDetails.attributes) {
-              projectDetails.source = projectData.source;
-              projectDetails.attributes = {};
-            }
-            let estimatePromises = [];
-            let estimateTypes = [];
-            resultResolve.forEach((sourceResolve) => {
-              // add attributes if any
-              if (sourceResolve.attributes && Object.keys(sourceResolve.attributes).length > 0) {
-                for (let attributeKey in sourceResolve.attributes) {
-                  projectDetails.attributes[attributeKey] = sourceResolve.attributes[attributeKey];
-                }
-              }
-              let projectType = projectTypesByCategory.get(sourceResolve.type);
-              if (projectType.primaryable) {
-                // call estimate
-                let estimatePromise = this.cheAPI.getProject().fetchEstimate(workspaceId, projectName, sourceResolve.type);
-                estimatePromises.push(estimatePromise);
-                estimateTypes.push(sourceResolve.type);
-              }
-            });
-
-            if (estimateTypes.length > 0) {
-              // wait estimate are all finished
-              let waitEstimate = this.$q.all(estimatePromises);
-
-              waitEstimate.then(() => {
-                var firstMatchingType;
-                var firstMatchingResult;
-                estimateTypes.forEach((type) => {
-                  let resultEstimate = this.cheAPI.getProject().getEstimate(workspaceId, projectName, type);
-                  // add attributes
-                  // there is a matching estimate
-                  if (Object.keys(resultEstimate.attributes).length > 0 && 'java' !== type && !firstMatchingType) {
-                    firstMatchingType = type;
-                    firstMatchingResult = resultEstimate.attributes;
-                  }
-                });
-
-                if (firstMatchingType) {
-                  projectDetails.attributes = firstMatchingResult;
-                  projectDetails.type = firstMatchingType;
-                  let updateProjectPromise = this.cheAPI.getProject().updateProject(workspaceId, projectName, projectDetails);
-                  updateProjectPromise.then(() => {
-                    deferredResolve.resolve();
-                  });
-                } else {
-                  deferredResolve.resolve();
-                }
-              });
-            } else {
-              deferredResolve.resolve();
-            }
-          });
-
-
-        }, (error) => {
-          deferredResolve.reject(error);
-        })
+        this.resolveProjectType(workspaceId, projectName, projectData, deferredResolve);
       });
       promise = this.$q.all([deferredImportPromise, deferredAddCommandPromise, deferredResolvePromise]);
     }
@@ -571,6 +519,90 @@ export class CreateProjectCtrl {
     });
 
   }
+
+  resolveProjectType(workspaceId, projectName, projectData, deferredResolve) {
+    let projectDetails = projectData.project;
+    if (!projectDetails.attributes) {
+      projectDetails.source = projectData.source;
+      projectDetails.attributes = {};
+    }
+
+    if (projectDetails.type) {
+      let updateProjectPromise = this.cheAPI.getProject().updateProject(workspaceId, projectName, projectDetails);
+      updateProjectPromise.then(() => {
+        deferredResolve.resolve();
+      });
+      return;
+    }
+
+    let resolvePromise = this.cheAPI.getProject().fetchResolve(workspaceId, projectName);
+    resolvePromise.then(() => {
+      let resultResolve = this.cheAPI.getProject().getResolve(workspaceId, projectName);
+      // get project-types
+      let fetchTypePromise = this.cheAPI.getProjectType().fetchTypes(workspaceId);
+      fetchTypePromise.then(() => {
+        let projectTypesByCategory = this.cheAPI.getProjectType().getProjectTypesIDs(workspaceId);
+        // now try the estimate for each source
+        let deferredEstimate = this.$q.defer();
+        let deferredEstimatePromise = deferredResolve.promise;
+
+
+        let estimatePromises = [];
+        let estimateTypes = [];
+        resultResolve.forEach((sourceResolve) => {
+          // add attributes if any
+          if (sourceResolve.attributes && Object.keys(sourceResolve.attributes).length > 0) {
+            for (let attributeKey in sourceResolve.attributes) {
+              projectDetails.attributes[attributeKey] = sourceResolve.attributes[attributeKey];
+            }
+          }
+          let projectType = projectTypesByCategory.get(sourceResolve.type);
+          if (projectType.primaryable) {
+            // call estimate
+            let estimatePromise = this.cheAPI.getProject().fetchEstimate(workspaceId, projectName, sourceResolve.type);
+            estimatePromises.push(estimatePromise);
+            estimateTypes.push(sourceResolve.type);
+          }
+        });
+
+        if (estimateTypes.length > 0) {
+          // wait estimate are all finished
+          let waitEstimate = this.$q.all(estimatePromises);
+
+          waitEstimate.then(() => {
+            var firstMatchingType;
+            var firstMatchingResult;
+            estimateTypes.forEach((type) => {
+              let resultEstimate = this.cheAPI.getProject().getEstimate(workspaceId, projectName, type);
+              // add attributes
+              // there is a matching estimate
+              if (Object.keys(resultEstimate.attributes).length > 0 && 'java' !== type && !firstMatchingType) {
+                firstMatchingType = type;
+                firstMatchingResult = resultEstimate.attributes;
+              }
+            });
+
+          if (firstMatchingType) {
+            projectDetails.attributes = firstMatchingResult;
+            projectDetails.type = firstMatchingType;
+            let updateProjectPromise = this.cheAPI.getProject().updateProject(workspaceId, projectName, projectDetails);
+            updateProjectPromise.then(() => {
+              deferredResolve.resolve();
+            });
+          } else {
+            deferredResolve.resolve();
+          }
+          });
+        } else {
+          deferredResolve.resolve();
+        }
+      });
+
+    }, (error) => {
+      deferredResolve.reject(error);
+    });
+  }
+
 
   /**
    * Show the add ssh key dialog
@@ -706,8 +738,7 @@ export class CreateProjectCtrl {
     if ('image' === recipeSource.type) {
       // needs to add recipe for that script
       promise = this.submitRecipe('generated-' + stack.name, 'FROM ' + recipeSource.origin);
-    } else if ('recipe' === recipeSource.type) {
-
+    } else if ('dockerfile' === recipeSource.type.toLowerCase()) {
       promise = this.submitRecipe('generated-' + stack.name, recipeSource.origin);
     } else {
       throw 'Not implemented';
@@ -944,6 +975,9 @@ export class CreateProjectCtrl {
   }
 
   resetCreateProgress() {
+    if (this.isResourceProblem()) {
+      this.$location.path('/workspaces');
+    }
     this.createProjectSvc.resetCreateProgress();
   }
 
@@ -985,7 +1019,6 @@ export class CreateProjectCtrl {
     return this.createProjectSvc.getWorkspaceOfProject();
   }
 
-
   getIDELink() {
     return this.createProjectSvc.getIDELink();
   }
@@ -1003,6 +1036,10 @@ export class CreateProjectCtrl {
     return index <= maxVisibleElement;
   }
 
+  isResourceProblem() {
+    let currentCreationStep = this.getCreationSteps()[this.getCurrentProgressStep()];
+    return currentCreationStep.hasError && currentCreationStep.logs.includes('You can stop other workspaces');
+  }
 
   isvisible(elementName) {
     let element = angular.element(elementName);
@@ -1051,6 +1088,16 @@ export class CreateProjectCtrl {
   }
 
   /**
+   * Update creation flow state when source option changes
+   */
+  onSourceOptionChanged() {
+    if ('select-source-existing' === this.selectSourceOption) {
+      //Need to call selection of current tab
+      this.setCurrentTab(this.currentTab);
+    }
+  }
+
+  /**
    * Use of an existing stack
    * @param stack the stack to use
    */
@@ -1087,6 +1134,7 @@ export class CreateProjectCtrl {
     if (!stack) {
       return;
     }
+
     this.templatesChoice = 'templates-samples';
     this.generateProjectName(true);
     // Enable wizard only if

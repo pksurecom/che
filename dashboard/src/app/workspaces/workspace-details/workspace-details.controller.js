@@ -49,6 +49,9 @@ export class WorkspaceDetailsCtrl {
     } else {
       this.updateWorkspaceData();
     }
+
+    // show link 'Show more' if true
+    this.showShowMore = false;
   }
 
   //Update the workspace data to be displayed.
@@ -128,12 +131,20 @@ export class WorkspaceDetailsCtrl {
   }
 
   runWorkspace() {
+    this.showShowMore = true;
+
     this.ideSvc.init();
     this.ideSvc.setSelectedWorkspace(this.workspaceDetails);
     this.$rootScope.loadingIDE = false;
     let promise = this.ideSvc.startIde(true);
-    promise.then(() => {}, (error) => {
-      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Start workspace failed.');
+    promise.then(() => {
+      this.showShowMore = false;
+    }, (error) => {
+      let errorMessage = 'Unable to start this workspace. ';
+      if (error.data && error.data.message !== null) {
+        errorMessage += error.data.message;
+      }
+      this.cheNotification.showError(errorMessage);
       this.$log.error(error);
     });
   }
@@ -145,5 +156,14 @@ export class WorkspaceDetailsCtrl {
       this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Stop workspace failed.');
       this.$log.error(error);
     });
+  }
+
+  /**
+   * Returns current status of workspace
+   * @returns {String}
+   */
+  getWorkspaceStatus() {
+    let workspace = this.cheWorkspace.getWorkspaceById(this.workspaceId);
+    return workspace ? workspace.status : 'unknown';
   }
 }
