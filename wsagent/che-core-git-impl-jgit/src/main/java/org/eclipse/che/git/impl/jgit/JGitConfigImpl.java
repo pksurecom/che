@@ -49,7 +49,7 @@ public class JGitConfigImpl extends Config {
         String[] values = _repository.getConfig().getStringList(key.section, key.subsection, key.name);
         // Make sure the property exists
         if (values == null || values.length == 0) {
-            throw new GitException("Unknown configuration key " + name);
+            throw new GitException("");
         }
         return values;
     }

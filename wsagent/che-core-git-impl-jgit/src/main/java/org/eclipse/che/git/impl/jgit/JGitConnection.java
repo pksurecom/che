@@ -468,7 +468,7 @@ public class JGitConnection implements GitConnection {
 
     @Override
     public boolean isInsideWorkTree() throws GitException {
-        return getRepository().getAllRefs().size() > 0;
+        return RepositoryCache.FileKey.isGitRepository(getRepository().getDirectory(), FS.DETECTED);
     }
 
     @Override
@@ -560,8 +560,15 @@ public class JGitConnection implements GitConnection {
             fetchCommand.setRemoveDeletedRefs(request.isRemoveDeletedRefs());
 
             fetchCommand.call();
-        } catch (GitAPIException e) {
-            throw new GitException(e);
+        } catch (GitAPIException exception) {
+            String errorMessage;
+            if (exception.getMessage().contains("Invalid remote: ")) {
+                errorMessage = "No remote repository specified.  Please, specify either a URL or a " +
+                               "remote name from which new revisions should be fetched in request.";
+            } else {
+                errorMessage = exception.getMessage();
+            }
+            throw new GitException(errorMessage);
         } 
     }
 
@@ -614,8 +621,10 @@ public class JGitConnection implements GitConnection {
         try {
             setRevisionRange(logCommand, request);
 
+            request.getFileFilter().forEach(logCommand::addPath);
+
             Iterator<RevCommit> revIterator = logCommand.call().iterator();
-            List<Revision> commits = new ArrayList<Revision>();
+            List<Revision> commits = new ArrayList<>();
 
             while (revIterator.hasNext()) {
                 RevCommit commit = revIterator.next();
@@ -773,15 +782,12 @@ public class JGitConnection implements GitConnection {
                         : new RefSpec(refSpec);
                 remoteBranch = fetchRefSpecs.getSource();
             } else {
-                remoteBranch = config.getString(ConfigConstants.CONFIG_REMOTE_SECTION, remote,
-                        ConfigConstants.CONFIG_FETCH_SECTION);
-                remoteBranch = remoteBranch.substring(1, remoteBranch.indexOf(":"));
+                remoteBranch = config.getString(ConfigConstants.CONFIG_BRANCH_SECTION, branch,
+                        ConfigConstants.CONFIG_KEY_MERGE);
             }
 
             if (remoteBranch == null) {
-                String key = ConfigConstants.CONFIG_BRANCH_SECTION + "." + branch + "."
-                        + ConfigConstants.CONFIG_KEY_MERGE;
-                throw new GitException(Messages.getString("ERROR_PULL_REMOTE_BRANCH_MISSING", key));
+                remoteBranch = fullBranch;
             }
 
             FetchCommand fetchCommand = getGit().fetch();
@@ -828,9 +834,16 @@ public class JGitConnection implements GitConnection {
             }
             message.append(Messages.getString("ERROR_PULL_COMMIT_BEFORE_MERGE"));
             throw new GitException(message.toString());
-        } catch (IOException | GitAPIException e) {
-            throw new GitException(e.getMessage(), e);
-        } 
+        } catch (IOException | GitAPIException exception) {
+            String errorMessage;
+            if (exception.getMessage().equals("Invalid remote: " + remote)) {
+                errorMessage = "No remote repository specified.  Please, specify either a URL or a " +
+                               "remote name from which new revisions should be fetched in request.";
+            } else {
+                errorMessage = exception.getMessage();
+            }
+            throw new GitException(errorMessage, exception);
+        }
         return DtoFactory.getInstance().createDto(PullResponse.class);
     }
 
@@ -1333,15 +1346,16 @@ public class JGitConnection implements GitConnection {
 
     @Override
     public List<RemoteReference> lsRemote(LsRemoteRequest request) throws UnauthorizedException, GitException {
-        LsRemoteCommand jgitCommand = getGit().lsRemote();
-        jgitCommand.setRemote(request.getRemoteUrl());
+        String remoteUrl = request.getRemoteUrl();
+        LsRemoteCommand lsRemoteCommand = getGit().lsRemote();
+        lsRemoteCommand.setRemote(remoteUrl);
         // TODO handle cases of isUseAuthorization()
         Collection<Ref> refs;
         try {
-            refs = jgitCommand.call();
+            refs = lsRemoteCommand.call();
         } catch (GitAPIException e) {
             if (e.getMessage().contains("Authentication is required but no CredentialsProvider has been registered")) {
-                throw new UnauthorizedException(e.getMessage());
+                throw new UnauthorizedException("fatal: Authentication failed for '" + remoteUrl + "/'\n");
             } else {
                 throw new GitException(e.getMessage(), e);
             }

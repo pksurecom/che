@@ -127,8 +127,8 @@ public class FetchTest {
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class,
-          expectedExceptions = GitException.class,
-          expectedExceptionsMessageRegExp = "org.eclipse.jgit.api.errors.InvalidRemoteException: Invalid remote: origin")
+            expectedExceptions = GitException.class, expectedExceptionsMessageRegExp = "No remote repository specified.  " +
+            "Please, specify either a URL or a remote name from which new revisions should be fetched in request.")
     public void testWhenThereAreNoAnyRemotes(GitConnectionFactory connectionFactory) throws Exception {
         //given
         GitConnection connection = connectToInitializedGitRepository(connectionFactory, repository);

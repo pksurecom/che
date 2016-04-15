@@ -68,8 +68,7 @@ public class LsRemoteTest {
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = org.eclipse.che.git.impl.GitConnectionFactoryProvider.class,
           expectedExceptions = UnauthorizedException.class,
-          expectedExceptionsMessageRegExp = "https://bitbucket.org/exoinvitemain/privater.git: " +
-                                            "Authentication is required but no CredentialsProvider has been registered")
+          expectedExceptionsMessageRegExp = "fatal: Authentication failed for 'https://bitbucket.org/exoinvitemain/privater.git/'\n")
     public void testShouldThrowUnauthorizedExceptionIfUserTryGetInfoAboutPrivateRepoAndUserIsUnauthorized(GitConnectionFactory connectionFactory)
             throws GitException, UnauthorizedException, IOException {
 
