@@ -68,7 +68,7 @@ public class TagCreateTest {
         request.setMessage("first version");
         connection.tagCreate(request);
         //when
-        Thread.sleep(1000);
+//        Thread.sleep(1000);
         request.setForce(true);
         connection.tagCreate(request);
         //then

@@ -46,8 +46,8 @@ public class ShowFileContentCommand extends GitCommand<ShowFileContentResponse> 
 
         String content = "";
 
-        for (String line : lines) {
-            content = content.concat(line + "\n");
+        for (int i =  0; i < lines.size(); i++) {
+            content = content.concat(lines.get(i).concat(i + 1 == lines.size() ? "" : "\n"));
         }
 
         return newDto(ShowFileContentResponse.class).withContent(content);

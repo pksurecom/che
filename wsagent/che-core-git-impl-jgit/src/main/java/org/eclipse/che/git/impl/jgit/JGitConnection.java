@@ -35,6 +35,7 @@ import org.eclipse.che.api.git.CredentialsLoader;
 import org.eclipse.che.api.git.DiffPage;
 import org.eclipse.che.api.git.GitConnection;
 import org.eclipse.che.api.git.GitException;
+import org.eclipse.che.api.git.GitUserResolver;
 import org.eclipse.che.api.git.LogPage;
 import org.eclipse.che.api.git.UserCredential;
 import org.eclipse.che.api.git.shared.AddRequest;
@@ -141,32 +142,25 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * @version $Id: JGitConnection.java 22817 2011-03-22 09:17:52Z andrew00x $
  */
 public class JGitConnection implements GitConnection {
-    private static final String REBASE_OPERATION_SKIP = "SKIP";
+    private static final String REBASE_OPERATION_SKIP     = "SKIP";
     private static final String REBASE_OPERATION_CONTINUE = "CONTINUE";
-    private static final String REBASE_OPERATION_ABORT = "ABORT";
-    private static final String ADD_ALL_OPTION = "all";
-    // The JGit repository
-    private final Repository repository;
-    // The git user
-    private final GitUser user;
-    // Configuration object
-    JGitConfigImpl _config;
-    // Git stuff
-    Git _git;
+    private static final String REBASE_OPERATION_ABORT    = "ABORT";
+    private static final String ADD_ALL_OPTION            = "all";
+
     private static final Logger LOG = LoggerFactory.getLogger(JGitConnection.class);
+
+    private final Repository      repository;
+    private final GitUserResolver userResolver;
+
+    private JGitConfigImpl config;
+    private Git            git;
 
     private final CredentialsLoader credentialsLoader;
 
-    /**
-     * @param repository
-     *            the JGit repository
-     * @param user
-     *            the user
-     */
     @Inject
-    JGitConnection(Repository repository, GitUser user, CredentialsLoader credentialsLoader) {
+    JGitConnection(Repository repository, GitUserResolver userResolver, CredentialsLoader credentialsLoader) {
         this.repository = repository;
-        this.user = user;
+        this.userResolver = userResolver;
         this.credentialsLoader = credentialsLoader;
     }
 
@@ -190,18 +184,16 @@ public class JGitConnection implements GitConnection {
     private void add(AddRequest request, boolean isUpdate) throws GitException {
         AddCommand addCommand = getGit().add().setUpdate(isUpdate);
 
-        List<String> filepattern = request.getFilepattern();
-        if (filepattern == null) {
-            filepattern = AddRequest.DEFAULT_PATTERN;
+        List<String> filePatterns = request.getFilepattern();
+        if (filePatterns == null) {
+            filePatterns = AddRequest.DEFAULT_PATTERN;
         }
-        for (String filepatternItem : filepattern) {
-            addCommand.addFilepattern(filepatternItem);
-        }
+        filePatterns.forEach(addCommand::addFilepattern);
 
         try {
             addCommand.call();
-        } catch (GitAPIException e) {
-            throw new GitException(e.getMessage(), e);
+        } catch (GitAPIException exception) {
+            throw new GitException(exception.getMessage(), exception);
         }
     }
 
@@ -250,11 +242,11 @@ public class JGitConnection implements GitConnection {
             }
             try {
                 checkoutCommand.call();
-            } catch (GitAPIException e) {
-                if (e.getMessage().endsWith("already exists")) {
+            } catch (GitAPIException exception) {
+                if (exception.getMessage().endsWith("already exists")) {
                     throw new GitException(Messages.getString("ERROR_BRANCH_NAME_EXISTS", cleanName));
                 }
-                throw new GitException(e.getMessage(), e.getCause());
+                throw new GitException(exception.getMessage(), exception.getCause());
             }
         }
     }
@@ -319,7 +311,7 @@ public class JGitConnection implements GitConnection {
         }
         String current = null;
         try {
-            Ref headRef = repository.getRef(Constants.HEAD);
+            Ref headRef = repository.exactRef(Constants.HEAD);
             if (headRef != null && !(Constants.HEAD.equals(headRef.getLeaf().getName()))) {
                 current = headRef.getLeaf().getName();
             }
@@ -344,7 +336,7 @@ public class JGitConnection implements GitConnection {
     }
 
     public void clone(CloneRequest request) throws GitException {
-        String remoteUri = null;
+        String remoteUri;
         try {
             if (request.getRemoteName() == null) {
                 request.setRemoteName(Constants.DEFAULT_REMOTE_NAME);
@@ -358,7 +350,7 @@ public class JGitConnection implements GitConnection {
             cloneCom.setURI(remoteUri);
             cloneCom.setDirectory(new File(request.getWorkingDir()));
             if (request.getBranchesToFetch() != null) {
-                cloneCom.setBranchesToClone(new ArrayList<String>(request.getBranchesToFetch()));
+                cloneCom.setBranchesToClone(new ArrayList<>(request.getBranchesToFetch()));
             } else {
                 cloneCom.setCloneAllBranches(true);
             }
@@ -477,14 +469,10 @@ public class JGitConnection implements GitConnection {
         ObjectId revision;
         try {
             revision = getRepository().resolve(request.getVersion());
-            // a RevWalk allows to walk over commits based on some filtering that is defined
             try (RevWalk revWalk = new RevWalk(getRepository())) {
-                RevCommit commit = revWalk.parseCommit(revision);
-                // and using commit's tree find the path
-                RevTree tree = commit.getTree();
-                System.out.println("Having tree: " + tree);
+                RevCommit revCommit = revWalk.parseCommit(revision);
+                RevTree tree = revCommit.getTree();
 
-                // now try to find a specific file
                 try (TreeWalk treeWalk = new TreeWalk(getRepository())) {
                     treeWalk.addTree(tree);
                     treeWalk.setRecursive(true);
@@ -493,13 +481,10 @@ public class JGitConnection implements GitConnection {
                         throw new GitException("fatal: Path '" + request.getFile() + "' does not exist in '"
                                                + request.getVersion() + "'\n");
                     }
-
                     ObjectId objectId = treeWalk.getObjectId(0);
                     ObjectLoader loader = repository.open(objectId);
-
                     content = new String(loader.getBytes());
                 }
-                revWalk.dispose();
             }
         } catch (IOException exception) {
             throw new GitException(exception.getMessage());
@@ -1285,7 +1270,7 @@ public class JGitConnection implements GitConnection {
         }
 
         Set<String> tagNames = repository.getTags().keySet();
-        List<Tag> tags = new ArrayList<Tag>(tagNames.size());
+        List<Tag> tags = new ArrayList<>(tagNames.size());
 
         for (String tagName : tagNames) {
             if (pattern == null || pattern.matcher(tagName).matches()) {
@@ -1296,7 +1281,7 @@ public class JGitConnection implements GitConnection {
     }
 
     public GitUser getUser() {
-        return user;
+        return userResolver.getUser();
     }
 
     @Override
@@ -1373,10 +1358,10 @@ public class JGitConnection implements GitConnection {
 
     @Override
     public Config getConfig() throws GitException {
-        if (_config != null) {
-            return _config;
+        if (config != null) {
+            return config;
         }
-        return _config = new JGitConfigImpl(repository);
+        return config = new JGitConfigImpl(repository);
     }
 
     @Override
@@ -1385,10 +1370,10 @@ public class JGitConnection implements GitConnection {
     }
 
     private Git getGit() {
-        if (_git != null) {
-            return _git;
+        if (git != null) {
+            return git;
         }
-        return _git = new Git(repository);
+        return git = new Git(repository);
     }
 
     private static <T> T createDto(Class<T> clazz) {

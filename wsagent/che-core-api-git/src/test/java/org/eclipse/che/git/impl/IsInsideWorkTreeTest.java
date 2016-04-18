@@ -52,7 +52,6 @@ public class IsInsideWorkTreeTest {
     @AfterMethod
     public void cleanUp() {
         cleanupTestRepo(repository);
-        cleanupTestRepo(regularDir);
     }
 
     @Test(dataProvider = "GitConnectionFactory", dataProviderClass = GitConnectionFactoryProvider.class)
