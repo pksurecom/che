@@ -16,6 +16,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.che.api.core.util.FileCleaner;
 import org.eclipse.che.api.core.util.ValueHolder;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonNameConvention;
 import org.eclipse.che.commons.json.JsonParseException;
@@ -27,10 +28,12 @@ import org.eclipse.che.plugin.docker.client.connection.DockerConnection;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.connection.DockerResponse;
 import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
+import org.eclipse.che.plugin.docker.client.helper.ContainersQueryFilter;
 import org.eclipse.che.plugin.docker.client.json.ContainerCommited;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerExitStatus;
+import org.eclipse.che.plugin.docker.client.json.ContainerFromList;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerProcesses;
 import org.eclipse.che.plugin.docker.client.json.ContainerResource;
@@ -162,6 +165,32 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), Image[].class);
+        } catch (JsonParseException e) {
+            throw new IOException(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public ContainerFromList[] getContainers(boolean all,
+                                             int limit,
+                                             String since,
+                                             String before,
+                                             boolean size,
+                                             @Nullable ContainersQueryFilter filter) throws IOException {
+        try(DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
+                                                           .method("GET")
+                                                           .path("/containers/json")
+                                                           .query("all", all)
+                                                           .query("limit", limit)
+                                                           .query("since", since)
+                                                           .query("before", before)
+                                                           .query("size", size)//warning if 1 method need more time for calculation containers size
+                                                           .query(filter.getKey(), filter.getValue())) {
+            DockerResponse response = connection.request();
+            final int status = response.getStatus();
+            if (OK.getStatusCode() != status) {
+                throw getDockerException(response);
+            }
+            return parseResponseStreamAndClose(response.getInputStream(), ContainerFromList[].class);
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }
