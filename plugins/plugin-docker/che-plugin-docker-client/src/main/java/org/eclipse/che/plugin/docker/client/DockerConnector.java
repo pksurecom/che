@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.docker.client;
 
 import com.google.common.io.CharStreams;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.gwt.http.client.URL;
 
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.che.api.core.util.FileCleaner;
@@ -176,6 +177,7 @@ public class DockerConnector {
                                              String before,
                                              boolean size,
                                              @Nullable ContainersQueryFilter filter) throws IOException {
+        //todo null checking for some query param: thinking very deep!!!
         try(DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                            .method("GET")
                                                            .path("/containers/json")
@@ -183,8 +185,8 @@ public class DockerConnector {
                                                            .query("limit", limit)
                                                            .query("since", since)
                                                            .query("before", before)
-                                                           .query("size", size)//warning if 1 method need more time for calculation containers size
-                                                           .query(filter.getKey(), filter.getValue())) {
+                                                           .query("size", size)//warning if "size = 1" method need more time for calculation containers size
+                                                           .query(filter.getQueryKey(), URL.encode(filter.toJson()))) {//todo Url.encode maybe move inside method toJson()?
             DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {

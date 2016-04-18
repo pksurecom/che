@@ -10,50 +10,73 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.client.helper;
 
+import com.google.gson.Gson;
+
 /**
  * This class created for simple generation docker container query filter expression.
  *
  * @author Alexander Andrienko
  */
 public class ContainersQueryFilter {
-    private static final String KEY = "filters";
+    private static final String QUERY_KEY = "filters";
+    private static final Gson   gson      = new Gson();//todo static injection?
 
-    private static final String LABEL  = "label";
-    private static final String STATUS = "status";
-    private static final String EXITED = "exited";
-    private static final String ISOLATION = "isolation";
+    private String[] exited;
+    private String[] label;
+    private String[] ancestor;
+    private String[] before;
+    private String[] since;
+    private String[] volume;
 
-    private ContainerStatus[] statuses;
-    private String[]         labels;
-    private Integer[]        exited;
+    private Status[]    status;
+    private Isolation[] isolations;
 
-    public void setStatus(ContainerStatus... statuses) {
-        this.statuses = statuses;
-    }
-
-    public void setExitedCode(Integer... exited) {
+    public void setExited(String... exited) {
         this.exited = exited;
     }
 
-    public void setLabels(String... labels) {
-        this.labels = labels;
+    public void setLabel(String... label) {
+        this.label = label;
     }
 
-    public String getKey() {
-        return KEY;
+    public void setAncestor(String... ancestor) {
+        this.ancestor = ancestor;
     }
 
-    public String getValue() {
-
-        return null;
+    public void setBefore(String... before) {
+        this.before = before;
     }
 
-    public enum ContainerStatus {
-        CREATED("created"), RESTARTING("restarting"), RUNNING("running"), PAUSED("paused"), EXITED("exited");
+    public void setSince(String... since) {
+        this.since = since;
+    }
+
+    public void setVolume(String... volume) {
+        this.volume = volume;
+    }
+
+    public void setStatus(Status... status) {
+        this.status = status;
+    }
+
+    public void setIsolations(Isolation... isolations) {
+        this.isolations = isolations;
+    }
+
+    public String getQueryKey() {
+        return QUERY_KEY;
+    }
+
+    public String toJson() {
+        return gson.toJson(this);
+    }
+
+    public enum Status {
+        CREATED("created"), RESTARTING("restarting"), RUNNING("running"), PAUSED("paused"), EXITED("exited"), DEAD("dead");
 
         private String status;
 
-        ContainerStatus(String status) {
+        Status(String status) {
             this.status = status;
         }
 
@@ -74,5 +97,13 @@ public class ContainersQueryFilter {
         public String getValue() {
             return value;
         }
+    }
+
+    public static void main(String[] args) {
+        ContainersQueryFilter containersQueryFilter = new ContainersQueryFilter();
+        containersQueryFilter.setBefore(new String[]{"dfdfdf", "dfdfdfd"});
+        containersQueryFilter.setExited(new String[]{"0", "255"});
+        containersQueryFilter.setStatus(new Status[]{Status.CREATED, Status.RESTARTING});
+        System.out.println(containersQueryFilter.toJson());
     }
 }
