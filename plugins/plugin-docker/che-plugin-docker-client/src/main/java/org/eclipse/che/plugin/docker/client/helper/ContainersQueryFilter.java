@@ -19,7 +19,7 @@ import com.google.gson.Gson;
  */
 public class ContainersQueryFilter {
     private static final String QUERY_KEY = "filters";
-    private static final Gson   gson      = new Gson();//todo static injection?
+    private static final Gson   GSON      = new Gson();//todo static injection?
 
     private String[] exited;
     private String[] label;
@@ -68,7 +68,7 @@ public class ContainersQueryFilter {
     }
 
     public String toJson() {
-        return gson.toJson(this);
+        return GSON.toJson(this);
     }
 
     public enum Status {
