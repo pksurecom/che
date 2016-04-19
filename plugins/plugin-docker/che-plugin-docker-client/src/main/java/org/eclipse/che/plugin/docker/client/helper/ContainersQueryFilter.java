@@ -99,6 +99,7 @@ public class ContainersQueryFilter {
         }
     }
 
+    //todo test
     public static void main(String[] args) {
         ContainersQueryFilter containersQueryFilter = new ContainersQueryFilter();
         containersQueryFilter.setBefore(new String[]{"dfdfdf", "dfdfdfd"});
