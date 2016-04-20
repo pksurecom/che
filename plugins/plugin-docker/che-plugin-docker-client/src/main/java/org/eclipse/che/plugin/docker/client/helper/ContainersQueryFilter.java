@@ -11,15 +11,18 @@
 package org.eclipse.che.plugin.docker.client.helper;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
+
+import java.io.UnsupportedEncodingException;
 
 /**
  * This class created for simple generation docker container query filter expression.
  *
  * @author Alexander Andrienko
  */
-public class ContainersQueryFilter {
+public class ContainersQueryFilter {//todo test but I think we will delete this class and will use {@link Filters} instead of
     private static final String QUERY_KEY = "filters";
-    private static final Gson   GSON      = new Gson();//todo static injection?
+    private static final Gson   GSON      = new Gson();
 
     private String[] exited;
     private String[] label;
@@ -31,80 +34,66 @@ public class ContainersQueryFilter {
     private Status[]    status;
     private Isolation[] isolations;
 
-    public void setExited(String... exited) {
+    public ContainersQueryFilter withExited(String... exited) {
         this.exited = exited;
+        return this;
     }
 
-    public void setLabel(String... label) {
+    public ContainersQueryFilter withLabel(String... label) {
         this.label = label;
+        return this;
     }
 
-    public void setAncestor(String... ancestor) {
+    public ContainersQueryFilter setAncestor(String... ancestor) {
         this.ancestor = ancestor;
+        return this;
     }
 
-    public void setBefore(String... before) {
+    public ContainersQueryFilter setBefore(String... before) {
         this.before = before;
+        return this;
     }
 
-    public void setSince(String... since) {
+    public ContainersQueryFilter setSince(String... since) {
         this.since = since;
+        return this;
     }
 
-    public void setVolume(String... volume) {
+    public ContainersQueryFilter setVolume(String... volume) {
         this.volume = volume;
+        return this;
     }
 
-    public void setStatus(Status... status) {
+    public ContainersQueryFilter setStatus(Status... status) {
         this.status = status;
+        return this;
     }
 
-    public void setIsolations(Isolation... isolations) {
+    public ContainersQueryFilter setIsolations(Isolation... isolations) {
         this.isolations = isolations;
+        return this;
     }
 
     public String getQueryKey() {
         return QUERY_KEY;
     }
 
-    public String toJson() {
+    public String toJson() throws UnsupportedEncodingException {
         return GSON.toJson(this);
     }
 
     public enum Status {
-        CREATED("created"), RESTARTING("restarting"), RUNNING("running"), PAUSED("paused"), EXITED("exited"), DEAD("dead");
-
-        private String status;
-
-        Status(String status) {
-            this.status = status;
-        }
-
-        public String getValue() {
-            return status;
-        }
+        @SerializedName("created") CREATED,
+        @SerializedName("restarting") RESTARTING,
+        @SerializedName("running") RUNNING,
+        @SerializedName("paused") PAUSED,
+        @SerializedName("exited") EXITED,
+        @SerializedName("dead") DEAD;
     }
 
     public enum Isolation {
-        DEFAULT("default"), PROCESS("process"), HYPERV("hyperv");
-
-        private String value;
-
-        Isolation(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-    }
-
-    //todo test
-    public static void main(String[] args) {
-        ContainersQueryFilter containersQueryFilter = new ContainersQueryFilter();
-        containersQueryFilter.setBefore(new String[]{"dfdfdf", "dfdfdfd"});
-        containersQueryFilter.setExited(new String[]{"0", "255"});
-        containersQueryFilter.setStatus(new Status[]{Status.CREATED, Status.RESTARTING});
-        System.out.println(containersQueryFilter.toJson());
+        @SerializedName("default") DEFAULT,
+        @SerializedName("process") PROCESS,
+        @SerializedName("hyperv") HYPERV;
     }
 }

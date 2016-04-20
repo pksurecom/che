@@ -43,7 +43,7 @@ public class DockerContainerNameGeneratorTest {
     public void machineNameShouldBeReturnedByGeneratedContainerName() {
         String generatedName = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
 
-        DockerContainerNameGenerator.ContainerNameInfoParser containerNameInfoParser = nameGenerator.parse(generatedName);
+        DockerContainerNameGenerator.ContainerNameInfo containerNameInfoParser = nameGenerator.parse(generatedName);
 
         assertEquals(containerNameInfoParser.getMachineId(), MACHINE_ID);
         assertEquals(containerNameInfoParser.getWorkspaceId(), WORKSPACE_ID);
@@ -53,7 +53,7 @@ public class DockerContainerNameGeneratorTest {
     public void machineNameByImageNameShouldBeReturned() {
         String imageName = "eclipse-che/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name";
 
-        DockerContainerNameGenerator.ContainerNameInfoParser containerNameInfoParser = nameGenerator.parse(imageName);
+        DockerContainerNameGenerator.ContainerNameInfo containerNameInfoParser = nameGenerator.parse(imageName);
 
         assertEquals(containerNameInfoParser.getMachineId(), "machineri6bxnoj5jq7ll9j");
         assertEquals(containerNameInfoParser.getWorkspaceId(), "workspacep2bivvctac5ciwoh");
@@ -63,7 +63,7 @@ public class DockerContainerNameGeneratorTest {
     public void machineNameByContainerNameShouldBeReturned() {
         String imageName = "workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name";
 
-        DockerContainerNameGenerator.ContainerNameInfoParser containerNameInfoParser = nameGenerator.parse(imageName);
+        DockerContainerNameGenerator.ContainerNameInfo containerNameInfoParser = nameGenerator.parse(imageName);
 
         assertEquals(containerNameInfoParser.getMachineId(), "machineri6bxnoj5jq7ll9j");
         assertEquals(containerNameInfoParser.getWorkspaceId(), "workspacep2bivvctac5ciwoh");

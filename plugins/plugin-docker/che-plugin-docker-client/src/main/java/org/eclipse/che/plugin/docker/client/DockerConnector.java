@@ -12,7 +12,6 @@ package org.eclipse.che.plugin.docker.client;
 
 import com.google.common.io.CharStreams;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.google.gwt.http.client.URL;
 
 import org.apache.commons.codec.binary.Base64;
 import org.eclipse.che.api.core.util.FileCleaner;
@@ -74,6 +73,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
@@ -171,22 +171,85 @@ public class DockerConnector {
         }
     }
 
+    /**
+     * Method returns list docker containers which wos filtered by query parameters {@code all}, {@code limit}, {@code since},
+     * {@code before}, {@code size}, {@code filter}.
+     *
+     * @param all
+     *         shows all containers. Only running containers are shown by default (i.e., this defaults to false)
+     * @param limit
+     *         shows limit last created containers, include non-running ones. Notice: if limit <= 0 then this
+     *         query parameter will not be added to request. //todo this mean unlimited result ?
+     * @param since
+     *         shows only containers created since Id, include non-running ones.//todo example
+     * @param before
+     *         shows only containers created before Id, include non-running ones.//todo example
+     * @param size
+     *         shows the containers sizes. Warning: if "size = true" method need more time for calculation containers size.
+     * @param filter a JSON encoded value of the filters (a Map<String, String[]>) to process on the containers list.
+     *               Available filters: todo complete this !
+     * @throws IOException
+     *         in case error parsing response from docker api
+     */
+//    public ContainerFromList[] getContainers(boolean all,
+//                                             int limit,
+//                                             @Nullable String since,
+//                                             @Nullable String before,
+//                                             boolean size,
+//                                             @Nullable ContainersQueryFilter filter) throws IOException {
+//        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
+//                                                            .method("GET")
+//                                                            .path("/containers/json")
+//                                                            .query("all", all)
+//                                                            .query("size", size)) {
+//            if (limit > 0) {
+//                connection.query("limit", limit);
+//            }
+//            if (!isNullOrEmpty(since)) {
+//                connection.query("since", since);
+//            }
+//            if (!isNullOrEmpty(before)) {
+//                connection.query("before", before);
+//            }
+//            if (filter != null) {
+//                String encodedJson = URLEncoder.encode(filter.toJson(), "UTF-8");
+//                connection.query(filter.getQueryKey(), encodedJson);
+//            }
+//            DockerResponse response = connection.request();
+//            final int status = response.getStatus();
+//            if (OK.getStatusCode() != status) {
+//                throw getDockerException(response);
+//            }
+//            return parseResponseStreamAndClose(response.getInputStream(), ContainerFromList[].class);
+//        } catch (JsonParseException e) {
+//            throw new IOException(e.getLocalizedMessage(), e);
+//        }
+//    }
+
+
     public ContainerFromList[] getContainers(boolean all,
                                              int limit,
-                                             String since,
-                                             String before,
+                                             @Nullable String since,
+                                             @Nullable String before,
                                              boolean size,
-                                             @Nullable ContainersQueryFilter filter) throws IOException {
-        //todo null checking for some query param: thinking very deep!!!
-        try(DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
-                                                           .method("GET")
-                                                           .path("/containers/json")
-                                                           .query("all", all)
-                                                           .query("limit", limit)
-                                                           .query("since", since)
-                                                           .query("before", before)
-                                                           .query("size", size)//warning if "size = 1" method need more time for calculation containers size
-                                                           .query(filter.getQueryKey(), URL.encode(filter.toJson()))) {//todo Url.encode maybe move inside method toJson()?
+                                             @Nullable Filters filters) throws IOException {
+        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
+                                                            .method("GET")
+                                                            .path("/containers/json")
+                                                            .query("all", all)
+                                                            .query("size", size)) {
+            if (limit > 0) {
+                connection.query("limit", limit);
+            }
+            if (!isNullOrEmpty(since)) {
+                connection.query("since", since);
+            }
+            if (!isNullOrEmpty(before)) {
+                connection.query("before", before);
+            }
+            if (filters != null) {
+                connection.query("filters", urlPathSegmentEscaper().escape(JsonHelper.toJson(filters.getFilters())));
+            }
             DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {

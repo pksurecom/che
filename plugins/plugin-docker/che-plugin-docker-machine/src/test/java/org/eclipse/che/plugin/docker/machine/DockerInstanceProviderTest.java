@@ -299,7 +299,7 @@ public class DockerInstanceProviderTest {
                                 MACHINE_ID,
                                 WORKSPACE_ID,
                                 "envName",
-                                "userId",
+                                USER_NAME,
                                 MachineStatus.CREATING,
                                 null);
 

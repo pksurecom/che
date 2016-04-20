@@ -56,7 +56,7 @@ public class DockerContainerNameGenerator {
      *         name of the container
      * @return important information about container with {@code machineImageName}
      */
-    public ContainerNameInfoParser parse(String machineImageName) {
+    public ContainerNameInfo parse(String machineImageName) {
         int namespaceIndex = machineImageName.indexOf("/") + 1;
         String containerName = machineImageName.substring(namespaceIndex, machineImageName.length());
 
@@ -64,7 +64,7 @@ public class DockerContainerNameGenerator {
         if (!matcher.matches()) {
             return null;
         }
-        return new ContainerNameInfoParser(containerName);
+        return new ContainerNameInfo(containerName);
     }
 
     /**
@@ -72,13 +72,13 @@ public class DockerContainerNameGenerator {
      * Notice: This class doesn't parse information about userName or machineName,because we do not give guarantees
      * about the integrity this data(see more {@link #generateContainerName(String, String, String, String)})
      */
-    public static class ContainerNameInfoParser {
+    public static class ContainerNameInfo {
         private static final Pattern PATTERN = Pattern.compile(WORKSPACE_ID_REGEX + "_" + MACHINE_ID_REGEX);
 
         private String workspaceId;
         private String machineId;
 
-        public ContainerNameInfoParser(String containerName) {
+        public ContainerNameInfo(String containerName) {
             Matcher workspaceIdMatcher = PATTERN.matcher(containerName);
             if (workspaceIdMatcher.find()) {
                 int end = workspaceIdMatcher.end();
@@ -105,7 +105,7 @@ public class DockerContainerNameGenerator {
 
         @Override
         public String toString() {
-            return "ContainerNameInfoParser{" +
+            return "ContainerNameInfo{" +
                    "workspaceId='" + workspaceId + '\'' +
                    ", machineId='" + machineId + '\'' +
                    '}';
@@ -114,8 +114,8 @@ public class DockerContainerNameGenerator {
         @Override
         public boolean equals(Object obj) {
             if (this == obj) return true;
-            if (!(obj instanceof ContainerNameInfoParser)) return false;
-            final ContainerNameInfoParser other = (ContainerNameInfoParser)obj;
+            if (!(obj instanceof ContainerNameInfo)) return false;
+            final ContainerNameInfo other = (ContainerNameInfo)obj;
             return Objects.equals(workspaceId, other.workspaceId)
                    && Objects.equals(machineId, other.machineId);
         }
