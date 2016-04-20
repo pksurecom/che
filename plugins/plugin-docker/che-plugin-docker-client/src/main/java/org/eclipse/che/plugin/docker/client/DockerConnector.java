@@ -28,7 +28,6 @@ import org.eclipse.che.plugin.docker.client.connection.DockerConnection;
 import org.eclipse.che.plugin.docker.client.connection.DockerConnectionFactory;
 import org.eclipse.che.plugin.docker.client.connection.DockerResponse;
 import org.eclipse.che.plugin.docker.client.dto.AuthConfigs;
-import org.eclipse.che.plugin.docker.client.helper.ContainersQueryFilter;
 import org.eclipse.che.plugin.docker.client.json.ContainerCommited;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
@@ -97,7 +96,7 @@ public class DockerConnector {
     private final DockerConnectionFactory connectionFactory;
 
     @Inject
-    public DockerConnector(DockerConnectorConfiguration connectorConfiguration, 
+    public DockerConnector(DockerConnectorConfiguration connectorConfiguration,
                            DockerConnectionFactory connectionFactory) {
         this.dockerDaemonUri = connectorConfiguration.getDockerDaemonUri();
         this.initialAuthConfig = connectorConfiguration.getAuthConfigs();
@@ -186,47 +185,20 @@ public class DockerConnector {
      *         shows only containers created before Id, include non-running ones.//todo example
      * @param size
      *         shows the containers sizes. Warning: if "size = true" method need more time for calculation containers size.
-     * @param filter a JSON encoded value of the filters (a Map<String, String[]>) to process on the containers list.
-     *               Available filters: todo complete this !
+     * @param filters
+     *         a JSON encoded value of the filters (a Map<String, String[]>) to process on the containers list.
+     *         Available filters:
+     *         <li>exited=<int>; - containers with exit code of <int><li/>
+     *         <li>status=(created|restarting|running|paused|exited)</li>
+     *         <li>label=key or label="key=value" of a container label</li>
+     *         <li>isolation=(default|process|hyperv) (Windows daemon only)</li>
+     *         <li>ancestor=(<image-name>[:<tag>], <image id> or <image@digest>)</li>
+     *         <li>before=(<container id> or <container name>)</li>
+     *         <li>since=(<container id> or <container name>)</li>
+     *         <li>volume=(<volume name> or <mount point destination>)</li>
      * @throws IOException
      *         in case error parsing response from docker api
      */
-//    public ContainerFromList[] getContainers(boolean all,
-//                                             int limit,
-//                                             @Nullable String since,
-//                                             @Nullable String before,
-//                                             boolean size,
-//                                             @Nullable ContainersQueryFilter filter) throws IOException {
-//        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
-//                                                            .method("GET")
-//                                                            .path("/containers/json")
-//                                                            .query("all", all)
-//                                                            .query("size", size)) {
-//            if (limit > 0) {
-//                connection.query("limit", limit);
-//            }
-//            if (!isNullOrEmpty(since)) {
-//                connection.query("since", since);
-//            }
-//            if (!isNullOrEmpty(before)) {
-//                connection.query("before", before);
-//            }
-//            if (filter != null) {
-//                String encodedJson = URLEncoder.encode(filter.toJson(), "UTF-8");
-//                connection.query(filter.getQueryKey(), encodedJson);
-//            }
-//            DockerResponse response = connection.request();
-//            final int status = response.getStatus();
-//            if (OK.getStatusCode() != status) {
-//                throw getDockerException(response);
-//            }
-//            return parseResponseStreamAndClose(response.getInputStream(), ContainerFromList[].class);
-//        } catch (JsonParseException e) {
-//            throw new IOException(e.getLocalizedMessage(), e);
-//        }
-//    }
-
-
     public ContainerFromList[] getContainers(boolean all,
                                              int limit,
                                              @Nullable String since,
@@ -953,7 +925,7 @@ public class DockerConnector {
             if (repository != null) {
                 connection.query("t", repository);
             }
-            if (memoryLimit != 0 ) {
+            if (memoryLimit != 0) {
                 connection.query("memory", memoryLimit);
             }
             if (memorySwapLimit != 0) {

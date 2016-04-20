@@ -100,7 +100,7 @@ public class DockerContainerCleaner implements Runnable {
     private void killContainer(ContainerFromList container) {
         String containerId = container.getId();
         try {
-            if (!container.getStatus().equals("exited")) {
+            if (container.getStatus().equals("running")) {
                 dockerConnector.killContainer(containerId);
             }
         } catch (IOException e) {
