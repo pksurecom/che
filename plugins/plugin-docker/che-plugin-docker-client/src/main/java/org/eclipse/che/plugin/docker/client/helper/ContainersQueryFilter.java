@@ -44,32 +44,32 @@ public class ContainersQueryFilter {//todo test but I think we will delete this 
         return this;
     }
 
-    public ContainersQueryFilter setAncestor(String... ancestor) {
+    public ContainersQueryFilter withAncestor(String... ancestor) {
         this.ancestor = ancestor;
         return this;
     }
 
-    public ContainersQueryFilter setBefore(String... before) {
+    public ContainersQueryFilter withBefore(String... before) {
         this.before = before;
         return this;
     }
 
-    public ContainersQueryFilter setSince(String... since) {
+    public ContainersQueryFilter withSince(String... since) {
         this.since = since;
         return this;
     }
 
-    public ContainersQueryFilter setVolume(String... volume) {
+    public ContainersQueryFilter withVolume(String... volume) {
         this.volume = volume;
         return this;
     }
 
-    public ContainersQueryFilter setStatus(Status... status) {
+    public ContainersQueryFilter withStatus(Status... status) {
         this.status = status;
         return this;
     }
 
-    public ContainersQueryFilter setIsolations(Isolation... isolations) {
+    public ContainersQueryFilter withIsolations(Isolation... isolations) {
         this.isolations = isolations;
         return this;
     }
