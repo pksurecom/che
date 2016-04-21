@@ -21,6 +21,7 @@ import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
+import org.eclipse.che.api.project.server.type.SettableValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
@@ -38,6 +39,7 @@ import org.eclipse.che.dto.server.DtoFactory;
 import java.io.File;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -300,5 +302,42 @@ public class WsAgentTestBase {
         }
 
     }
+
+
+    protected static class PTsettableVP extends ProjectTypeDef {
+
+        public PTsettableVP() {
+            super("settableVPPT", "settableVPPT", true, false);
+            addVariableDefinition("my", "my", false, new MySettableVPFactory());
+        }
+
+
+        private static class MySettableVPFactory implements ValueProviderFactory {
+
+            public static String value = "notset";
+
+
+            @Override
+            public ValueProvider newInstance(FolderEntry projectFolder) {
+                return new MySettableValueProvider();
+            }
+
+            public static class MySettableValueProvider extends SettableValueProvider {
+
+                @Override
+                public List<String> getValues(String attributeName) throws ValueStorageException {
+                    return Arrays.asList(value);
+                }
+
+                @Override
+                public void setValues(String attributeName, List<String> values) throws ValueStorageException {
+                    value = values.get(0);
+                }
+            }
+        }
+    }
+
+
+
 
 }

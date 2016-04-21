@@ -124,15 +124,26 @@ public class RegisteredProject implements ProjectConfig {
 
                     if (folder != null) {
 
-                        if (valueProvider.isSettable() && !value.isEmpty()) {
-
-                            // set value externally if settable and initialized
-                            valueProvider.setValues(name, value.getList());
-                        } else {
-
-                            // get from value provider if read-only
+                        if (!valueProvider.isSettable() || value.isEmpty()) {
+                            // get provided value
                             value = new AttributeValue(valueProvider.getValues(name));
+                        } else {
+                            // set provided (not empty) value
+                            valueProvider.setValues(name, value.getList());
                         }
+//                        if (valueProvider.isSettable()) {
+//
+//                            // set value externally if settable and initialized
+//                            if(!value.isEmpty())
+//                                valueProvider.setValues(name, value.getList());
+//                            else
+//                                value = new AttributeValue(valueProvider.getValues(name));
+//
+//                        } else {
+//
+//                            // get from value provider if read-only
+//                            value = new AttributeValue(valueProvider.getValues(name));
+//                        }
 
                     } else {
                         continue;
