@@ -58,7 +58,7 @@ public class DockerContainerCleaner implements Runnable {
     @Override
     public void run() {
         try {
-            ContainerListEntry[] allDockerContainers = dockerConnector.listContainers(new ListContainersParams().withAll(true));
+            ContainerListEntry[] allDockerContainers = dockerConnector.listContainers();
             List<MachineImpl> machines = machineManager.getMachines();
 
             List<ContainerListEntry> unUsedContainers = findUnUsedContainers(allDockerContainers, machines);
@@ -77,7 +77,7 @@ public class DockerContainerCleaner implements Runnable {
     private List<ContainerListEntry> findUnUsedContainers(ContainerListEntry[] containers, List<MachineImpl> machines) {
         List<ContainerListEntry> unUsedContainers = new ArrayList<>();
         for (ContainerListEntry container : containers) {
-            final ContainerNameInfo containerNameInfo = nameGenerator.parse(container.getImage());
+            final ContainerNameInfo containerNameInfo = nameGenerator.parse(container.getNames()[0]);
             if (containerNameInfo == null) {
                 continue;
             }

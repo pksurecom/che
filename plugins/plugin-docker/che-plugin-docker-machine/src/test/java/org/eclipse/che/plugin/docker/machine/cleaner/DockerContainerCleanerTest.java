@@ -27,7 +27,6 @@ import java.io.IOException;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -45,14 +44,14 @@ public class DockerContainerCleanerTest {
 
     private static final String workspaceId1 = "workspaceid1";
 
-    private static final String imageName1 = "imageName1";
-    private static final String imageName2 = "imageName2";
+    private static final String containerName1 = "containerName1";
+    private static final String containerName2 = "containerName2";
 
     private static final String containerId1 = "containerId1";
     private static final String containerId2 = "containerId2";
 
     private static final String EXITED_STATUS  = "exited";
-    private static final String RUNNING_STATUS = "running";
+    private static final String RUNNING_STATUS = "Up 6 hour ago";
 
     @Mock
     private MachineManager               machineManager;
@@ -80,20 +79,20 @@ public class DockerContainerCleanerTest {
     @BeforeMethod
     public void setUp() throws MachineException, IOException {
         when(machineManager.getMachines()).thenReturn(singletonList(machineImpl1));
-        when(dockerConnector.listContainers(any())).thenReturn(new ContainerListEntry[] {container1, container2});
+        when(dockerConnector.listContainers()).thenReturn(new ContainerListEntry[] {container1, container2});
         when(machineImpl1.getId()).thenReturn(machineId1);
         when(machineImpl1.getWorkspaceId()).thenReturn(workspaceId1);
 
-        when(container1.getImage()).thenReturn(imageName1);
+        when(container1.getNames()).thenReturn(new String[]{containerName1});
         when(container1.getStatus()).thenReturn(RUNNING_STATUS);
         when(container1.getId()).thenReturn(containerId1);
 
-        when(container2.getImage()).thenReturn(imageName2);
+        when(container2.getNames()).thenReturn(new String[]{containerName2});
         when(container2.getStatus()).thenReturn(RUNNING_STATUS);
         when(container2.getId()).thenReturn(containerId2);
 
-        when(nameGenerator.parse(imageName1)).thenReturn(containerNameInfo1);
-        when(nameGenerator.parse(imageName2)).thenReturn(containerNameInfo2);
+        when(nameGenerator.parse(containerName1)).thenReturn(containerNameInfo1);
+        when(nameGenerator.parse(containerName2)).thenReturn(containerNameInfo2);
 
         when(containerNameInfo1.getMachineId()).thenReturn(machineId1);
         when(containerNameInfo1.getWorkspaceId()).thenReturn(workspaceId1);
@@ -103,14 +102,14 @@ public class DockerContainerCleanerTest {
     public void dockerContainerShouldBeKilledAndRemoved() throws MachineException, IOException {
         cleaner.run();
 
-        verify(dockerConnector).listContainers(any());
+        verify(dockerConnector).listContainers();
         verify(machineManager).getMachines();
 
-        verify(container1).getImage();
-        verify(container2).getImage();
+        verify(container1).getNames();
+        verify(container2).getNames();
 
-        verify(nameGenerator).parse(imageName1);
-        verify(nameGenerator).parse(imageName2);
+        verify(nameGenerator).parse(containerName1);
+        verify(nameGenerator).parse(containerName2);
 
         verify(containerNameInfo1).getMachineId();
         verify(containerNameInfo2).getMachineId();
@@ -135,7 +134,7 @@ public class DockerContainerCleanerTest {
 
     @Test
     public void noneContainerShouldBeRemoved() throws IOException {
-        when(nameGenerator.parse(imageName2)).thenReturn(null);
+        when(nameGenerator.parse(containerName2)).thenReturn(null);
 
         cleaner.run();
 

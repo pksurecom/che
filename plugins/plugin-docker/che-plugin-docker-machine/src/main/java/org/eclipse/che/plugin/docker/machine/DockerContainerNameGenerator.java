@@ -12,6 +12,7 @@ package org.eclipse.che.plugin.docker.machine;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.user.User;
 
 import java.util.Objects;
@@ -19,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class used for generation docker container name or parse important information from docker container name.
+ * This class is used for generation docker container name or parsing important information from docker container name.
  *
  * @author Alexander Andrienko
  */
@@ -31,8 +32,8 @@ public class DockerContainerNameGenerator {
     private static final Pattern CONTAINER_NAME_PATTERN = Pattern.compile(CONTAINER_NAME_REGEX);
 
     /**
-     * Return generated name for docker container. Method generate docker container name in format:
-     * workspaceId + "_" + machineId + "_" + userName +"_" + machineName
+     * Return generated name for docker container. Method generate name for docker container in format:
+     * <br><p>workspaceId + "_" + machineId + "_" + userName +"_" + machineName</p>
      * Notice: if userName or machineName contains incorrect symbols for creation docker container, then we replace this
      * symbols to valid docker container name symbols.
      *
@@ -53,13 +54,12 @@ public class DockerContainerNameGenerator {
     /**
      * Parse machine image name to get important identifier information about this container (like workspaceId, machineId).
      *
-     * @param machineImageName
+     * @param containerName
      *         name of the container
      * @return important information about container with {@code machineImageName}
      */
-    public ContainerNameInfo parse(String machineImageName) {
-        int namespaceIndex = machineImageName.indexOf("/") + 1;
-        String containerName = machineImageName.substring(namespaceIndex, machineImageName.length());
+    public ContainerNameInfo parse(@Nullable String containerName) {
+        containerName = containerName.replace("/", "");
 
         Matcher matcher = CONTAINER_NAME_PATTERN.matcher(containerName);
         if (!matcher.matches()) {

@@ -72,7 +72,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
@@ -192,14 +191,12 @@ public class DockerConnector {
                                                             .method("GET")
                                                             .path("/containers/json")
                                                             .query("all", params.isAll())
-                                                            .query("size", params.isSize())) {
-            if (params.getLimit() > 0) {
-                connection.query("limit", params.getLimit());
-            }
-            if (!isNullOrEmpty(params.getSince())) {
+                                                            .query("size", params.isSize())
+                                                            .query("limit", params.getLimit())) {
+            if (params.getSince() != null) {
                 connection.query("since", params.getSince());
             }
-            if (!isNullOrEmpty(params.getBefore())) {
+            if (params.getBefore() != null) {
                 connection.query("before", params.getBefore());
             }
             if (params.getFilters() != null) {

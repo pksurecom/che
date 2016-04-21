@@ -39,6 +39,10 @@ public class ContainerListEntry {
         this.id = id;
     }
 
+    /***
+     * Return docker container name. Earlier docker api allowed creation additional names, that why this method return String[].
+     * But for now container name is the first element of this array. Read more https://github.com/docker/docker/issues/12538
+     */
     public String[] getNames() {
         return names;
     }
