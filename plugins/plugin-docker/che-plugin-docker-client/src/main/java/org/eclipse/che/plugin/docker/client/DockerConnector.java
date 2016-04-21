@@ -31,6 +31,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerCommited;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerExitStatus;
+import org.eclipse.che.plugin.docker.client.json.ContainerFromList;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerProcesses;
 import org.eclipse.che.plugin.docker.client.json.ContainerResource;
@@ -45,6 +46,7 @@ import org.eclipse.che.plugin.docker.client.json.Image;
 import org.eclipse.che.plugin.docker.client.json.ImageInfo;
 import org.eclipse.che.plugin.docker.client.json.ProgressStatus;
 import org.eclipse.che.plugin.docker.client.json.Version;
+import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,6 +72,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
@@ -93,7 +96,7 @@ public class DockerConnector {
     private final DockerConnectionFactory connectionFactory;
 
     @Inject
-    public DockerConnector(DockerConnectorConfiguration connectorConfiguration, 
+    public DockerConnector(DockerConnectorConfiguration connectorConfiguration,
                            DockerConnectionFactory connectionFactory) {
         this.dockerDaemonUri = connectorConfiguration.getDockerDaemonUri();
         this.initialAuthConfig = connectorConfiguration.getAuthConfigs();
@@ -162,6 +165,41 @@ public class DockerConnector {
                 throw getDockerException(response);
             }
             return parseResponseStreamAndClose(response.getInputStream(), Image[].class);
+        } catch (JsonParseException e) {
+            throw new IOException(e.getLocalizedMessage(), e);
+        }
+    }
+
+    /**
+     * Method returns list docker containers which wos filtered by query parameters from {@link ListContainersParams}
+     *
+     * @throws IOException
+     *         in case error parsing response from docker api
+     */
+    public ContainerFromList[] listContainers(ListContainersParams params) throws IOException {
+        try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
+                                                            .method("GET")
+                                                            .path("/containers/json")
+                                                            .query("all", params.isAll())
+                                                            .query("size", params.isSize())) {
+            if (params.getLimit() > 0) {
+                connection.query("limit", params.getLimit());
+            }
+            if (!isNullOrEmpty(params.getSince())) {
+                connection.query("since", params.getSince());
+            }
+            if (!isNullOrEmpty(params.getBefore())) {
+                connection.query("before", params.getBefore());
+            }
+            if (params.getFilters() != null) {
+                connection.query("filters", urlPathSegmentEscaper().escape(JsonHelper.toJson(params.getFilters())));
+            }
+            DockerResponse response = connection.request();
+            final int status = response.getStatus();
+            if (OK.getStatusCode() != status) {
+                throw getDockerException(response);
+            }
+            return parseResponseStreamAndClose(response.getInputStream(), ContainerFromList[].class);
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }
@@ -859,7 +897,7 @@ public class DockerConnector {
             if (repository != null) {
                 connection.query("t", repository);
             }
-            if (memoryLimit != 0 ) {
+            if (memoryLimit != 0) {
                 connection.query("memory", memoryLimit);
             }
             if (memorySwapLimit != 0) {
