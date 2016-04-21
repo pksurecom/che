@@ -18,7 +18,7 @@ import java.util.Map;
  *
  * @author Alexander Andrienko
  */
-public class ContainerFromList {
+public class ContainerListEntry {
     private String              id;
     private String[]            names;
     private String              image;
@@ -121,7 +121,7 @@ public class ContainerFromList {
 
     @Override
     public String toString() {
-        return "ContainerFromList{" +
+        return "ContainerListEntry{" +
                "id='" + id + '\'' +
                ", names=" + Arrays.toString(names) +
                ", image='" + image + '\'' +
