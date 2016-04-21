@@ -25,8 +25,8 @@ import java.util.regex.Pattern;
  * @author Alexander Andrienko
  */
 public class DockerContainerNameGenerator {
-    private static final String WORKSPACE_ID_REGEX      = "workspace[0-9a-z]{16}";
-    private static final String MACHINE_ID_REGEX        = "machine[0-9a-z]{16}";
+    private static final String WORKSPACE_ID_REGEX = "workspace[0-9a-z]{16}";
+    private static final String MACHINE_ID_REGEX   = "machine[0-9a-z]{16}";
 
     private static final String  CONTAINER_NAME_REGEX   = "^" + WORKSPACE_ID_REGEX + '_' + MACHINE_ID_REGEX + "(_[a-z0-9_-]+){2}$";
     private static final Pattern CONTAINER_NAME_PATTERN = Pattern.compile(CONTAINER_NAME_REGEX);
@@ -52,11 +52,11 @@ public class DockerContainerNameGenerator {
     }
 
     /**
-     * Parse machine image name to get important identifier information about this container (like workspaceId, machineId).
+     * Parse machine's container name to get important identifier information about this container (like workspaceId, machineId).
      *
      * @param containerName
      *         name of the container
-     * @return important information about container with {@code machineImageName}
+     * @return information about container
      */
     public ContainerNameInfo parse(@Nullable String containerName) {
         containerName = containerName.replace("/", "");
@@ -71,7 +71,7 @@ public class DockerContainerNameGenerator {
     /**
      * Class contains information about docker container, which was parsed from docker container name.
      * Notice: This class doesn't parse information about userName or machineName,because we do not give guarantees
-     * about the integrity this data(see more {@link #generateContainerName(String, String, String, String)})
+     * about the integrity of this data(see more {@link #generateContainerName(String, String, String, String)})
      */
     public static class ContainerNameInfo {
         private static final Pattern PATTERN = Pattern.compile(WORKSPACE_ID_REGEX + "_" + MACHINE_ID_REGEX);
@@ -79,7 +79,7 @@ public class DockerContainerNameGenerator {
         private String workspaceId;
         private String machineId;
 
-        public ContainerNameInfo(String containerName) {
+        ContainerNameInfo(String containerName) {
             Matcher workspaceIdMatcher = PATTERN.matcher(containerName);
             if (workspaceIdMatcher.find()) {
                 int end = workspaceIdMatcher.end();

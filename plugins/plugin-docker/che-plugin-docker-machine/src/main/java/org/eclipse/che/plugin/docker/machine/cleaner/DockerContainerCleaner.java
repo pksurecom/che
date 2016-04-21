@@ -19,7 +19,6 @@ import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
-import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
