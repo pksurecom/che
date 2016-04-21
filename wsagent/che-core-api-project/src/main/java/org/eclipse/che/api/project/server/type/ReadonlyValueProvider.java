@@ -10,19 +10,23 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server.type;
 
+import java.util.List;
+
 /**
+ * Value provider to read the values.
+ * Initializing
+ *
  * @author gazarenkov
  */
-public class ProvidedVariable extends Variable {
+public abstract class ReadonlyValueProvider implements ValueProvider {
 
-    protected ValueProviderFactory valueProviderFactory = null;
+    @Override
+    public final void setValues(String attributeName, List<String> values) throws ValueStorageException {
+        throw new ValueStorageException("Value Provider is read only");
+    }
 
-    public ProvidedVariable(String projectType,
-                            String name,
-                            String description,
-                            boolean required,
-                            ValueProviderFactory valueProviderFactory) {
-        super(projectType, name, description, required);
-        this.valueProviderFactory = valueProviderFactory;
+    @Override
+    public final boolean isSettable() {
+        return false;
     }
 }

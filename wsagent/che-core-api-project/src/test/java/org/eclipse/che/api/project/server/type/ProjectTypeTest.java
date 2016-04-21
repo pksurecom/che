@@ -342,7 +342,7 @@ public class ProjectTypeTest {
             return new MyValueProvider();
         }
 
-        public static class MyValueProvider implements ValueProvider {
+        public static class MyValueProvider extends ReadonlyValueProvider {
 
             @Override
             public List<String> getValues(String attributeName) throws ValueStorageException {

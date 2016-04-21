@@ -20,6 +20,7 @@ import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
@@ -218,7 +219,7 @@ public class WsAgentTestBase {
             @Override
             public ValueProvider newInstance(final FolderEntry projectFolder) {
 
-                return new ValueProvider() {
+                return new ReadonlyValueProvider() {
 
                     @Override
                     public List<String> getValues(String attributeName) throws ValueStorageException {
@@ -274,7 +275,7 @@ public class WsAgentTestBase {
             @Override
             public ValueProvider newInstance(final FolderEntry projectFolder) {
 
-                return new ValueProvider() {
+                return new ReadonlyValueProvider() {
 
                     @Override
                     public List<String> getValues(String attributeName) throws ValueStorageException {

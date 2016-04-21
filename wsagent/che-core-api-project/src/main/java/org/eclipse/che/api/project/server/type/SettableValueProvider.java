@@ -10,29 +10,13 @@
  *******************************************************************************/
 package org.eclipse.che.api.project.server.type;
 
-import java.util.List;
-
 /**
- * Provides access to the value of attribute of Project.
- *
- * @author andrew00x
  * @author gazarenkov
  */
-public interface ValueProvider {
+public abstract class SettableValueProvider implements ValueProvider {
 
-    /** Gets values. */
-    List<String> getValues(String attributeName) throws ValueStorageException;
-
-    /**
-     * Sets values
-     * @param attributeName - name
-     * @param values - values
-     * @throws ValueStorageException
-     */
-    void setValues(String attributeName, List<String> values) throws ValueStorageException;
-
-    /**
-     * @return whether this Value Provider intended to initialize values
-     */
-    boolean isSettable();
+    @Override
+    public final boolean isSettable() {
+        return true;
+    }
 }
