@@ -31,7 +31,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerCommited;
 import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerExitStatus;
-import org.eclipse.che.plugin.docker.client.json.ContainerFromList;
+import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
 import org.eclipse.che.plugin.docker.client.json.ContainerProcesses;
 import org.eclipse.che.plugin.docker.client.json.ContainerResource;
@@ -85,6 +85,7 @@ import static javax.ws.rs.core.Response.Status.OK;
  * @author andrew00x
  * @author Alexander Garagatyi
  * @author Anton Korneta
+ * @author Alexander Andrienko
  */
 @Singleton
 public class DockerConnector {
@@ -171,12 +172,22 @@ public class DockerConnector {
     }
 
     /**
-     * Method returns list docker containers which wos filtered by query parameters from {@link ListContainersParams}
+     * Method returns list docker containers, include non-running ones.
      *
      * @throws IOException
      *         in case error parsing response from docker api
      */
-    public ContainerFromList[] listContainers(ListContainersParams params) throws IOException {
+    public ContainerListEntry[] listContainers() throws IOException {
+        return listContainers(new ListContainersParams().withAll(true));
+    }
+
+    /**
+     * Method returns list docker containers which was filtered by query parameters from {@link ListContainersParams}
+     *
+     * @throws IOException
+     *         in case error parsing response from docker api
+     */
+    public ContainerListEntry[] listContainers(ListContainersParams params) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/containers/json")
@@ -199,7 +210,7 @@ public class DockerConnector {
             if (OK.getStatusCode() != status) {
                 throw getDockerException(response);
             }
-            return parseResponseStreamAndClose(response.getInputStream(), ContainerFromList[].class);
+            return parseResponseStreamAndClose(response.getInputStream(), ContainerListEntry[].class);
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }

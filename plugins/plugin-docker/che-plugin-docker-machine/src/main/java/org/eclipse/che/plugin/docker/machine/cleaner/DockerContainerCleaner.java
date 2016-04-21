@@ -18,7 +18,7 @@ import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.json.ContainerFromList;
+import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.slf4j.Logger;
@@ -58,12 +58,12 @@ public class DockerContainerCleaner implements Runnable {
     @Override
     public void run() {
         try {
-            ContainerFromList[] allDockerContainers = dockerConnector.listContainers(new ListContainersParams().withAll(true));
+            ContainerListEntry[] allDockerContainers = dockerConnector.listContainers(new ListContainersParams().withAll(true));
             List<MachineImpl> machines = machineManager.getMachines();
 
-            List<ContainerFromList> unUsedContainers = findUnUsedContainers(allDockerContainers, machines);
+            List<ContainerListEntry> unUsedContainers = findUnUsedContainers(allDockerContainers, machines);
 
-            for (ContainerFromList container : unUsedContainers) {
+            for (ContainerListEntry container : unUsedContainers) {
                 killContainer(container);
                 removeContainerByID(container.getId());
             }
@@ -74,9 +74,9 @@ public class DockerContainerCleaner implements Runnable {
         }
     }
 
-    private List<ContainerFromList> findUnUsedContainers(ContainerFromList[] containers, List<MachineImpl> machines) {
-        List<ContainerFromList> unUsedContainers = new ArrayList<>();
-        for (ContainerFromList container : containers) {
+    private List<ContainerListEntry> findUnUsedContainers(ContainerListEntry[] containers, List<MachineImpl> machines) {
+        List<ContainerListEntry> unUsedContainers = new ArrayList<>();
+        for (ContainerListEntry container : containers) {
             final ContainerNameInfo containerNameInfo = nameGenerator.parse(container.getImage());
             if (containerNameInfo == null) {
                 continue;
@@ -91,7 +91,7 @@ public class DockerContainerCleaner implements Runnable {
         return unUsedContainers;
     }
 
-    private void killContainer(ContainerFromList container) {
+    private void killContainer(ContainerListEntry container) {
         String containerId = container.getId();
         try {
             if (container.getStatus().startsWith("Up")) {

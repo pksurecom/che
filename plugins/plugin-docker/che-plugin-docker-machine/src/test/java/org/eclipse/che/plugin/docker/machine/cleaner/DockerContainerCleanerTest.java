@@ -14,7 +14,7 @@ import org.eclipse.che.api.machine.server.MachineManager;
 import org.eclipse.che.api.machine.server.exception.MachineException;
 import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
-import org.eclipse.che.plugin.docker.client.json.ContainerFromList;
+import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -65,9 +65,9 @@ public class DockerContainerCleanerTest {
     private MachineImpl machineImpl1;
 
     @Mock
-    private ContainerFromList container1;
+    private ContainerListEntry container1;
     @Mock
-    private ContainerFromList container2;
+    private ContainerListEntry container2;
 
     @Mock
     private ContainerNameInfo containerNameInfo1;
@@ -80,7 +80,7 @@ public class DockerContainerCleanerTest {
     @BeforeMethod
     public void setUp() throws MachineException, IOException {
         when(machineManager.getMachines()).thenReturn(singletonList(machineImpl1));
-        when(dockerConnector.listContainers(any())).thenReturn(new ContainerFromList[] {container1, container2});
+        when(dockerConnector.listContainers(any())).thenReturn(new ContainerListEntry[] {container1, container2});
         when(machineImpl1.getId()).thenReturn(machineId1);
         when(machineImpl1.getWorkspaceId()).thenReturn(workspaceId1);
 

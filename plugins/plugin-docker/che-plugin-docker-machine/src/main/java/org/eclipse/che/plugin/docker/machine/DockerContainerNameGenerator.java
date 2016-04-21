@@ -24,10 +24,10 @@ import java.util.regex.Pattern;
  * @author Alexander Andrienko
  */
 public class DockerContainerNameGenerator {
-    private static final String WORKSPACE_ID_REGEX      = "workspace[\\da-z]{16}";
-    private static final String MACHINE_ID_REGEX        = "machine[\\da-z]{16}";
+    private static final String WORKSPACE_ID_REGEX      = "workspace[0-9a-z]{16}";
+    private static final String MACHINE_ID_REGEX        = "machine[0-9a-z]{16}";
 
-    private static final String  CONTAINER_NAME_REGEX   = "^" + WORKSPACE_ID_REGEX + '_' + MACHINE_ID_REGEX + "_[a-z0-9_-]+_[a-z0-9_-]+$";
+    private static final String  CONTAINER_NAME_REGEX   = "^" + WORKSPACE_ID_REGEX + '_' + MACHINE_ID_REGEX + "(_[a-z0-9_-]+){2}$";
     private static final Pattern CONTAINER_NAME_PATTERN = Pattern.compile(CONTAINER_NAME_REGEX);
 
     /**

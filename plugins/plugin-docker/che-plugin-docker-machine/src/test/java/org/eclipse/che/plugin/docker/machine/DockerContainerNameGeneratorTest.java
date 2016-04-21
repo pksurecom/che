@@ -51,7 +51,6 @@ public class DockerContainerNameGeneratorTest {
         assertEquals(containerNameInfoParser.getWorkspaceId(), WORKSPACE_ID);
     }
 
-
     @DataProvider(name = "validContainerNames")
     public static Object[][] validContainerNames() {
         return new Object[][] {{"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name",

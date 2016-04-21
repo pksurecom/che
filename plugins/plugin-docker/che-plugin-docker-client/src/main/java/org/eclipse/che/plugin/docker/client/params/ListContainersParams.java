@@ -12,54 +12,102 @@ package org.eclipse.che.plugin.docker.client.params;
 
 import org.eclipse.che.plugin.docker.client.json.Filters;
 
+import java.util.Objects;
+
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#listContainers(ListContainersParams)}.
  *
  * @author Alexander Andrienko
  */
 public class ListContainersParams {
-    private boolean all;
-    private int limit;
-    private  String since;
-    private String before;
-    private boolean size;
+    private Boolean all;
+    private Integer limit;
+    private String  since;
+    private String  before;
+    private Boolean size;
     private Filters filters;
 
-    public ListContainersParams withAll(boolean all) {
+    /**
+     * Adds parameter show all containers. Only running containers are shown by default.
+     *
+     * @param all
+     *         if all == true show all containers, if all = false show only running containers
+     */
+    public ListContainersParams withAll(Boolean all) {
         this.all = all;
         return this;
     }
 
-    public ListContainersParams withLimit(int limit) {
+    /**
+     * Adds parameter show limit last created containers, include non-running ones.
+     *
+     * @param limit
+     *         amount elements of the list containers
+     */
+    public ListContainersParams withLimit(Integer limit) {
         this.limit = limit;
         return this;
     }
 
-    public ListContainersParams withSince(String since) {
-        this.since = since;
+    /**
+     * Adds parameter show only containers created since container with {@code id}.
+     *
+     * @param id
+     *         container id
+     */
+    public ListContainersParams withSince(String id) {
+        this.since = id;
         return this;
     }
 
-    public ListContainersParams withBefore(String before) {
-        this.before = before;
+    /**
+     * Adds parameter show only containers created before container with {@code id}.
+     *
+     * @param id
+     *         container id
+     */
+    public ListContainersParams withBefore(String id) {
+        this.before = id;
         return this;
     }
 
-    public ListContainersParams withSize(boolean size) {
+    /**
+     * Adds parameter show docker container size information.
+     *
+     * @param size
+     *         if size = true then api add container size information, otherwise hide this information.
+     *         Warning: if size = true docker api need more time for calculation container size
+     */
+    public ListContainersParams withSize(Boolean size) {
         this.size = size;
         return this;
     }
 
+    /**
+     * Adds parameter filters for filter list containers. See more {@link Filters}
+     *
+     * @param filters
+     *         json object with filter parameters.
+     *         Filter values:
+     *         <li>exited=<int>; -- containers with exit code of <int>;</li>
+     *         <li>status=(created|restarting|running|paused|exited|dead)</li>
+     *         <li>label=key or label="key=value" of a container label</li>
+     *         <li>isolation=(default|process|hyperv) (Windows daemon only)</li>
+     *         <li>ancestor=(<image-name>[:<tag>], <image id> or <image@digest>)</li>
+     *         <li>before=(<container id> or <container name>)</li>
+     *         <li>since=(<container id> or <container name>)</li>
+     *         <li>volume=(<volume name> or <mount point destination>)</li>
+     */
     public ListContainersParams withFilters(Filters filters) {
         this.filters = filters;
         return this;
     }
 
-    public boolean isAll() {
+    public Boolean isAll() {
         return all;
     }
 
-    public int getLimit() {
+    public Integer getLimit() {
         return limit;
     }
 
@@ -71,11 +119,42 @@ public class ListContainersParams {
         return before;
     }
 
-    public boolean isSize() {
+    public Boolean isSize() {
         return size;
     }
 
     public Filters getFilters() {
         return filters;
+    }
+
+    @Override
+    public String toString() {
+        return "ListContainersParams{" +
+               "all=" + all +
+               ", limit=" + limit +
+               ", since='" + since + '\'' +
+               ", before='" + before + '\'' +
+               ", size=" + size +
+               ", filters=" + filters +
+               '}';
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof ListContainersParams)) return false;
+        ListContainersParams another = (ListContainersParams)obj;
+
+        return Objects.equals(isAll(), another.isAll()) &&
+               Objects.equals(getLimit(), another.getLimit()) &&
+               Objects.equals(getSince(), another.getSince()) &&
+               Objects.equals(getBefore(), another.getBefore()) &&
+               Objects.equals(isSize(), another.isSize()) &&
+               Objects.equals(getFilters(), another.getFilters());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(isAll(), getLimit(), getSince(), getBefore(), isSize(), getFilters());
     }
 }
