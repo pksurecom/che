@@ -53,7 +53,9 @@ public class DockerContainerCleaner implements Runnable {
         this.nameGenerator = nameGenerator;
     }
 
-    @ScheduleRate(period = 5, initialDelay = 5, unit = TimeUnit.MINUTES)//it will be changed to one per hour. Maybe it should be set in property ?
+    @ScheduleRate(periodParameterName = "docker.clean.up.unused.containers.period_min",
+                  initialDelayParameterName = "docker.clean.up.unused.containers.period_min",
+                  unit = TimeUnit.MINUTES)
     @Override
     public void run() {
         try {
