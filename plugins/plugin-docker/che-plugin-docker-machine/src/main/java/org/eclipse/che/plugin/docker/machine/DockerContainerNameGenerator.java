@@ -34,8 +34,7 @@ public class DockerContainerNameGenerator {
     /**
      * Return generated name for docker container. Method generate name for docker container in format:
      * <br><p>workspaceId + "_" + machineId + "_" + userName +"_" + machineName</p>
-     * Notice: if userName or machineName contains incorrect symbols for creation docker container, then we replace this
-     * symbols to valid docker container name symbols.
+     * Notice: if userName or machineName contains incorrect symbols for creation docker container, then we skip this symbols
      *
      * @param workspaceId
      *         unique workspace id, see more (@link WorkspaceConfig#getId)
@@ -52,7 +51,9 @@ public class DockerContainerNameGenerator {
     }
 
     /**
-     * Parse machine's container name to get important identifier information about this container (like workspaceId, machineId).
+     * Parse machine's {@code containerName} to get information about this container (like workspaceId, machineId).
+     * Notice: method doesn't parse information about userName or machineName,because we do not give guarantees
+     * about the integrity of this data(see more {@link #generateContainerName(String, String, String, String)})
      *
      * @param containerName
      *         name of the container
@@ -72,15 +73,14 @@ public class DockerContainerNameGenerator {
 
     /**
      * Class contains information about docker container, which was parsed from docker container name.
-     * Notice: This class doesn't parse information about userName or machineName,because we do not give guarantees
-     * about the integrity of this data(see more {@link #generateContainerName(String, String, String, String)})
+     * Usually used {@link #parse(String)}
      */
     public static class ContainerNameInfo {
 
         private final String workspaceId;
         private final String machineId;
 
-        ContainerNameInfo(String workspaceId, String machineId) {
+        private ContainerNameInfo(String workspaceId, String machineId) {
             this.workspaceId = workspaceId;
             this.machineId = machineId;
         }
