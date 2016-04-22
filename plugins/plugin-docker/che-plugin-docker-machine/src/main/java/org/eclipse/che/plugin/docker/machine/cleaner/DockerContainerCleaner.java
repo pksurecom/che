@@ -81,7 +81,7 @@ public class DockerContainerCleaner implements Runnable {
                 continue;
             }
             boolean containerIsUsed = machines.stream()
-                                              .allMatch(machine -> machine.getId().equals(containerNameInfo.getMachineId())
+                                              .anyMatch(machine -> machine.getId().equals(containerNameInfo.getMachineId())
                                                                    && machine.getWorkspaceId().equals(containerNameInfo.getWorkspaceId()));
             if (!containerIsUsed) {
                 unUsedContainers.add(container);
