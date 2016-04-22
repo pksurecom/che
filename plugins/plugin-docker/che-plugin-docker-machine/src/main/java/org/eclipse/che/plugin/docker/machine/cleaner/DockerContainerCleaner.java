@@ -67,9 +67,11 @@ public class DockerContainerCleaner implements Runnable {
                 removeContainerByID(container.getId());
             }
         } catch (IOException e) {
-            LOG.error("Failed to get list docker containers");
+            LOG.error("Failed to get list docker containers", e);
         } catch (MachineException e) {
-            LOG.error("Failed to get list machines to clean up unused containers");
+            LOG.error("Failed to get list machines to clean up unused containers", e);
+        } catch (Exception e) {
+            LOG.error("Failed to clean up inactive containers", e);
         }
     }
 
@@ -98,7 +100,7 @@ public class DockerContainerCleaner implements Runnable {
                 LOG.info("Container with 'id': {} was killed", containerId);
             }
         } catch (IOException e) {
-            LOG.error("Failed to kill unused container '{}'", containerId);
+            LOG.error("Failed to kill unused container '{}'", containerId, e);
         }
     }
 
@@ -108,7 +110,7 @@ public class DockerContainerCleaner implements Runnable {
             dockerConnector.removeContainer(containerId, true, true);
             LOG.info("Container with 'id': {} was removed", containerId);
         } catch (IOException e) {
-            LOG.error("Failed to delete unused container '{}'", containerId);
+            LOG.error("Failed to delete unused container '{}'", containerId, e);
         }
     }
 }

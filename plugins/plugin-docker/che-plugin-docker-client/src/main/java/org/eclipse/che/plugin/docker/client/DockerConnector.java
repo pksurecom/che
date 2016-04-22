@@ -171,17 +171,17 @@ public class DockerConnector {
     }
 
     /**
-     * Method returns list docker containers, include non-running ones.
+     * Method returns list of docker containers, include non-running ones.
      *
      * @throws IOException
-     *         in case error parsing response from docker api
+     *         when problems occurs with docker api calls
      */
     public ContainerListEntry[] listContainers() throws IOException {
         return listContainers(new ListContainersParams().withAll(true));
     }
 
     /**
-     * Method returns list docker containers which was filtered by query parameters from {@link ListContainersParams}
+     * Method returns list of docker containers which was filtered by query parameters from {@link ListContainersParams}
      *
      * @throws IOException
      *         in case error parsing response from docker api
