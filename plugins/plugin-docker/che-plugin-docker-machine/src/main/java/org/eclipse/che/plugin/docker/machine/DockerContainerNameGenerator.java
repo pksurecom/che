@@ -25,10 +25,10 @@ import java.util.regex.Pattern;
  * @author Alexander Andrienko
  */
 public class DockerContainerNameGenerator {
-    private static final String WORKSPACE_ID_REGEX = "workspace[0-9a-z]{16}";
-    private static final String MACHINE_ID_REGEX   = "machine[0-9a-z]{16}";
+    private static final String WORKSPACE_ID_GROUP = "(?<workspaceId>workspace[0-9a-z]{16})";
+    private static final String MACHINE_ID_GROUP   = "(?<machineId>machine[0-9a-z]{16})";
 
-    private static final String  CONTAINER_NAME_REGEX   = "^" + WORKSPACE_ID_REGEX + '_' + MACHINE_ID_REGEX + "(_[a-z0-9_-]+){2}$";
+    private static final String  CONTAINER_NAME_REGEX   = "^" + WORKSPACE_ID_GROUP + "_" + MACHINE_ID_GROUP + "(_.*){2}$";
     private static final Pattern CONTAINER_NAME_PATTERN = Pattern.compile(CONTAINER_NAME_REGEX);
 
     /**
@@ -62,10 +62,12 @@ public class DockerContainerNameGenerator {
         containerName = containerName.replace("/", "");
 
         Matcher matcher = CONTAINER_NAME_PATTERN.matcher(containerName);
-        if (!matcher.matches()) {
-            return null;
+        if (matcher.matches()) {
+            String workspaceId = matcher.group("workspaceId");
+            String machineId = matcher.group("machineId");
+            return new ContainerNameInfo(workspaceId, machineId);
         }
-        return new ContainerNameInfo(containerName);
+        return null;
     }
 
     /**
@@ -74,20 +76,13 @@ public class DockerContainerNameGenerator {
      * about the integrity of this data(see more {@link #generateContainerName(String, String, String, String)})
      */
     public static class ContainerNameInfo {
-        private static final Pattern PATTERN = Pattern.compile(WORKSPACE_ID_REGEX + "_" + MACHINE_ID_REGEX);
 
-        private String workspaceId;
-        private String machineId;
+        private final String workspaceId;
+        private final String machineId;
 
-        ContainerNameInfo(String containerName) {
-            Matcher workspaceIdMatcher = PATTERN.matcher(containerName);
-            if (workspaceIdMatcher.find()) {
-                int end = workspaceIdMatcher.end();
-
-                int separatorIndex = containerName.indexOf("_");
-                workspaceId = containerName.substring(0, separatorIndex);
-                machineId = containerName.substring(separatorIndex + 1, end);
-            }
+        ContainerNameInfo(String workspaceId, String machineId) {
+            this.workspaceId = workspaceId;
+            this.machineId = machineId;
         }
 
         /**

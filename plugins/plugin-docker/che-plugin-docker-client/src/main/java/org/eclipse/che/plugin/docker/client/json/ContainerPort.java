@@ -15,7 +15,7 @@ package org.eclipse.che.plugin.docker.client.json;
  *
  * @author Alexander Andrienko
  */
-public class Port {
+public class ContainerPort {
     private int    privatePort;
     private int    publicPort;
     private String type;
@@ -46,7 +46,7 @@ public class Port {
 
     @Override
     public String toString() {
-        return "Port{" +
+        return "ContainerPort{" +
                "privatePort=" + privatePort +
                ", publicPort=" + publicPort +
                ", type='" + type + '\'' +

@@ -26,7 +26,7 @@ public class ContainerListEntry {
     private String              command;
     private long                created;
     private String              status;
-    private Port[]              ports;
+    private ContainerPort[]     ports;
     private Map<String, String> labels;
     private int                 sizeRw;
     private int                 sizeRootFs;
@@ -91,11 +91,11 @@ public class ContainerListEntry {
         this.status = status;
     }
 
-    public Port[] getPorts() {
+    public ContainerPort[] getPorts() {
         return ports;
     }
 
-    public void setPorts(Port[] ports) {
+    public void setPorts(ContainerPort[] ports) {
         this.ports = ports;
     }
 

@@ -189,10 +189,16 @@ public class DockerConnector {
     public ContainerListEntry[] listContainers(ListContainersParams params) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
-                                                            .path("/containers/json")
-                                                            .query("all", params.isAll())
-                                                            .query("size", params.isSize())
-                                                            .query("limit", params.getLimit())) {
+                                                            .path("/containers/json")) {
+            if (params.isAll()) {
+                connection.query("all", params.isAll());
+            }
+            if (params.isSize() != null) {
+                connection.query("size", params.isSize());
+            }
+            if (params.getLimit() != null) {
+                connection.query("limit", params.getLimit());
+            }
             if (params.getSince() != null) {
                 connection.query("since", params.getSince());
             }
