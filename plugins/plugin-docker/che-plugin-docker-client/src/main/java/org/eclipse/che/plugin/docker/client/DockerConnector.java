@@ -190,7 +190,7 @@ public class DockerConnector {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/containers/json")) {
-            if (params.isAll()) {
+            if (params.isAll() != null) {
                 connection.query("all", params.isAll());
             }
             if (params.isSize() != null) {
