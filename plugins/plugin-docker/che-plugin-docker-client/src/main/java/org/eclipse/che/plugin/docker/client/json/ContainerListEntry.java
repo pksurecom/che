@@ -31,6 +31,9 @@ public class ContainerListEntry {
     private int                 sizeRw;
     private int                 sizeRootFs;
 
+    /**
+     * Returns unique container identifier
+     */
     public String getId() {
         return id;
     }
@@ -39,8 +42,8 @@ public class ContainerListEntry {
         this.id = id;
     }
 
-    /***
-     * Return docker container name. Earlier docker api allowed creation additional names, that why this method return String[].
+    /**
+     * Returns docker container name. Earlier docker api allowed creation additional names, that why this method return String[].
      * But for now container name is the first element of this array. Read more https://github.com/docker/docker/issues/12538
      */
     public String[] getNames() {
@@ -51,6 +54,9 @@ public class ContainerListEntry {
         this.names = names;
     }
 
+    /**
+     * Returns name for image, which was used for creation the container
+     */
     public String getImage() {
         return image;
     }
@@ -59,6 +65,9 @@ public class ContainerListEntry {
         this.image = image;
     }
 
+    /**
+     * Returns id for image, which was used for creation the container
+     */
     public String getImageID() {
         return imageID;
     }
@@ -67,6 +76,10 @@ public class ContainerListEntry {
         this.imageID = imageID;
     }
 
+    /**
+     * Returns time creation of the container in Unix time format(number of milliseconds since Unix epoch January 1 1970 to data
+     * creation container)
+     */
     public long getCreated() {
         return created;
     }
@@ -75,6 +88,9 @@ public class ContainerListEntry {
         this.created = created;
     }
 
+    /**
+     * Returns command which container performs
+     */
     public String getCommand() {
         return command;
     }
@@ -83,6 +99,9 @@ public class ContainerListEntry {
         this.command = command;
     }
 
+    /**
+     * Returns container status in declarative form, f.e "Up 6 minutes", "Exit 0"
+     */
     public String getStatus() {
         return status;
     }
@@ -91,6 +110,9 @@ public class ContainerListEntry {
         this.status = status;
     }
 
+    /**
+     * Returns published a container's port(s) to the host. See more {@link ContainerPort}
+     */
     public ContainerPort[] getPorts() {
         return ports;
     }
@@ -99,6 +121,9 @@ public class ContainerListEntry {
         this.ports = ports;
     }
 
+    /**
+     * Returns metadata of the container
+     */
     public Map<String, String> getLabels() {
         return labels;
     }
@@ -107,6 +132,9 @@ public class ContainerListEntry {
         this.labels = labels;
     }
 
+    /**
+     * Returns the real size of the container.
+     */
     public int getSizeRw() {
         return sizeRw;
     }
@@ -115,6 +143,9 @@ public class ContainerListEntry {
         this.sizeRw = sizeRw;
     }
 
+    /**
+     *  Returns the virtual size of the container
+     */
     public int getSizeRootFs() {
         return sizeRootFs;
     }

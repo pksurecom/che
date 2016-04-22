@@ -11,7 +11,7 @@
 package org.eclipse.che.plugin.docker.client.json;
 
 /**
- * Defines information about container port
+ * Defines information about container port which was published to the host
  *
  * @author Alexander Andrienko
  */
