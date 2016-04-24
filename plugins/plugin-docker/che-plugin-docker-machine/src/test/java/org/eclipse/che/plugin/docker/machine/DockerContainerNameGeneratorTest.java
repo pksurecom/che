@@ -10,16 +10,20 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
+import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.user.UserImpl;
 import org.mockito.InjectMocks;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.Optional;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static java.util.Collections.emptyList;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
+import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;
 
 /**
@@ -37,16 +41,21 @@ public class DockerContainerNameGeneratorTest {
     @InjectMocks
     private DockerContainerNameGenerator nameGenerator;
 
+    @BeforeMethod
+    public void setUp() {
+        EnvironmentContext.getCurrent().setUser(new UserImpl(USER_NAME, "stub", "stub", emptyList(), false));
+    }
+
     @Test
     public void containerNameShouldBeGenerated() {
         String expectedResult = "workspacebbbx2ree3iykn8gc_machineic131ppamujngv6y_some_user_ws-machine";
-        String actualResult = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
+        String actualResult = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, MACHINE_NAME);
         assertEquals(expectedResult, actualResult);
     }
 
     @Test
     public void machineNameShouldBeReturnedByGeneratedContainerName() {
-        String generatedName = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
+        String generatedName = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, MACHINE_NAME);
 
         Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(generatedName);
 

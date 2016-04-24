@@ -158,7 +158,6 @@ public class DockerInstanceProviderTest {
         String generatedContainerId = "genContainerId";
         doReturn(generatedContainerId).when(containerNameGenerator).generateContainerName(eq(WORKSPACE_ID),
                                                                                           eq(MACHINE_ID),
-                                                                                          eq(USER_NAME),
                                                                                           eq(MACHINE_NAME));
 
 
@@ -192,7 +191,6 @@ public class DockerInstanceProviderTest {
         String generatedContainerId = "genContainerId";
         doReturn(generatedContainerId).when(containerNameGenerator).generateContainerName(eq(WORKSPACE_ID),
                                                                                           eq(MACHINE_ID),
-                                                                                          eq(USER_NAME),
                                                                                           eq(MACHINE_NAME));
         String repo = "repo1";
         String tag = "tag1";
@@ -211,7 +209,6 @@ public class DockerInstanceProviderTest {
         String generatedContainerId = "genContainerId";
         doReturn(generatedContainerId).when(containerNameGenerator).generateContainerName(eq(WORKSPACE_ID),
                                                                                           eq(MACHINE_ID),
-                                                                                          eq(USER_NAME),
                                                                                           eq(MACHINE_NAME));
 
 
@@ -235,7 +232,6 @@ public class DockerInstanceProviderTest {
         String generatedContainerId = "genContainerId";
         doReturn(generatedContainerId).when(containerNameGenerator).generateContainerName(eq(WORKSPACE_ID),
                                                                                           eq(MACHINE_ID),
-                                                                                          eq(USER_NAME),
                                                                                           eq(MACHINE_NAME));
         createInstanceFromSnapshot();
 
@@ -282,7 +278,6 @@ public class DockerInstanceProviderTest {
         String generatedContainerId = "genContainerId";
         doReturn(generatedContainerId).when(containerNameGenerator).generateContainerName(eq(WORKSPACE_ID),
                                                                                           eq(MACHINE_ID),
-                                                                                          eq(USER_NAME),
                                                                                           eq(MACHINE_NAME));
 
         final MachineSourceImpl machineSource = new MachineSourceImpl("type", "location");
@@ -318,7 +313,6 @@ public class DockerInstanceProviderTest {
         String generatedContainerId = "genContainerId";
         doReturn(generatedContainerId).when(containerNameGenerator).generateContainerName(eq(WORKSPACE_ID),
                                                                                           eq(MACHINE_ID),
-                                                                                          eq(USER_NAME),
                                                                                           eq(MACHINE_NAME));
 
         final MachineSourceImpl machineSource = new MachineSourceImpl("type", "location");

@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.docker.machine;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.commons.user.User;
+import org.eclipse.che.commons.env.EnvironmentContext;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -40,12 +40,11 @@ public class DockerContainerNameGenerator {
      *         unique workspace id, see more (@link WorkspaceConfig#getId)
      * @param machineId
      *         unique machine id, see more {@link Machine#getId()}
-     * @param userName
-     *         name of the user who is docker container owner, see more {@link User#getName()}
      * @param machineName
      *         name of the workspace machine, see more {@link MachineConfig#getName()}
      */
-    public String generateContainerName(String workspaceId, String machineId, String userName, String machineName) {
+    public String generateContainerName(String workspaceId, String machineId, String machineName) {
+        String userName = EnvironmentContext.getCurrent().getUser().getName();
         String containerName = workspaceId + '_' + machineId + '_' + userName + '_' + machineName;
         return containerName.toLowerCase().replaceAll("[^a-z0-9_-]+", "");
     }
@@ -53,7 +52,7 @@ public class DockerContainerNameGenerator {
     /**
      * Parse machine's {@code containerName} to get information about this container (like workspaceId, machineId).
      * Notice: method doesn't parse information about userName or machineName,because we do not give guarantees
-     * about the integrity of this data(see more {@link #generateContainerName(String, String, String, String)})
+     * about the integrity of this data(see more {@link #generateContainerName(String, String, String)})
      *
      * @param containerName
      *         name of the container
