@@ -14,6 +14,8 @@ import org.eclipse.che.plugin.docker.client.json.Filters;
 
 import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Arguments holder for {@link org.eclipse.che.plugin.docker.client.DockerConnector#listContainers(ListContainersParams)}.
  *
@@ -31,9 +33,10 @@ public class ListContainersParams {
      * Adds parameter show all containers. Only running containers are shown by default.
      *
      * @param all
-     *         if all == true show all containers, if all = false show only running containers
+     *         if true show all containers, if false show only running containers
      */
-    public ListContainersParams withAll(Boolean all) {
+    public ListContainersParams withAll(boolean all) {
+        requireNonNull(all);
         this.all = all;
         return this;
     }
@@ -44,7 +47,8 @@ public class ListContainersParams {
      * @param limit
      *         amount elements of the list containers
      */
-    public ListContainersParams withLimit(Integer limit) {
+    public ListContainersParams withLimit(int limit) {
+        requireNonNull(limit);
         this.limit = limit;
         return this;
     }
@@ -56,6 +60,7 @@ public class ListContainersParams {
      *         container id
      */
     public ListContainersParams withSince(String id) {
+        requireNonNull(id);
         this.since = id;
         return this;
     }
@@ -67,6 +72,7 @@ public class ListContainersParams {
      *         container id
      */
     public ListContainersParams withBefore(String id) {
+        requireNonNull(id);
         this.before = id;
         return this;
     }
@@ -78,7 +84,8 @@ public class ListContainersParams {
      *         if size = true then api add container size information, otherwise hide this information.
      *         Warning: if size = true docker api need more time for calculation container size
      */
-    public ListContainersParams withSize(Boolean size) {
+    public ListContainersParams withSize(boolean size) {
+        requireNonNull(size);
         this.size = size;
         return this;
     }
@@ -99,6 +106,7 @@ public class ListContainersParams {
      *         <li>volume=(<volume name> or <mount point destination>)</li>
      */
     public ListContainersParams withFilters(Filters filters) {
+        requireNonNull(filters);
         this.filters = filters;
         return this;
     }

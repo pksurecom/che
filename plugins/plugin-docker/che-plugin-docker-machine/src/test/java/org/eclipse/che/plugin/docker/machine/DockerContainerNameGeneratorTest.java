@@ -16,7 +16,11 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.Optional;
+
 import static org.testng.AssertJUnit.assertEquals;
+import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
+import static org.testng.AssertJUnit.assertFalse;
 
 /**
  * Test for {@link DockerContainerNameGenerator}
@@ -44,10 +48,10 @@ public class DockerContainerNameGeneratorTest {
     public void machineNameShouldBeReturnedByGeneratedContainerName() {
         String generatedName = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
 
-        DockerContainerNameGenerator.ContainerNameInfo containerNameInfoParser = nameGenerator.parse(generatedName);
+        Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(generatedName);
 
-        assertEquals(containerNameInfoParser.getMachineId(), MACHINE_ID);
-        assertEquals(containerNameInfoParser.getWorkspaceId(), WORKSPACE_ID);
+        assertEquals(containerNameInfoParser.get().getMachineId(), MACHINE_ID);
+        assertEquals(containerNameInfoParser.get().getWorkspaceId(), WORKSPACE_ID);
     }
 
     @DataProvider(name = "validContainerNames")
@@ -68,10 +72,10 @@ public class DockerContainerNameGeneratorTest {
 
     @Test(dataProvider = "validContainerNames")
     public void testValidContainerNames(String containerName) {
-        DockerContainerNameGenerator.ContainerNameInfo containerNameInfoParser = nameGenerator.parse(containerName);
+        Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(containerName);
 
-        assertEquals(containerNameInfoParser.getMachineId(), "machineri6bxnoj5jq7ll9j");
-        assertEquals(containerNameInfoParser.getWorkspaceId(), "workspacep2bivvctac5ciwoh");
+        assertEquals(containerNameInfoParser.get().getMachineId(), "machineri6bxnoj5jq7ll9j");
+        assertEquals(containerNameInfoParser.get().getWorkspaceId(), "workspacep2bivvctac5ciwoh");
     }
 
     @DataProvider(name = "invalidContainerNames")
@@ -111,9 +115,9 @@ public class DockerContainerNameGeneratorTest {
 
     @Test(dataProvider = "invalidContainerNames")
     public void testInvalidContainerNames(String containerName) {
-        DockerContainerNameGenerator.ContainerNameInfo containerNameInfoParser = nameGenerator.parse(containerName);
+        Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(containerName);
 
-        assertEquals(containerNameInfoParser, null);
+        assertFalse(containerNameInfoParser.isPresent());
     }
 }
 

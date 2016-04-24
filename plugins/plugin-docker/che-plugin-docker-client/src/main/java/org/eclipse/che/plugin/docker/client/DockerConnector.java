@@ -73,6 +73,8 @@ import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.net.UrlEscapers.urlPathSegmentEscaper;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.Response.Status.CREATED;
 import static javax.ws.rs.core.Response.Status.NOT_MODIFIED;
 import static javax.ws.rs.core.Response.Status.NO_CONTENT;
@@ -176,7 +178,7 @@ public class DockerConnector {
      * @throws IOException
      *         when problems occurs with docker api calls
      */
-    public ContainerListEntry[] listContainers() throws IOException {
+    public List<ContainerListEntry> listContainers() throws IOException {
         return listContainers(new ListContainersParams().withAll(true));
     }
 
@@ -186,7 +188,7 @@ public class DockerConnector {
      * @throws IOException
      *         in case error parsing response from docker api
      */
-    public ContainerListEntry[] listContainers(ListContainersParams params) throws IOException {
+    public List<ContainerListEntry> listContainers(ListContainersParams params) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/containers/json")) {
@@ -213,7 +215,7 @@ public class DockerConnector {
             if (OK.getStatusCode() != status) {
                 throw getDockerException(response);
             }
-            return parseResponseStreamAndClose(response.getInputStream(), ContainerListEntry[].class);
+            return stream(parseResponseStreamAndClose(response.getInputStream(), ContainerListEntry[].class)).collect(toList());
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }

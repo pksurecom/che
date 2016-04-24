@@ -15,7 +15,6 @@ import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 
 import org.eclipse.che.api.core.model.machine.ServerConf;
-import org.eclipse.che.plugin.docker.machine.cleaner.DockerContainerCleaner;
 
 /**
  * Module for components that are needed for {@link DockerInstanceProvider}

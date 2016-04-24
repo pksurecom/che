@@ -12,10 +12,10 @@ package org.eclipse.che.plugin.docker.machine;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.user.User;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,16 +59,16 @@ public class DockerContainerNameGenerator {
      *         name of the container
      * @return information about container
      */
-    public ContainerNameInfo parse(@Nullable String containerName) {
+    public Optional<ContainerNameInfo> parse(String containerName) {
         containerName = containerName.replace("/", "");
 
         Matcher matcher = CONTAINER_NAME_PATTERN.matcher(containerName);
         if (matcher.matches()) {
             String workspaceId = matcher.group("workspaceId");
             String machineId = matcher.group("machineId");
-            return new ContainerNameInfo(workspaceId, machineId);
+            return Optional.of(new ContainerNameInfo(workspaceId, machineId));
         }
-        return null;
+        return Optional.empty();
     }
 
     /**

@@ -24,7 +24,9 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.Optional;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
 import static org.mockito.Mockito.never;
@@ -79,7 +81,7 @@ public class DockerContainerCleanerTest {
     @BeforeMethod
     public void setUp() throws MachineException, IOException {
         when(machineManager.getMachines()).thenReturn(singletonList(machineImpl1));
-        when(dockerConnector.listContainers()).thenReturn(new ContainerListEntry[] {container1, container2});
+        when(dockerConnector.listContainers()).thenReturn(asList(container1, container2));
         when(machineImpl1.getId()).thenReturn(machineId1);
         when(machineImpl1.getWorkspaceId()).thenReturn(workspaceId1);
 
@@ -91,8 +93,10 @@ public class DockerContainerCleanerTest {
         when(container2.getStatus()).thenReturn(RUNNING_STATUS);
         when(container2.getId()).thenReturn(containerId2);
 
-        when(nameGenerator.parse(containerName1)).thenReturn(containerNameInfo1);
-        when(nameGenerator.parse(containerName2)).thenReturn(containerNameInfo2);
+        Optional<ContainerNameInfo> optional1 = Optional.of(containerNameInfo1);
+        Optional<ContainerNameInfo> optional2 = Optional.of(containerNameInfo2);
+        when(nameGenerator.parse(containerName1)).thenReturn(optional1);
+        when(nameGenerator.parse(containerName2)).thenReturn(optional2);
 
         when(containerNameInfo1.getMachineId()).thenReturn(machineId1);
         when(containerNameInfo1.getWorkspaceId()).thenReturn(workspaceId1);
@@ -134,7 +138,7 @@ public class DockerContainerCleanerTest {
 
     @Test
     public void noneContainerShouldBeRemoved() throws IOException {
-        when(nameGenerator.parse(containerName2)).thenReturn(null);
+        when(nameGenerator.parse(containerName2)).thenReturn(Optional.empty());
 
         cleaner.run();
 
