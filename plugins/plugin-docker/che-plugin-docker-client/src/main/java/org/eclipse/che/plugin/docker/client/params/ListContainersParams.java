@@ -36,7 +36,6 @@ public class ListContainersParams {
      *         if true show all containers, if false show only running containers
      */
     public ListContainersParams withAll(boolean all) {
-        requireNonNull(all);
         this.all = all;
         return this;
     }
@@ -48,7 +47,6 @@ public class ListContainersParams {
      *         amount elements of the list containers
      */
     public ListContainersParams withLimit(int limit) {
-        requireNonNull(limit);
         this.limit = limit;
         return this;
     }
@@ -85,7 +83,6 @@ public class ListContainersParams {
      *         Warning: if size = true docker api need more time for calculation container size
      */
     public ListContainersParams withSize(boolean size) {
-        requireNonNull(size);
         this.size = size;
         return this;
     }

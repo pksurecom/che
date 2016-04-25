@@ -62,12 +62,13 @@ public class DockerContainerNameGenerator {
         containerName = containerName.replace("/", "");
 
         Matcher matcher = CONTAINER_NAME_PATTERN.matcher(containerName);
+        ContainerNameInfo containerNameInfo = null;
         if (matcher.matches()) {
             String workspaceId = matcher.group("workspaceId");
             String machineId = matcher.group("machineId");
-            return Optional.of(new ContainerNameInfo(workspaceId, machineId));
+            containerNameInfo = new ContainerNameInfo(workspaceId, machineId);
         }
-        return Optional.empty();
+        return Optional.ofNullable(containerNameInfo);
     }
 
     /**
