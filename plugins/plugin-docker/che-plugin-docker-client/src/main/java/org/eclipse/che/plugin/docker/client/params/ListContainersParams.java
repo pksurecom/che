@@ -29,6 +29,15 @@ public class ListContainersParams {
     private Boolean size;
     private Filters filters;
 
+    private ListContainersParams() {}
+
+    /**
+     * Creates and returns arguments holder.
+     */
+    public static ListContainersParams from() {
+        return new ListContainersParams();
+    }
+
     /**
      * Adds parameter show all containers. Only running containers are shown by default.
      *

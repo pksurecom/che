@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.docker.machine;
 
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.user.UserImpl;
 import org.mockito.InjectMocks;
 import org.mockito.testng.MockitoTestNGListener;
@@ -65,61 +66,99 @@ public class DockerContainerNameGeneratorTest {
 
     @DataProvider(name = "validContainerNames")
     public static Object[][] validContainerNames() {
-        return new Object[][] {{"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_u_a"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_-_-"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j____"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j__tfdfd_klk"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j__"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_tfdf_dKlk"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_a_"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j__o_"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_tfdfdklk____"}};
+        return new Object[][] {{"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_u_a",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_-_-",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j____",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j__tfdfd_klk",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j__",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_tfdf_dKlk",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_a_",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j__o_",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_tfdfdklk____",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
+                               {"workspacep_machiner_user-name_ws-machine-name",
+                                new Pair<>("machiner", "workspacep")},
+
+                               {"workspace1_machine2_user-name_ws-machine-name",
+                                new Pair<>("machine2", "workspace1")},
+
+                               {"workspace1_machinea_user-name_ws-machine-name",
+                                new Pair<>("machinea", "workspace1")},
+
+                               {"workspacea_machine1_user-name_ws-machine-name",
+                                new Pair<>("machine1", "workspacea")},
+
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_a",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")}};
     }
 
     @Test(dataProvider = "validContainerNames")
-    public void testValidContainerNames(String containerName) {
+    public void testValidContainerNames(String containerName, Pair<String, String> expectedResult) {
         Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(containerName);
 
-        assertEquals(containerNameInfoParser.get().getMachineId(), "machineri6bxnoj5jq7ll9j");
-        assertEquals(containerNameInfoParser.get().getWorkspaceId(), "workspacep2bivvctac5ciwoh");
+        assertEquals(containerNameInfoParser.get().getMachineId(), expectedResult.first);
+        assertEquals(containerNameInfoParser.get().getWorkspaceId(), expectedResult.second);
     }
 
     @DataProvider(name = "invalidContainerNames")
     public static Object[][] inValidContainerNames() {
         return new Object[][] {{"Workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac5ciwohmachineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9juser-name_ws-machine-name"},
+                               {"workspacep2bivvctac5ciwohmachineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9juser-name_ws-machine-name"},
                                {"workspacep2bivvctac5ciwoh__machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
                                {"1orkspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac5ciwoh5_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j7_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac%ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctackciwoh_machineri6%xnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctackciwoh_machineri6o*noj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac5ciWoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac5ciw_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_a"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art"},
-                               {"/workspacep2bivvctac5ciwoh_"},
-                               {"/pong"},
+                               {"workspacep2bivvctac%ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
+                               {"workspacep2bivvctackciwoh_machineri6%xnoj5jq7ll9j_user-name_ws-machine-name"},
+                               {"workspacep2bivvctackciwoh_machineri6o*noj5jq7ll9j_user-name_ws-machine-name"},
+                               {"workspacep2bivvctac5ciWoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
+                               {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_ws-machine-name"},
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j"},
+                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"},
+                               {"workspacep2bivvctac5ciwoh_"},
+                               {"pong"},
                                {"workspace"},
                                {"machine"},
-                               {"/workspace"},
-                               {"/machine"},
-                               {"/workspace_machine"},
+                               {"workspace"},
+                               {"machine"},
+                               {"workspace_machine"},
+                               {"workspace_machine_user-name_ws-machine-name"},
+                               {"work_machinetyy_user-name_ws-machine-name"},
+                               {"workspacedfdf_machin_user-name_ws-machine-name"},
                                {"workspaceid"},
                                {"machineid"},
                                {"workspacerere_machinedfdf"},
-                               {"/workspacerere_machinedfdf"},
+                               {"workspacerere_machinedfdf"},
                                {"someusercontainer"},
-                               {"/machineri6bxnoj5jq7ll9j_workspacep2bivvctac5ciwoh_user-name_ws-machine-name"}};
+                               {"machineri6bxnoj5jq7ll9j_workspacep2bivvctac5ciwoh_user-name_ws-machine-name"}};
     }
 
     @Test(dataProvider = "invalidContainerNames")

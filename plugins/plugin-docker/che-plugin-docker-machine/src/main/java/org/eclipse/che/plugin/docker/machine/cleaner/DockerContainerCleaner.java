@@ -54,8 +54,8 @@ public class DockerContainerCleaner implements Runnable {
         this.nameGenerator = nameGenerator;
     }
 
-    @ScheduleRate(periodParameterName = "docker.clean.up.unused.containers.period_min",
-                  initialDelayParameterName = "docker.clean.up.unused.containers.period_min",
+    @ScheduleRate(periodParameterName = "machine.docker.unused_containers_cleanup_period_min",
+                  initialDelayParameterName = "machine.docker.unused_containers_cleanup_period_min",
                   unit = TimeUnit.MINUTES)
     @Override
     public void run() {
@@ -67,7 +67,7 @@ public class DockerContainerCleaner implements Runnable {
 
             for (ContainerListEntry container : unUsedContainers) {
                 killContainer(container);
-                removeContainerByID(container.getId());
+                removeContainer(container);
             }
         } catch (IOException e) {
             LOG.error("Failed to get list docker containers", e);
@@ -98,23 +98,26 @@ public class DockerContainerCleaner implements Runnable {
 
     private void killContainer(ContainerListEntry container) {
         String containerId = container.getId();
+        String containerName = container.getNames()[0];
         try {
             if (container.getStatus().startsWith("Up")) {
                 dockerConnector.killContainer(containerId);
-                LOG.info("Container with 'id': {} was killed", containerId);
+                LOG.info("Container with 'id': '{}' and 'name': '{}' was killed ", containerId, containerName);
             }
         } catch (IOException e) {
-            LOG.error("Failed to kill unused container '{}'", containerId, e);
+            LOG.error("Failed to kill unused container with 'id': '{}' and 'name': '{}'", containerId, containerName, e);
         }
     }
 
-    private void removeContainerByID(String containerId) {
+    private void removeContainer(ContainerListEntry container) {
+        String containerId = container.getId();
+        String containerName = container.getNames()[0];
         try {
             //remove force with volumes
             dockerConnector.removeContainer(containerId, true, true);
-            LOG.info("Container with 'id': {} was removed", containerId);
+            LOG.info("Container with 'id': '{}' and 'name': '{}' was removed", containerId, containerName);
         } catch (IOException e) {
-            LOG.error("Failed to delete unused container '{}'", containerId, e);
+            LOG.error("Failed to delete unused container with 'id': '{}' and 'name': '{}'", containerId, containerName, e);
         }
     }
 }

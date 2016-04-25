@@ -179,7 +179,7 @@ public class DockerConnector {
      *         when problems occurs with docker api calls
      */
     public List<ContainerListEntry> listContainers() throws IOException {
-        return listContainers(new ListContainersParams().withAll(true));
+        return listContainers(ListContainersParams.from().withAll(true));
     }
 
     /**
