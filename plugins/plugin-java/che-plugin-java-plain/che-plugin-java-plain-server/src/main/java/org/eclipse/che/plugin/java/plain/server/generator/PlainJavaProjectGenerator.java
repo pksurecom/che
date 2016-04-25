@@ -19,6 +19,7 @@ import org.eclipse.che.api.project.server.type.AttributeValue;
 
 import java.util.Map;
 
+import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_OUTPUT_FOLDER_VALUE;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.PLAIN_JAVA_PROJECT_ID;
 
@@ -37,6 +38,7 @@ public class PlainJavaProjectGenerator implements CreateProjectHandler {
                                 Map<String, AttributeValue> attributes,
                                 Map<String, String> options) throws ForbiddenException, ConflictException, ServerException {
 
+        baseFolder.createFolder(DEFAULT_OUTPUT_FOLDER_VALUE);
         FolderEntry sourceFolder = baseFolder.createFolder(DEFAULT_SOURCE_FOLDER_VALUE);
         FolderEntry defaultPackage = sourceFolder.createFolder(PACKAGE_NAME);
 

@@ -19,7 +19,7 @@ import org.eclipse.che.api.core.util.StreamPump;
 import org.eclipse.che.api.core.util.Watchdog;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.RegisteredProject;
-import org.eclipse.che.ide.ext.java.server.classpath.ClassPathBuilder;
+import org.eclipse.che.plugin.java.server.classpath.ClassPathBuilder;
 import org.eclipse.che.ide.ext.java.shared.dto.ClassPathBuilderResult;
 import org.eclipse.che.ide.extension.maven.server.projecttype.MavenClassPathConfigurator;
 import org.eclipse.che.ide.maven.tools.MavenUtils;

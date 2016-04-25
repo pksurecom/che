@@ -30,8 +30,8 @@ import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
 import org.eclipse.che.commons.lang.IoUtil;
-import org.eclipse.che.ide.ext.java.server.projecttype.JavaProjectType;
-import org.eclipse.che.ide.ext.java.server.projecttype.JavaPropertiesValueProviderFactory;
+import org.eclipse.che.plugin.java.server.projecttype.JavaProjectType;
+import org.eclipse.che.plugin.java.server.projecttype.JavaValueProviderFactory;
 import org.eclipse.che.ide.extension.maven.server.projecttype.MavenProjectType;
 import org.eclipse.che.ide.extension.maven.server.projecttype.MavenValueProviderFactory;
 import org.eclipse.che.jdt.core.resources.ResourceChangedEvent;
@@ -124,7 +124,7 @@ public abstract class BaseTest {
 
         projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
         projectTypeRegistry.registerProjectType(new TestProjectType());
-        projectTypeRegistry.registerProjectType(new JavaProjectType(new JavaPropertiesValueProviderFactory()));
+        projectTypeRegistry.registerProjectType(new JavaProjectType(new JavaValueProviderFactory()));
         projectTypeRegistry.registerProjectType(new MavenProjectType(new MavenValueProviderFactory()));
 
         projectHandlerRegistry = new ProjectHandlerRegistry(new HashSet<>());

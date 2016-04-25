@@ -14,6 +14,7 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.project.server.FileEntry;
 import org.eclipse.che.api.project.server.FolderEntry;
+import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
@@ -65,7 +66,7 @@ public class MavenValueProviderFactory implements ValueProviderFactory {
         return new MavenValueProvider(projectFolder);
     }
 
-    protected class MavenValueProvider implements ValueProvider {
+    protected class MavenValueProvider extends ReadonlyValueProvider {
 
         protected FolderEntry projectFolder;
 

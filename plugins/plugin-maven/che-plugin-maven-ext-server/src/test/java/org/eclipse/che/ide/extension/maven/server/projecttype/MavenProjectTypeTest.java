@@ -20,17 +20,15 @@ import org.eclipse.che.api.project.server.RegisteredProject;
 import org.eclipse.che.api.project.server.VirtualFileEntry;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
-import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
-import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.test.SelfReturningAnswer;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.ide.ext.java.server.projecttype.JavaProjectType;
-import org.eclipse.che.ide.ext.java.server.projecttype.JavaPropertiesValueProviderFactory;
+import org.eclipse.che.plugin.java.server.projecttype.JavaProjectType;
+import org.eclipse.che.plugin.java.server.projecttype.JavaValueProviderFactory;
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.GeneratorStrategy;
 import org.eclipse.che.ide.extension.maven.server.projecttype.handler.MavenProjectGenerator;
 import org.eclipse.che.ide.extension.maven.shared.MavenAttributes;
@@ -92,7 +90,7 @@ public class MavenProjectTypeTest {
 //        vfsRegistry.registerProvider(workspace, memoryFileSystemProvider);
 
         Set<ProjectTypeDef> projTypes = new HashSet<>();
-        projTypes.add(new JavaProjectType(new JavaPropertiesValueProviderFactory()));
+        projTypes.add(new JavaProjectType(new JavaValueProviderFactory()));
         projTypes.add(new MavenProjectType(new MavenValueProviderFactory()));
 
         ptRegistry = new ProjectTypeRegistry(projTypes);

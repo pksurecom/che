@@ -11,8 +11,8 @@
 package org.eclipse.che.plugin.java.plain.server.projecttype;
 
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.ide.ext.java.server.projecttype.AbstractJavaInitHandler;
 import org.eclipse.che.jdt.core.launching.JREContainerInitializer;
+import org.eclipse.che.plugin.java.server.projecttype.AbstractJavaInitHandler;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
@@ -33,6 +34,7 @@ import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants
  * Initialize classpath with JRE classpath entry container and 'src' source classpath entry.
  *
  * @author Evgen Vidolob
+ * @author Valeriy Svydenko
  */
 public class PlainJavaInitHandler extends AbstractJavaInitHandler {
 
@@ -40,6 +42,21 @@ public class PlainJavaInitHandler extends AbstractJavaInitHandler {
 
     @Override
     protected void initializeClasspath(IJavaProject javaProject) throws ServerException {
+        IClasspathEntry[] projectClasspath;
+        try {
+            projectClasspath = javaProject.getRawClasspath();
+        } catch (JavaModelException e) {
+            LOG.warn("Can't get classpath for: " + javaProject.getProject().getFullPath().toOSString(), e);
+            throw new ServerException(e);
+        }
+
+        //default classpath
+        IClasspathEntry[] defaultClasspath = new IClasspathEntry[]{JavaCore.newSourceEntry(javaProject.getPath())};
+        if (!Arrays.equals(defaultClasspath, projectClasspath)) {
+            //classpath is already initialized
+            return;
+        }
+
         List<IClasspathEntry> classpathEntries = new ArrayList<>();
         //create classpath container for default JRE
         IClasspathEntry jreContainer = JavaCore.newContainerEntry(new Path(JREContainerInitializer.JRE_CONTAINER));

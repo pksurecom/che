@@ -25,8 +25,8 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.eclipse.che.ide.ext.java.server.projecttype.JavaProjectType;
-import org.eclipse.che.ide.ext.java.server.projecttype.JavaPropertiesValueProviderFactory;
+import org.eclipse.che.plugin.java.server.projecttype.JavaProjectType;
+import org.eclipse.che.plugin.java.server.projecttype.JavaValueProviderFactory;
 import org.eclipse.che.ide.extension.maven.server.projecttype.MavenProjectResolver;
 import org.eclipse.che.ide.extension.maven.server.projecttype.MavenProjectType;
 import org.eclipse.che.ide.extension.maven.server.projecttype.MavenValueProviderFactory;
@@ -97,7 +97,7 @@ public class MavenProjectResolverTest {
 
         WorkspaceHolder workspaceHolder = new TestWorkspaceHolder(projects);
         ProjectTypeRegistry projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
-        projectTypeRegistry.registerProjectType(new JavaProjectType(new JavaPropertiesValueProviderFactory()));
+        projectTypeRegistry.registerProjectType(new JavaProjectType(new JavaValueProviderFactory()));
         projectTypeRegistry.registerProjectType(new MavenProjectType(new MavenValueProviderFactory()));
 
         VirtualFileSystemProvider vfsProvider = new LocalVirtualFileSystemProvider(rootDirectory, null);

@@ -29,7 +29,7 @@ import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants
 @Singleton
 public class PlainJavaProjectType extends ProjectTypeDef {
     @Inject
-    public PlainJavaProjectType(PlainJavaPropertiesValueProviderFactory valueProviderFactory) {
+    public PlainJavaProjectType(PlainJavaValueProviderFactory valueProviderFactory) {
         super(PLAIN_JAVA_PROJECT_ID, PLAIN_JAVA_PROJECT_NAME, true, false, true);
 
         setValueProviderFactory(SOURCE_FOLDER, valueProviderFactory);

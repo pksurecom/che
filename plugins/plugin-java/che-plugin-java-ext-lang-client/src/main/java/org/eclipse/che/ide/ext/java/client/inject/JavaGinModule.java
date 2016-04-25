@@ -34,16 +34,22 @@ import org.eclipse.che.ide.ext.java.client.dependenciesupdater.JavaClasspathServ
 import org.eclipse.che.ide.ext.java.client.dependenciesupdater.JavaClasspathServiceClientImpl;
 import org.eclipse.che.ide.ext.java.client.documentation.QuickDocPresenter;
 import org.eclipse.che.ide.ext.java.client.documentation.QuickDocumentation;
+import org.eclipse.che.ide.ext.java.client.inject.factories.ButtonWidgetFactory;
 import org.eclipse.che.ide.ext.java.client.inject.factories.PropertyWidgetFactory;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
 import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationServiceImpl;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFileView;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFileViewImpl;
+import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.sources.SourceEntryPresenter;
 import org.eclipse.che.ide.ext.java.client.project.interceptor.JavaClassInterceptor;
 import org.eclipse.che.ide.ext.java.client.project.interceptor.JavaContentRootInterceptor;
 import org.eclipse.che.ide.ext.java.client.project.interceptor.TestContentRootDecorator;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeFactory;
 import org.eclipse.che.ide.ext.java.client.project.node.JavaNodeManager;
+import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.ClasspathPagePresenter;
+import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.button.ButtonWidget;
+import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.button.ButtonWidgetImpl;
+import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.libraries.LibEntryPresenter;
 import org.eclipse.che.ide.ext.java.client.project.settings.JavaNodeSettingsProvider;
 import org.eclipse.che.ide.ext.java.client.reference.JavaFqnProvider;
 import org.eclipse.che.ide.ext.java.client.search.JavaSearchService;
@@ -93,6 +99,8 @@ public class JavaGinModule extends AbstractGinModule {
         install(new GinFactoryModuleBuilder().build(JavaNodeFactory.class));
         install(new GinFactoryModuleBuilder().implement(PropertyWidget.class, PropertyWidgetImpl.class)
                                              .build(PropertyWidgetFactory.class));
+        install(new GinFactoryModuleBuilder().implement(ButtonWidget.class, ButtonWidgetImpl.class)
+                                             .build(ButtonWidgetFactory.class));
 
         install(new GinFactoryModuleBuilder().build(NodeFactory.class));
         install(new GinFactoryModuleBuilder().build(org.eclipse.che.ide.ext.java.client.navigation.factory.NodeFactory.class));
@@ -104,6 +112,8 @@ public class JavaGinModule extends AbstractGinModule {
         GinMultibinder.newSetBinder(binder(), PreferencesManager.class).addBinding().to(ErrorsWarningsPreferenceManager.class);
 
         GinMultibinder.newSetBinder(binder(), CommandPropertyValueProvider.class).addBinding().to(CurrentClassFQNProvider.class);
+        GinMultibinder.newSetBinder(binder(), ClasspathPagePresenter.class).addBinding().to(LibEntryPresenter.class);
+        GinMultibinder.newSetBinder(binder(), ClasspathPagePresenter.class).addBinding().to(SourceEntryPresenter.class);
     }
 
     @Provides

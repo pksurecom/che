@@ -18,6 +18,7 @@ import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.java.plain.server.generator.PlainJavaProjectGenerator;
 import org.eclipse.che.plugin.java.plain.server.projecttype.PlainJavaInitHandler;
 import org.eclipse.che.plugin.java.plain.server.projecttype.PlainJavaProjectType;
+import org.eclipse.che.plugin.java.plain.server.rest.ClasspathUpdaterService;
 
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
@@ -31,5 +32,7 @@ public class PlainJavaProjectModule extends AbstractModule {
         newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(PlainJavaProjectType.class);
         newSetBinder(binder(), ProjectHandler.class).addBinding().to(PlainJavaProjectGenerator.class);
         newSetBinder(binder(), ProjectHandler.class).addBinding().to(PlainJavaInitHandler.class);
+
+        bind(ClasspathUpdaterService.class);
     }
 }

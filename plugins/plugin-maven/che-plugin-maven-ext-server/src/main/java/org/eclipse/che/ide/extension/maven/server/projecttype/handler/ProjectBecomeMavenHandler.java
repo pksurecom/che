@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.ide.ext.java.server.projecttype.AbstractJavaInitHandler;
+import org.eclipse.che.plugin.java.server.projecttype.AbstractJavaInitHandler;
 import org.eclipse.che.ide.extension.maven.server.core.MavenWorkspace;
 import org.eclipse.jdt.core.IJavaProject;
 
