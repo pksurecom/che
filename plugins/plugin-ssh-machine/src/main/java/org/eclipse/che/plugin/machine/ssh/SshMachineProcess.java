@@ -22,7 +22,6 @@ import org.eclipse.che.api.machine.server.spi.impl.AbstractMachineProcess;
 import org.eclipse.che.commons.annotation.Nullable;
 
 import javax.inject.Inject;
-
 import java.io.IOException;
 
 import static java.lang.String.format;
@@ -35,6 +34,7 @@ import static java.lang.String.format;
 public class SshMachineProcess extends AbstractMachineProcess implements InstanceProcess {
     private final String    commandLine;
     private final SshClient sshClient;
+    private final String    pidFilePath;
 
     private volatile boolean started;
 
@@ -44,9 +44,11 @@ public class SshMachineProcess extends AbstractMachineProcess implements Instanc
     public SshMachineProcess(@Assisted Command command,
                              @Nullable @Assisted("outputChannel") String outputChannel,
                              @Assisted int pid,
-                             @Assisted SshClient sshClient) {
+                             @Assisted SshClient sshClient,
+                             @Assisted String pidFilePath) {
         super(command, pid, outputChannel);
         this.sshClient = sshClient;
+        this.pidFilePath = pidFilePath;
         this.commandLine = command.getCommandLine();
         this.started = false;
     }
@@ -77,7 +79,10 @@ public class SshMachineProcess extends AbstractMachineProcess implements Instanc
             throw new ConflictException("Process already started.");
         }
 
-        sshProcess = sshClient.createProcess(commandLine);
+        // 'echo' saves shell pid in file, then run command
+        final String command = "/bin/bash" + " -c 'echo $$>" + pidFilePath + ";" + commandLine + "'";
+
+        sshProcess = sshClient.createProcess(command);
 
         started = true;
 
@@ -102,7 +107,15 @@ public class SshMachineProcess extends AbstractMachineProcess implements Instanc
 
     @Override
     public void kill() throws MachineException {
-        sshProcess.kill();
+        try {
+            // get pid of shell, find all children, remove ps columns headers, kill children
+            SshProcess process = sshClient.createProcess(format("cat %1$s | xargs ps -o pid --ppid | tail -n +2 | xargs kill; rm %1$s",
+                                                                pidFilePath));
+            process.start();
+        } finally {
+            //noinspection ThrowFromFinallyBlock
+            sshProcess.kill();
+        }
     }
 
     private static class PrefixingLineConsumer implements LineConsumer {

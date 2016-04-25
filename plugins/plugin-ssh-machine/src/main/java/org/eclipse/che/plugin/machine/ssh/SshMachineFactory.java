@@ -57,9 +57,11 @@ public interface SshMachineFactory {
      * @param outputChannel channel where output will be available on process execution
      * @param pid virtual id of that process
      * @param sshClient client to communicate with machine
+     * @param pidFilePath path to pid-file in machine
      */
     SshMachineProcess createInstanceProcess(@Assisted Command command,
                                             @Assisted("outputChannel") String outputChannel,
                                             @Assisted int pid,
-                                            @Assisted SshClient sshClient);
+                                            @Assisted SshClient sshClient,
+                                            @Assisted String pidFilePath);
 }

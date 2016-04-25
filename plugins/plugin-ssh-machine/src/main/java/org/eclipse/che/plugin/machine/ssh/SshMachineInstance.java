@@ -49,7 +49,8 @@ import static java.util.Collections.emptyMap;
  */
 // todo try to avoid map of processes
 public class SshMachineInstance extends AbstractInstance {
-    private static final AtomicInteger pidSequence = new AtomicInteger(1);
+    private static final AtomicInteger pidSequence       = new AtomicInteger(1);
+    private static final String        PID_FILE_TEMPLATE = "/tmp/eclipse-che-machine-%s-process-%s";
 
     private final SshClient                                   sshClient;
     private final LineConsumer                                outputConsumer;
@@ -127,7 +128,8 @@ public class SshMachineInstance extends AbstractInstance {
     public InstanceProcess createProcess(Command command, String outputChannel) throws MachineException {
         final Integer pid = pidSequence.getAndIncrement();
 
-        SshMachineProcess instanceProcess = machineFactory.createInstanceProcess(command, outputChannel, pid, sshClient);
+        final String pidFile = String.format(PID_FILE_TEMPLATE, getId(), pid);
+        SshMachineProcess instanceProcess = machineFactory.createInstanceProcess(command, outputChannel, pid, sshClient, pidFile);
 
         machineProcesses.put(pid, instanceProcess);
 
