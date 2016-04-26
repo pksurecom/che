@@ -110,7 +110,7 @@ public class DockerContainerCleanerTest {
         verify(machineManager).getMachines();
 
         verify(container1).getNames();
-        verify(container2).getNames();
+        verify(container2, times(3)).getNames();
 
         verify(nameGenerator).parse(containerName1);
         verify(nameGenerator).parse(containerName2);

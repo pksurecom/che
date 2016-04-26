@@ -59,7 +59,8 @@ public class DockerContainerNameGenerator {
      * @return information about container
      */
     public Optional<ContainerNameInfo> parse(String containerName) {
-        containerName = containerName.replace("/", "");
+        String[] containerNameParts = containerName.split("/");
+        containerName = containerNameParts[containerNameParts.length - 1];
 
         Matcher matcher = CONTAINER_NAME_PATTERN.matcher(containerName);
         ContainerNameInfo containerNameInfo = null;
