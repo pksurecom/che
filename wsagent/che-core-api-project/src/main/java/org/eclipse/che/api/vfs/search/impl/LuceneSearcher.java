@@ -250,6 +250,7 @@ public abstract class LuceneSearcher implements Searcher {
         if (text != null) {
             QueryParser qParser = new QueryParser("text", makeAnalyzer());
             try {
+                qParser.setAllowLeadingWildcard(true);
                 luceneQuery.add(qParser.parse(text), BooleanClause.Occur.MUST);
             } catch (ParseException e) {
                 throw new ServerException(e.getMessage());

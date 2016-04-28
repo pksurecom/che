@@ -69,7 +69,8 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
     @Override
     public void search(final String text) {
         QueryExpression queryExpression = new QueryExpression();
-        queryExpression.setText(text + '*');
+        final String preparedTextToSearch = prepareTextToSearch(text);
+        queryExpression.setText(preparedTextToSearch);
         if (!view.getFileMask().isEmpty()) {
             queryExpression.setName(view.getFileMask());
         }
@@ -89,6 +90,46 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
                 view.showErrorMessage(dtoFactory.createDtoFromJson(arg.getMessage(), ServiceError.class).getMessage());
             }
         });
+    }
+
+    /**
+     * Escapes characters that QueryParser expects to be escaped by a preceding <code>\</code>
+     * and adds <code>*</code> at the end of the text to search.
+     */
+    private String prepareTextToSearch(String text) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append('*');
+        for (int i = 0; i < text.length(); i++) {
+            char character = text.charAt(i);
+            if (isEscapedCharacter(character)) {
+                stringBuilder.append("%5C");
+            }
+            stringBuilder.append(character);
+        }
+        stringBuilder.append('*');
+        return stringBuilder.toString();
+    }
+
+    private boolean isEscapedCharacter(char character) {
+        return character == '\\' ||
+               character == '+' ||
+               character == '-' ||
+               character == '!' ||
+               character == '(' ||
+               character == ')' ||
+               character == ':' ||
+               character == '^' ||
+               character == '[' ||
+               character == ']' ||
+               character == '\"' ||
+               character == '{' ||
+               character == '}' ||
+               character == '~' ||
+               character == '*' ||
+               character == '?' ||
+               character == '|' ||
+               character == '&' ||
+               character == '/';
     }
 
     @Override
