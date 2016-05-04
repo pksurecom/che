@@ -78,6 +78,9 @@ public class DockerContainerNameGeneratorTest {
                                {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name",
                                 new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
+                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machineri6bxnoj5jq7ll98",
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
                                {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_u_a",
                                 new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
@@ -124,7 +127,16 @@ public class DockerContainerNameGeneratorTest {
                                 new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
                                {"/host.node.com/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")}};
+                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+
+                               {"workspace1_machinea_USER_ws-machine-name",
+                                new Pair<>("machinea", "workspace1")},
+
+                               {"workspace1_machinea_user%100%_ws-machine-name",
+                                new Pair<>("machinea", "workspace1")},
+
+                               {"workspace1_machinea_user_ws-machine-name$workspace1_machinea_user_ws-machine-name",
+                                new Pair<>("machinea", "workspace1")}};
     }
 
     @Test(dataProvider = "validContainerNames")
@@ -137,7 +149,7 @@ public class DockerContainerNameGeneratorTest {
 
     @DataProvider(name = "invalidContainerNames")
     public static Object[][] inValidContainerNames() {
-        return new Object[][] {{"/host.node.com./Workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
+        return new Object[][] {{"/host.node.com/Workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
                                {"/workspacep2bivvctac5ciwohmachineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
                                {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9juser-name_ws-machine-name"},
                                {"/workspacep2bivvctac5ciwoh__machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
@@ -147,6 +159,10 @@ public class DockerContainerNameGeneratorTest {
                                {"workspacep2bivvctackciwoh_machineri6o*noj5jq7ll9j_user-name_ws-machine-name"},
                                {"workspacep2bivvctac5ciWoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
                                {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_ws-machine-name"},
+                               {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_WS-maChineName"},
+                               {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_ws-mac%ine-name"},
+                               {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_workspACEMachineName"},
+                               {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_workspace"},
                                {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j"},
                                {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"},
                                {"workspacep2bivvctac5ciwoh_"},
@@ -157,6 +173,8 @@ public class DockerContainerNameGeneratorTest {
                                {"machine"},
                                {"workspace_machine"},
                                {"workspace_machine_user-name_ws-machine-name"},
+                               {"workspace5r_workspace5r_machine_user-name_ws-machine-name"},
+                               {"workspace_workspace_machine_user-name_ws-machine-name"},
                                {"work_machinetyy_user-name_ws-machine-name"},
                                {"workspacedfdf_machin_user-name_ws-machine-name"},
                                {"workspaceid"},

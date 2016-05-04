@@ -78,6 +78,19 @@ public class MachineRegistry {
     }
 
     /**
+     * Return true if machine with unique {@code machineId} is exist, or false otherwise.
+     *
+     * @param machineId
+     *         unique machine identifier
+     */
+    public synchronized boolean machineIsExist(String machineId) {
+        if (machines.containsKey(machineId)) {
+            return instances.get(machineId) == null;
+        }
+        return false;
+    }
+
+    /**
      * Get dev machine of specific workspace. Dev machine should be in RUNNING state
      *
      * @param workspaceId

@@ -205,12 +205,14 @@ public class DockerConnector {
     }
 
     /**
-     * Method returns list of docker containers which was filtered by query parameters from {@link ListContainersParams}
+     * Method returns list of docker containers which was filtered by {@link ListContainersParams}
      *
      * @throws IOException
      *         when problems occurs with docker api calls
      */
     public List<ContainerListEntry> listContainers(ListContainersParams params) throws IOException {
+        final Filters filters = params.getFilters();
+
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/containers/json")) {
@@ -219,7 +221,9 @@ public class DockerConnector {
             addQueryParamIfNotNull(connection, "limit", params.getLimit());
             addQueryParamIfNotNull(connection, "since", params.getSince());
             addQueryParamIfNotNull(connection, "before", params.getBefore());
-            addQueryParamIfNotNull(connection, "filters", urlPathSegmentEscaper().escape(JsonHelper.toJson(params.getFilters())));
+            if (filters != null) {
+                connection.query("filters", urlPathSegmentEscaper().escape(JsonHelper.toJson(params.getFilters())));
+            }
             DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {

@@ -27,6 +27,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerConfig;
 import org.eclipse.che.plugin.docker.client.json.ContainerCreated;
 import org.eclipse.che.plugin.docker.client.json.ContainerExitStatus;
 import org.eclipse.che.plugin.docker.client.json.ContainerInfo;
+import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
 import org.eclipse.che.plugin.docker.client.json.ContainerProcesses;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.ExecCreated;
@@ -46,6 +47,7 @@ import org.eclipse.che.plugin.docker.client.params.GetResourceParams;
 import org.eclipse.che.plugin.docker.client.params.InspectContainerParams;
 import org.eclipse.che.plugin.docker.client.params.InspectImageParams;
 import org.eclipse.che.plugin.docker.client.params.KillContainerParams;
+import org.eclipse.che.plugin.docker.client.params.ListContainersParams;
 import org.eclipse.che.plugin.docker.client.params.PullParams;
 import org.eclipse.che.plugin.docker.client.params.PushParams;
 import org.eclipse.che.plugin.docker.client.params.PutResourceParams;
@@ -78,6 +80,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -97,11 +100,11 @@ import static org.testng.Assert.assertEquals;
 @Listeners(MockitoTestNGListener.class)
 public class DockerConnectorTest {
 
-    private static final String EXCEPTION_ERROR_MESSAGE    = "Error response from docker API, status: 500, message: Error";
-    private static final int    RESPONSE_ERROR_CODE        = 500;
-    private static final int    RESPONSE_SUCCESS_CODE      = 200;
-    private static final int    RESPONSE_NO_CONTENT_CODE   = 204;
-    private static final int    RESPONSE_CREATED_CODE      = 201;
+    private static final String EXCEPTION_ERROR_MESSAGE  = "Error response from docker API, status: 500, message: Error";
+    private static final int    RESPONSE_ERROR_CODE      = 500;
+    private static final int    RESPONSE_SUCCESS_CODE    = 200;
+    private static final int    RESPONSE_NO_CONTENT_CODE = 204;
+    private static final int    RESPONSE_CREATED_CODE    = 201;
 
     private static final String REQUEST_METHOD_GET    = "GET";
     private static final String REQUEST_METHOD_POST   = "POST";
@@ -119,8 +122,8 @@ public class DockerConnectorTest {
     private static final String   STREAM_DATA           = "stream data";
     private static final String   DOCKER_RESPONSE       = "stream";
     private static final String   ERROR_MESSAGE         = "some error occurs";
-    private static final String[] CMD_WITH_ARGS         = { "command", "arg1", "arg2" };
-    private static final String[] CMD_ARGS              = { "arg1", "arg2" };
+    private static final String[] CMD_WITH_ARGS         = {"command", "arg1", "arg2"};
+    private static final String[] CMD_ARGS              = {"arg1", "arg2"};
     private static final byte[]   STREAM_DATA_BYTES     = STREAM_DATA.getBytes();
     private static final byte[]   DOCKER_RESPONSE_BYTES = DOCKER_RESPONSE.getBytes();
 
@@ -149,7 +152,7 @@ public class DockerConnectorTest {
     private File                         dockerfile;
 
     @Captor
-    private ArgumentCaptor<Object>       captor;
+    private ArgumentCaptor<Object> captor;
 
     @BeforeMethod
     public void setup() throws IOException, URISyntaxException {
@@ -252,6 +255,57 @@ public class DockerConnectorTest {
 
         verify(dockerResponse).getStatus();
         verify(dockerConnector).getDockerException(dockerResponse);
+    }
+
+    @Test
+    public void shouldBeAbleToGetListContainersWithListContainersParams() throws IOException, JsonParseException {
+        ListContainersParams listContainersParams = ListContainersParams.from();
+        ContainerListEntry containerListEntry = mock(ContainerListEntry.class);
+        List<ContainerListEntry> expectedListContainers = singletonList(containerListEntry);
+
+        doReturn(expectedListContainers).when(dockerConnector).parseResponseStreamAsListAndClose(inputStream);
+
+        List<ContainerListEntry> containers = dockerConnector.listContainers(listContainersParams);
+
+        verify(dockerConnectionFactory).openConnection(any(URI.class));
+        verify(dockerConnection).method(REQUEST_METHOD_GET);
+        verify(dockerConnection).path("/containers/json");
+        verify(dockerConnection).request();
+        verify(dockerResponse).getStatus();
+        verify(dockerResponse).getInputStream();
+        verify(dockerConnector).parseResponseStreamAsListAndClose(inputStream);
+
+        assertEquals(containers, expectedListContainers);
+    }
+
+    @Test(expectedExceptions = DockerException.class, expectedExceptionsMessageRegExp = EXCEPTION_ERROR_MESSAGE)
+    public void shouldThrowDockerExceptionWhileGettingListContainersByParamsObjectIfResponseCodeIsNotSuccess()
+            throws IOException, JsonParseException {
+        ListContainersParams listContainersParams = ListContainersParams.from();
+
+        when(dockerResponse.getStatus()).thenReturn(RESPONSE_ERROR_CODE);
+
+        dockerConnector.listContainers(listContainersParams);
+
+        verify(dockerResponse).getStatus();
+        verify(dockerConnector).getDockerException(dockerResponse);
+    }
+
+    @Test
+    public void shouldCallListContainersWithParametersObject() throws IOException {
+        ListContainersParams listContainersParams = ListContainersParams.from().withAll(true);
+        ContainerListEntry containerListEntry = mock(ContainerListEntry.class);
+        List<ContainerListEntry> expectedListContainers = singletonList(containerListEntry);
+
+        doReturn(expectedListContainers).when(dockerConnector).listContainers(listContainersParams);
+
+        List<ContainerListEntry> result = dockerConnector.listContainers();
+
+        ArgumentCaptor<ListContainersParams> listContainersParamsArgumentCaptor = ArgumentCaptor.forClass(ListContainersParams.class);
+        verify(dockerConnector).listContainers(listContainersParamsArgumentCaptor.capture());
+
+        assertEquals(result, expectedListContainers);
+        assertEquals(listContainersParamsArgumentCaptor.getValue(), listContainersParams);
     }
 
     @Test

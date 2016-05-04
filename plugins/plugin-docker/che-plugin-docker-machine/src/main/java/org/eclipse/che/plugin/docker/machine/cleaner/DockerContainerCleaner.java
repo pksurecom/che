@@ -13,9 +13,7 @@ package org.eclipse.che.plugin.docker.machine.cleaner;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import org.eclipse.che.api.machine.server.MachineManager;
-import org.eclipse.che.api.machine.server.exception.MachineException;
-import org.eclipse.che.api.machine.server.model.impl.MachineImpl;
+import org.eclipse.che.api.machine.server.MachineRegistry;
 import org.eclipse.che.commons.schedule.ScheduleRate;
 import org.eclipse.che.plugin.docker.client.DockerConnector;
 import org.eclipse.che.plugin.docker.client.json.ContainerListEntry;
@@ -29,6 +27,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static java.lang.String.format;
+import static org.eclipse.che.plugin.docker.client.params.RemoveContainerParams.from;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
 
 /**
@@ -41,15 +41,15 @@ public class DockerContainerCleaner implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(DockerContainerCleaner.class);
 
-    private final MachineManager               machineManager;
+    private final MachineRegistry              machineRegistry;
     private final DockerConnector              dockerConnector;
     private final DockerContainerNameGenerator nameGenerator;
 
     @Inject
-    public DockerContainerCleaner(MachineManager machineManager,
+    public DockerContainerCleaner(MachineRegistry machineRegistry,
                                   DockerConnector dockerConnector,
                                   DockerContainerNameGenerator nameGenerator) {
-        this.machineManager = machineManager;
+        this.machineRegistry = machineRegistry;
         this.dockerConnector = dockerConnector;
         this.nameGenerator = nameGenerator;
     }
@@ -61,63 +61,55 @@ public class DockerContainerCleaner implements Runnable {
     public void run() {
         try {
             List<ContainerListEntry> allDockerContainers = dockerConnector.listContainers();
-            List<MachineImpl> machines = machineManager.getMachines();
+            List<ContainerListEntry> unusedContainers = findUnusedContainers(allDockerContainers);
 
-            List<ContainerListEntry> unUsedContainers = findUnUsedContainers(allDockerContainers, machines);
+            for (ContainerListEntry container : unusedContainers) {
+                String containerId = container.getId();
+                String containerName = container.getNames()[0];
 
-            for (ContainerListEntry container : unUsedContainers) {
-                killContainer(container);
-                removeContainer(container);
+                killContainer(containerId, containerName, container.getStatus());
+                removeContainer(containerId, containerName);
             }
         } catch (IOException e) {
             LOG.error("Failed to get list docker containers", e);
-        } catch (MachineException e) {
-            LOG.error("Failed to get list machines to clean up unused containers", e);
         } catch (Exception e) {
             LOG.error("Failed to clean up inactive containers", e);
         }
     }
 
-    private List<ContainerListEntry> findUnUsedContainers(List<ContainerListEntry> containers, List<MachineImpl> machines) {
-        List<ContainerListEntry> unUsedContainers = new ArrayList<>();
+    private List<ContainerListEntry> findUnusedContainers(List<ContainerListEntry> containers) {
+        List<ContainerListEntry> unusedContainers = new ArrayList<>();
         for (ContainerListEntry container : containers) {
             Optional<ContainerNameInfo> optional = nameGenerator.parse(container.getNames()[0]);
             if (!optional.isPresent()) {
                 continue;
             }
             final ContainerNameInfo containerNameInfo = optional.get();
-            boolean containerIsUsed = machines.stream()
-                                              .anyMatch(machine -> machine.getId().equals(containerNameInfo.getMachineId())
-                                                                   && machine.getWorkspaceId().equals(containerNameInfo.getWorkspaceId()));
-            if (!containerIsUsed) {
-                unUsedContainers.add(container);
+            if (!machineRegistry.machineIsExist(containerNameInfo.getMachineId())) {
+                unusedContainers.add(container);
             }
         }
-        return unUsedContainers;
+        return unusedContainers;
     }
 
-    private void killContainer(ContainerListEntry container) {
-        String containerId = container.getId();
-        String containerName = container.getNames()[0];
+    private void killContainer(String containerId, String containerName, String containerStatus) {
         try {
-            if (container.getStatus().startsWith("Up")) {
+            if (containerStatus.startsWith("Up")) {
                 dockerConnector.killContainer(containerId);
                 LOG.warn("Container with 'id': '{}' and 'name': '{}' was killed ", containerId, containerName);
             }
         } catch (IOException e) {
-            LOG.error("Failed to kill unused container with 'id': '{}' and 'name': '{}'", containerId, containerName, e);
+            LOG.error(format("Failed to kill unused container with 'id': '%s' and 'name': '%s'", containerId, containerName), e);
         }
     }
 
-    private void removeContainer(ContainerListEntry container) {
-        String containerId = container.getId();
-        String containerName = container.getNames()[0];
+    private void removeContainer(String containerId, String containerName) {
         try {
             //remove force with volumes
-            dockerConnector.removeContainer(containerId, true, true);
+            dockerConnector.removeContainer(from(containerId).withForce(true).withRemoveVolumes(true));
             LOG.warn("Container with 'id': '{}' and 'name': '{}' was removed", containerId, containerName);
         } catch (IOException e) {
-            LOG.error("Failed to delete unused container with 'id': '{}' and 'name': '{}'", containerId, containerName, e);
+            LOG.error(format("Failed to delete unused container with 'id': '%s' and 'name': '%s'", containerId, containerName), e);
         }
     }
 }
