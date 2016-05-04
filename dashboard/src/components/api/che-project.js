@@ -20,20 +20,13 @@ export class CheProject {
 
   /**
    * Default constructor that is using resource
-   * @ngInject for Dependency injection
    */
-  constructor($resource, $q, cheUser, cheProfile, cheWebsocket, cheWorkspace, $location) {
+  constructor($resource, $q, cheWebsocket, wsagentPath) {
 
     // keep resource
     this.$resource = $resource;
 
-    this.cheUser = cheUser;
-
-    this.cheProfile = cheProfile;
-
     this.cheWebsocket = cheWebsocket;
-
-    this.cheWorkspace = cheWorkspace;
 
     this.$q = $q;
 
@@ -45,9 +38,6 @@ export class CheProject {
 
     // projects per workspace id
     this.projectsDetailsPerWorkspaceMap = new Map();
-
-    // map containing map (first map is workspace with key = workspaceId, inner map is key = project, value = permissions
-    this.permissionsPerWorkspaceMap = new Map();
 
     // workspaces used to retrieve projects
     this.workspaces = [];
@@ -65,23 +55,19 @@ export class CheProject {
     this.resolveMap = new Map();
 
     // remote call
-    this.remoteProjectsAPI = this.$resource('//:agent/wsagent/ext/project/:workspaceId', {agent : 'agent', workspaceId: '@id'}, {
-      import: {method: 'POST', url: '//:agent/wsagent/ext/project/:workspaceId/import/:path'},
-      create: {method: 'POST', url: '//:agent/wsagent/ext/project/:workspaceId?name=:path'},
-      details: {method: 'GET', url:  '//:agent/wsagent/ext/project/:workspaceId/:path'},
-      estimate: {method: 'GET', url: '//:agent/wsagent/ext/project/:workspaceId/estimate/:path?type=:type'},
-      getPermissions: {method: 'GET', url: '//:agent/wsagent/ext/project/:workspaceId/permissions/:path', isArray: true},
-      updatePermissions: {method: 'POST', url: '//:agent/wsagent/ext/project/:workspaceId/permissions/:path', isArray: true},
-      rename: {method: 'POST', url: '//:agent/wsagent/ext/project/:workspaceId/rename/:path?name=:name'},
-      remove: {method: 'DELETE', url: '//:agent/wsagent/ext/project/:workspaceId/:path'},
-      resolve: {method: 'GET', url: '//:agent/wsagent/ext/project/:workspaceId/resolve/:path', isArray: true},
-      update: {method: 'PUT', url: '//:agent/wsagent/ext/project/:workspaceId/:path'}
+    this.remoteProjectsAPI = this.$resource(wsagentPath + '/project/:workspaceId', {workspaceId: '@id'}, {
+      import: {method: 'POST', url: wsagentPath + '/project/:workspaceId/import/:path'},
+      create: {method: 'POST', url: wsagentPath + '/project/:workspaceId?name=:path'},
+      details: {method: 'GET', url: wsagentPath + '/project/:workspaceId/:path'},
+      estimate: {method: 'GET', url: wsagentPath + '/project/:workspaceId/estimate/:path?type=:type'},
+      rename: {method: 'POST', url: wsagentPath + '/project/:workspaceId/rename/:path?name=:name'},
+      remove: {method: 'DELETE', url: wsagentPath + '/project/:workspaceId/:path'},
+      resolve: {method: 'GET', url: wsagentPath + '/project/:workspaceId/resolve/:path', isArray: true},
+      update: {method: 'PUT', url: wsagentPath + '/project/:workspaceId/:path'}
     });
   }
 
-  getWorkspaceAgent(workspaceId) {
-    return this.cheWorkspace.getWorkspaceAgent(workspaceId);
-  }
+
 
   /**
    * Notified when workspaces are updated
@@ -140,8 +126,7 @@ export class CheProject {
    * @param workspace
    */
   fetchProjectsForWorkspaceId(workspaceId) {
-    let agent = this.getWorkspaceAgent(workspaceId);
-    let promise = this.remoteProjectsAPI.query({agent: agent, workspaceId: workspaceId}).$promise;
+    let promise = this.remoteProjectsAPI.query({workspaceId: workspaceId}).$promise;
     let updatedPromise = promise.then((projectReferences) => {
       var remoteProjects = [];
       projectReferences.forEach((projectReference) => {
@@ -221,8 +206,7 @@ export class CheProject {
     if ((!data.type || data.type.length === 0) && data.description) {
       delete(data.description);
     }
-    let agent = this.getWorkspaceAgent(workspaceId);
-    let promise = this.remoteProjectsAPI.import({agent: agent, workspaceId: workspaceId, path: path}, data).$promise;
+    let promise = this.remoteProjectsAPI.import({workspaceId: workspaceId, path: path}, data).$promise;
     // update projects as well
     promise.then(this.fetchProjectsForWorkspaceId(workspaceId));
     return promise;
@@ -244,95 +228,6 @@ export class CheProject {
   }
 
   /**
-   * Fetch permissions for a project based located on the given workspace id and path
-   * @param workspaceId the workspace ID to use
-   * @param path the path of the project
-   * @param data the project body description
-   * @returns {$promise|*|T.$promise}
-   */
-  fetchPermissions(workspaceId, path) {
-    let agent = this.getWorkspaceAgent(workspaceId);
-    let promise = this.remoteProjectsAPI.getPermissions({agent: agent, workspaceId: workspaceId, path: path}).$promise;
-
-    let storePermissionsPromise = promise.then((permissions) => {
-
-      var workspaceMap = this.permissionsPerWorkspaceMap.get(workspaceId);
-      if (!workspaceMap) {
-        workspaceMap = new Map();
-        this.permissionsPerWorkspaceMap.set(workspaceId, workspaceMap);
-      }
-
-      var projectMap = workspaceMap.get(path);
-      if (!projectMap) {
-        projectMap = new Map();
-        workspaceMap.set(path, projectMap);
-      }
-      projectMap.set(path, permissions);
-
-      return permissions;
-    });
-
-    // update permissions with users
-
-    let updateUsersPromise = storePermissionsPromise.then((permissions) => {
-      var allpromises = [];
-      //allpromises.push(storePermissionsPromise);
-
-      permissions.forEach((permission)=> {
-        if (permission.principal.type === 'USER' && permission.principal.name === 'any') {
-          permission.principal.email = 'Any user';
-          permission.principal.fullname = 'Public project sharing';
-        } else if (permission.principal.type === 'USER') {
-          var principalId = permission.principal.name;
-          let userPromise = this.cheUser.fetchUserId(principalId);
-          let profilePromise = this.cheProfile.fetchProfileId(principalId);
-          let updateProfilePromise = profilePromise.then(() => {
-            var profile = this.cheProfile.getProfileFromId(principalId);
-            permission.principal.fullname = this.getFullName(profile);
-
-          }, (error) => {
-            if (error.status === 304) {
-              // get from cache
-              var profile = this.cheProfile.getProfileFromId(principalId);
-              permission.principal.fullname = this.getFullName(profile);
-
-            } else {
-              // unable to get user
-              permission.principal.fullname = permission.principal.name;
-            }
-          });
-
-
-          let updatedUserPromise = userPromise.then(() => {
-            var user = this.cheUser.getUserFromId(principalId);
-            permission.principal.email = user.email;
-
-          }, (error) => {
-            if (error.status === 304) {
-              // get from cache
-              var user = this.cheUser.getUserFromId(principalId);
-              permission.principal.email = user.email;
-
-            } else {
-              // unable to get user
-              permission.principal.email = permission.principal.name;
-            }
-          });
-
-
-          allpromises.push(updatedUserPromise);
-          allpromises.push(updateProfilePromise);
-        }
-      });
-      return this.$q.all(allpromises);
-    });
-
-
-    return updateUsersPromise;
-
-  }
-
-  /**
    * Gets the fullname from a profile
    * @param profile the profile to analyze
    * @returns {string} a name
@@ -349,34 +244,6 @@ export class CheProject {
 
     return firstName + ' ' + lastName;
   }
-
-
-  updatePermissions(workspaceId, path, data) {
-    let agent = this.getWorkspaceAgent(workspaceId);
-    let promise = this.remoteProjectsAPI.updatePermissions({agent: agent, workspaceId: workspaceId, path: path}, data).$promise;
-    return promise;
-
-  }
-
-  /**
-   * Return last retrieved permissions
-   * @param workspaceId
-   * @param path
-   * @returns {*}
-   */
-  getPermissions(workspaceId, path) {
-    var workspaceMap = this.permissionsPerWorkspaceMap.get(workspaceId);
-    if (!workspaceMap) {
-      return [];
-    }
-    var projectMap = workspaceMap.get(path);
-    if (!projectMap) {
-      return [];
-    }
-    return projectMap.get(path);
-
-  }
-
 
   /**
    * Gets all projects that are currently monitored
@@ -410,8 +277,7 @@ export class CheProject {
   fetchProjectDetails(workspaceId, projectPath) {
     //TODO why we cannot use project path
     var projectName = projectPath[0] === '/' ? projectPath.slice(1) : projectPath;
-    let agent = this.getWorkspaceAgent(workspaceId);
-    let promise = this.remoteProjectsAPI.details({agent: agent, workspaceId: workspaceId, path: projectName}).$promise;
+    let promise = this.remoteProjectsAPI.details({workspaceId: workspaceId, path: projectName}).$promise;
 
     // check if it was OK or not
     let parsedResultPromise = promise.then((projectDetails) => {
@@ -441,9 +307,7 @@ export class CheProject {
     if(newProjectDetails.workspaceId){
       delete(newProjectDetails.workspaceId);
     }
-    let agent = this.getWorkspaceAgent(workspaceId);
     let promiseUpdateProjectDetails = this.remoteProjectsAPI.update({
-      agent: agent,
       workspaceId: workspaceId,
       path: path
     }, newProjectDetails).$promise;
@@ -458,15 +322,13 @@ export class CheProject {
   }
 
   rename(workspaceId, projectName, newProjectName) {
-    let agent = this.getWorkspaceAgent(workspaceId);
-    let promise = this.remoteProjectsAPI.rename({agent: agent, workspaceId: workspaceId, path: projectName, name: newProjectName}, null).$promise;
+    let promise = this.remoteProjectsAPI.rename({workspaceId: workspaceId, path: projectName, name: newProjectName}, null).$promise;
 
     return promise;
   }
 
   remove(workspaceId, projectName) {
-    let agent = this.getWorkspaceAgent(workspaceId);
-    let promiseDelete = this.remoteProjectsAPI.remove({agent: agent, workspaceId: workspaceId, path: projectName}).$promise;
+    let promiseDelete = this.remoteProjectsAPI.remove({workspaceId: workspaceId, path: projectName}).$promise;
     // update list of projects
     let promiseUpdateProjects = promiseDelete.then(() => {
       this.fetchProjectsForWorkspaceId(workspaceId);
@@ -485,8 +347,7 @@ export class CheProject {
    */
   fetchEstimate(workspaceId, projectPath, projectType) {
       let projectName = projectPath[0] === '/' ? projectPath.slice(1) : projectPath;
-      let agent = this.getWorkspaceAgent(workspaceId);
-      let promise = this.remoteProjectsAPI.estimate({agent: agent, workspaceId: workspaceId, path: projectName, type: projectType}).$promise;
+      let promise = this.remoteProjectsAPI.estimate({workspaceId: workspaceId, path: projectName, type: projectType}).$promise;
       let parsedResultPromise = promise.then((estimate) => {
         if (estimate) {
           this.estimateMap.set(workspaceId + projectName + projectType, estimate);
@@ -512,8 +373,7 @@ export class CheProject {
    */
   fetchResolve(workspaceId, projectPath) {
     let projectName = projectPath[0] === '/' ? projectPath.slice(1) : projectPath;
-    let agent = this.getWorkspaceAgent(workspaceId);
-    let promise = this.remoteProjectsAPI.resolve({agent: agent, workspaceId: workspaceId, path: projectName}).$promise;
+    let promise = this.remoteProjectsAPI.resolve({workspaceId: workspaceId, path: projectName}).$promise;
     let parsedResultPromise = promise.then((resolve) => {
       if (resolve) {
         this.resolveMap.set(workspaceId + projectName, resolve);

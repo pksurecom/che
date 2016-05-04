@@ -10,6 +10,8 @@
  */
 'use strict';
 
+import {CheWorkspaceAgent} from './che-workspace-agent';
+
 /**
  * This class is handling the workspace retrieval
  * It sets to the array workspaces the current workspaces which are not temporary
@@ -39,6 +41,9 @@ export class CheWorkspace {
     // per Id
     this.workspacesById = new Map();
 
+    //Workspace agents per workspace id:s
+    this.workspaceAgents = new Map();
+
     // listeners if workspaces are changed/updated
     this.listeners = [];
 
@@ -61,6 +66,10 @@ export class CheWorkspace {
   }
 
   getWorkspaceAgent(workspaceId) {
+    if (this.workspaceAgents.has(workspaceId)) {
+      return this.workspaceAgents.get(workspaceId);
+    }
+
     let runtimeConfig = this.getWorkspaceById(workspaceId).runtime;
     let wsAgentLink;
     if (runtimeConfig) {
@@ -68,7 +77,11 @@ export class CheWorkspace {
         return link.rel === 'wsagent';
       });
     }
-    return wsAgentLink ? wsAgentLink.href.replace(/^https?:\/\//,'').replace('/wsagent/ext', '') : '';
+    //TODO
+    let workspaceAgentData = {path : wsAgentLink.href};
+    let wsagent = new CheWorkspaceAgent(this.$resource, this.$q, this.cheWebsocket, workspaceAgentData);
+    this.workspaceAgents.set(workspaceId, wsagent);
+    return wsagent;
   }
 
   /**

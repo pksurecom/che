@@ -11,7 +11,6 @@
 'use strict';
 
 import {CheAPI} from './che-api.factory';
-import {CheProject} from './che-project.factory';
 import {CheWorkspace} from './che-workspace.factory';
 import {CheUser} from './che-user.factory';
 import {CheProjectType} from './che-project-type.factory';
@@ -36,7 +35,6 @@ import {CheOAuthProvider} from './che-o-auth-provider.factory';
 export class ApiConfig {
 
   constructor(register) {
-    register.factory('cheProject', CheProject);
     register.factory('cheWorkspace', CheWorkspace);
     register.factory('cheUser', CheUser);
     register.factory('cheProjectType', CheProjectType);

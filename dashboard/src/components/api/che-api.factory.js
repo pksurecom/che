@@ -22,9 +22,8 @@ export class CheAPI {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor(cheProject, cheWorkspace, cheUser, cheProfile, cheProjectType, cheProjectTemplate, cheWebsocket, cheGit, cheSvn,
+  constructor(cheWorkspace, cheUser, cheProfile, cheProjectType, cheProjectTemplate, cheWebsocket, cheGit, cheSvn,
               cheService, cheAdminPlugins, cheAdminService, cheRecipe, cheRecipeTemplate, cheStack, cheOAuthProvider) {
-    this.cheProject = cheProject;
     this.cheWorkspace = cheWorkspace;
     this.cheUser = cheUser;
     this.cheProfile = cheProfile;
@@ -40,20 +39,8 @@ export class CheAPI {
     this.cheRecipeTemplate = cheRecipeTemplate;
     this.cheStack = cheStack;
     this.cheOAuthProvider = cheOAuthProvider;
-
-    // register listener of projects onto workspaces
-    this.cheWorkspace.addListener(this.cheProject);
-
   }
 
-
-  /**
-   * The Che Project API
-   * @returns {CheAPI.cheProject|*}
-   */
-  getProject() {
-    return this.cheProject;
-  }
 
   /**
    * The Che Workspace API

@@ -77,7 +77,7 @@ export class ListProjectsCtrl {
 
   updateData() {
     this.workspaces = this.cheAPI.getWorkspace().getWorkspaces();
-    this.projectsPerWorkspace = this.cheAPI.getProject().getProjectsByWorkspace();
+    this.projectsPerWorkspace = this.cheAPI.getWorkspace().getWorkspaceAgent().getProject().getProjectsByWorkspace();
     this.projects = this.cheAPI.getProject().getAllProjects();
     // init the filters of workspaces
     this.workspaces.forEach((workspace) => {
