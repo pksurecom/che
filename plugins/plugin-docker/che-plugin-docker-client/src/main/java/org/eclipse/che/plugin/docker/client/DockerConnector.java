@@ -208,36 +208,24 @@ public class DockerConnector {
      * Method returns list of docker containers which was filtered by query parameters from {@link ListContainersParams}
      *
      * @throws IOException
-     *         in case error parsing response from docker api
+     *         when problems occurs with docker api calls
      */
     public List<ContainerListEntry> listContainers(ListContainersParams params) throws IOException {
         try (DockerConnection connection = connectionFactory.openConnection(dockerDaemonUri)
                                                             .method("GET")
                                                             .path("/containers/json")) {
-            if (params.isAll() != null) {
-                connection.query("all", params.isAll());
-            }
-            if (params.isSize() != null) {
-                connection.query("size", params.isSize());
-            }
-            if (params.getLimit() != null) {
-                connection.query("limit", params.getLimit());
-            }
-            if (params.getSince() != null) {
-                connection.query("since", params.getSince());
-            }
-            if (params.getBefore() != null) {
-                connection.query("before", params.getBefore());
-            }
-            if (params.getFilters() != null) {
-                connection.query("filters", urlPathSegmentEscaper().escape(JsonHelper.toJson(params.getFilters())));
-            }
+            addQueryParamIfNotNull(connection, "all", params.isAll());
+            addQueryParamIfNotNull(connection, "size", params.isSize());
+            addQueryParamIfNotNull(connection, "limit", params.getLimit());
+            addQueryParamIfNotNull(connection, "since", params.getSince());
+            addQueryParamIfNotNull(connection, "before", params.getBefore());
+            addQueryParamIfNotNull(connection, "filters", urlPathSegmentEscaper().escape(JsonHelper.toJson(params.getFilters())));
             DockerResponse response = connection.request();
             final int status = response.getStatus();
             if (OK.getStatusCode() != status) {
                 throw getDockerException(response);
             }
-            return stream(parseResponseStreamAndClose(response.getInputStream(), ContainerListEntry[].class)).collect(toList());
+            return parseResponseStreamAsListAndClose(response.getInputStream());
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }
