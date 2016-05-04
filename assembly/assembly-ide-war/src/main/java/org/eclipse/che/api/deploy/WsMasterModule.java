@@ -16,6 +16,7 @@ import com.google.inject.name.Names;
 
 import org.eclipse.che.api.machine.shared.Constants;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.docker.machine.DockerMachineImplTerminalLauncher;
 import org.everrest.guice.ServiceBindingHelper;
 
 /** @author andrew00x */
@@ -74,6 +75,10 @@ public class WsMasterModule extends AbstractModule {
                 .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceValidator.class);
 
         bind(org.eclipse.che.api.workspace.server.event.MachineStateListener.class).asEagerSingleton();
+        bindConstant().annotatedWith(Names.named(DockerMachineImplTerminalLauncher.START_TERMINAL_COMMAND))
+                      .to("mkdir -p ~/che " +
+                          "&& cp /mnt/che/terminal -R ~/che" +
+                          "&& ~/che/terminal/che-websocket-terminal -addr :4411 -cmd /bin/bash -static ~/che/terminal/");
 
         bind(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncher.class)
                 .to(org.eclipse.che.api.machine.server.wsagent.WsAgentLauncherImpl.class);
