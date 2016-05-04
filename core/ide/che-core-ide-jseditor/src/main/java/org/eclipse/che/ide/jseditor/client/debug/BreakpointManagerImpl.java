@@ -44,7 +44,7 @@ import org.eclipse.che.ide.debug.HasBreakpointRenderer;
 import org.eclipse.che.ide.debug.dto.BreakpointDto;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.jseditor.client.document.Document;
-import org.eclipse.che.ide.jseditor.client.texteditor.EmbeddedTextEditorPresenter;
+import org.eclipse.che.ide.jseditor.client.texteditor.TextEditor;
 import org.eclipse.che.ide.project.event.ProjectExplorerLoadedEvent;
 import org.eclipse.che.ide.project.event.ResourceNodeDeletedEvent;
 import org.eclipse.che.ide.project.node.FileReferenceNode;
@@ -229,8 +229,8 @@ public class BreakpointManagerImpl implements BreakpointManager,
      */
     private boolean isLineNotEmpty(final VirtualFile activeFile, int lineNumber) {
         EditorPartPresenter editor = getEditorForFile(activeFile.getPath());
-        if (editor instanceof EmbeddedTextEditorPresenter) {
-            Document document = ((EmbeddedTextEditorPresenter)editor).getDocument();
+        if (editor instanceof TextEditor) {
+            Document document = ((TextEditor)editor).getDocument();
             return !document.getLineContent(lineNumber).trim().isEmpty();
         }
 

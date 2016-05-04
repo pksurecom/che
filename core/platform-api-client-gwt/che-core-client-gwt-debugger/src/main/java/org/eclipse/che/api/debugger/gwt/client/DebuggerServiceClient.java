@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The client-side service to debug application.
+ * Client for the service to debug application.
  *
  * @author Vitaly Parfonov
  * @author Anatoliy Bazko

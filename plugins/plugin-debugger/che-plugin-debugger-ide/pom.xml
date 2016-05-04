@@ -215,7 +215,7 @@
                         </goals>
                         <configuration>
                             <dtoPackages>
-                                <package>org.eclipse.che.ide.ext.debugger.client.configuration.dto</package>
+                                <package>org.eclipse.che.plugin.debugger.ide.configuration.dto</package>
                             </dtoPackages>
                             <outputDirectory>${dto-generator-out-directory}</outputDirectory>
                             <genClassName>org.eclipse.che.plugin.debugger.ide.configuration.dto.DtoClientImpls</genClassName>

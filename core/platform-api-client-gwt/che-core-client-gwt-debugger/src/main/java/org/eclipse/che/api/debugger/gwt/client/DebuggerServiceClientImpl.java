@@ -40,6 +40,7 @@ import java.util.Map;
 
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
+
 /**
  * The implementation of {@link DebuggerServiceClient}.
  *
@@ -50,7 +51,7 @@ public class DebuggerServiceClientImpl implements DebuggerServiceClient {
     private final LoaderFactory          loaderFactory;
     private final AsyncRequestFactory    asyncRequestFactory;
     private final DtoUnmarshallerFactory dtoUnmarshallerFactory;
-    private final AppContext appContext;
+    private final AppContext             appContext;
 
     @Inject
     protected DebuggerServiceClientImpl(AppContext appContext,
