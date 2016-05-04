@@ -57,14 +57,14 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
  * @author Anton Korneta
  */
 @Singleton
-public class LinksInjector {
+public class WorkspaceServiceLinksInjector {
 
     //TODO: we need keep IDE context in some property to have possibility configure it because context is different in Che and Hosted packaging
     //TODO: not good solution do it here but critical for this task  https://jira.codenvycorp.com/browse/IDEX-3619
     private final String ideContext;
 
     @Inject
-    public LinksInjector(@Named("che.ide.context") String ideContext) {
+    public WorkspaceServiceLinksInjector(@Named("che.ide.context") String ideContext) {
         this.ideContext = ideContext;
     }
 

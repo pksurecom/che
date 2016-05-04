@@ -127,7 +127,7 @@ public class WorkspaceServiceTest {
 
     @BeforeMethod
     public void setup() {
-        service = new WorkspaceService(wsManager, machineManager, validator, new LinksInjector(IDE_CONTEXT));
+        service = new WorkspaceService(wsManager, machineManager, validator, new WorkspaceServiceLinksInjector(IDE_CONTEXT));
     }
 
     @Test

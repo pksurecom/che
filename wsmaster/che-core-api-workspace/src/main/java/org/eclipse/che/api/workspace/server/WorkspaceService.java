@@ -84,7 +84,7 @@ public class WorkspaceService extends Service {
     private final WorkspaceValidator validator;
     private final MachineManager     machineManager;
 
-    private final LinksInjector linksInjector;
+    private final WorkspaceServiceLinksInjector linksInjector;
 
     @Context
     private SecurityContext securityContext;
@@ -93,11 +93,11 @@ public class WorkspaceService extends Service {
     public WorkspaceService(WorkspaceManager workspaceManager,
                             MachineManager machineManager,
                             WorkspaceValidator validator,
-                            LinksInjector linksInjector) {
+                            WorkspaceServiceLinksInjector workspaceServiceLinksInjector) {
         this.workspaceManager = workspaceManager;
         this.machineManager = machineManager;
         this.validator = validator;
-        this.linksInjector = linksInjector;
+        this.linksInjector = workspaceServiceLinksInjector;
     }
 
     @POST
