@@ -281,26 +281,16 @@ export class CheWorkspace {
    */
   getWebsocketUrl(workspaceId) {
     let workspace = this.workspacesById.get(workspaceId);
-    if (!workspace || !workspace.runtime) {
+    if (!workspace || !workspace.runtime || !workspace.runtime.devMachine) {
       return '';
     }
-    let runtimeData = workspace.runtime;
 
-    // extract the Websocket URL of the runtime
-    let servers = runtimeData.devMachine.runtime.servers;
-
-    var wsagentServerAddress;
-    for (var key in servers) {
-      let server = servers[key];
-      if ('wsagent' === server.ref) {
-        wsagentServerAddress = server.address;
+    for (var link in workspace.runtime.devMachine.links) {
+      if (link.rel === 'wsagent.websocket') {
+        return link.href;
       }
     }
-    let endpoint = runtimeData.devMachine.runtime.envVariables.CHE_API_ENDPOINT;
-
-    var contextPath;
-
-    return 'ws://' + wsagentServerAddress + '/wsagent/ext/ws/' + workspaceId;
+    return '';
   }
 
   getIdeUrl(workspaceName) {
