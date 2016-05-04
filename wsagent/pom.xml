@@ -30,5 +30,6 @@
         <module>che-core-api-git-shared</module>
         <module>che-core-git-impl-native</module>
         <module>che-core-api-debugger</module>
+        <module>wsagent-local</module>
     </modules>
 </project>
