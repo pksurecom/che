@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
@@ -42,7 +41,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     private String                  description;
     private String                  defaultEnv;
     private List<CommandImpl>       commands;
-    private List<ProjectConfigImpl> projects;
+    private List<ProjectConfig> projects;
     private List<EnvironmentImpl>   environments;
 
     public WorkspaceConfigImpl(String name,
@@ -117,14 +116,14 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
     }
 
     @Override
-    public List<ProjectConfigImpl> getProjects() {
+    public List<ProjectConfig> getProjects() {
         if (projects == null) {
             projects = new ArrayList<>();
         }
         return projects;
     }
 
-    public void setProjects(List<ProjectConfigImpl> projects) {
+    public void setProjects(List<ProjectConfig> projects) {
         this.projects = projects;
     }
 

@@ -120,13 +120,13 @@ public class ProjectService extends Service {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Gets list of projects in root folder",
+    @ApiOperation(value = "Gets list of getProjects in root folder",
                   response = ProjectConfigDto.class,
                   responseContainer = "List")
     @ApiResponses({@ApiResponse(code = 200, message = "OK"),
                    @ApiResponse(code = 500, message = "Server error")})
     @GenerateLink(rel = Constants.LINK_REL_GET_PROJECTS)
-    public List<ProjectConfigDto> getProjects(@ApiParam("ID of workspace to get projects")
+    public List<ProjectConfigDto> getProjects(@ApiParam("ID of workspace to get getProjects")
                                               @PathParam("ws-id") String workspace) throws IOException,
                                                                                            ServerException,
                                                                                            ConflictException,
@@ -146,7 +146,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
                    @ApiResponse(code = 403, message = "Access to requested project is forbidden"),
                    @ApiResponse(code = 500, message = "Server error")})
-    public ProjectConfigDto getProject(@ApiParam(value = "ID of workspace to get projects", required = true)
+    public ProjectConfigDto getProject(@ApiParam(value = "ID of workspace to get getProjects", required = true)
                                        @PathParam("ws-id") String workspace,
                                        @ApiParam(value = "Path to requested project", required = true)
                                        @PathParam("path") String path) throws NotFoundException,
@@ -249,7 +249,7 @@ public class ProjectService extends Service {
                    @ApiResponse(code = 404, message = "Project with specified path doesn't exist in workspace"),
                    @ApiResponse(code = 403, message = "Access to requested project is forbidden"),
                    @ApiResponse(code = 500, message = "Server error")})
-    public SourceEstimation estimateProject(@ApiParam(value = "ID of workspace to estimate projects", required = true)
+    public SourceEstimation estimateProject(@ApiParam(value = "ID of workspace to estimate getProjects", required = true)
                                             @PathParam("ws-id") String workspace,
                                             @ApiParam(value = "Path to requested project", required = true)
                                             @PathParam("path") String path,
@@ -274,7 +274,7 @@ public class ProjectService extends Service {
     @GET
     @Path("/resolve/{path:.*}")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<SourceEstimation> resolveSources(@ApiParam(value = "ID of workspace to estimate projects", required = true)
+    public List<SourceEstimation> resolveSources(@ApiParam(value = "ID of workspace to estimate getProjects", required = true)
                                                  @PathParam("ws-id") String workspace,
                                                  @ApiParam(value = "Path to requested project", required = true)
                                                  @PathParam("path") String path) throws NotFoundException,

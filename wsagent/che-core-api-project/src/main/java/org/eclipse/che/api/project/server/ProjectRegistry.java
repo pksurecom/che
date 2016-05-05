@@ -15,8 +15,6 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
 import org.eclipse.che.api.project.server.type.BaseProjectType;
@@ -32,7 +30,6 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,7 +46,7 @@ public class ProjectRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(ProjectRegistry.class);
 
     private final Map<String, RegisteredProject> projects;
-    private final WorkspaceHolder                workspaceHolder;
+    private final WorkspaceProjectsSyncer        workspaceHolder;
     private final VirtualFileSystem              vfs;
     private final ProjectTypeRegistry            projectTypeRegistry;
     private final ProjectHandlerRegistry         handlers;
@@ -58,7 +55,7 @@ public class ProjectRegistry {
     private boolean initialized;
 
     @Inject
-    public ProjectRegistry(WorkspaceHolder workspaceHolder,
+    public ProjectRegistry(WorkspaceProjectsSyncer workspaceHolder,
                            VirtualFileSystemProvider vfsProvider,
                            ProjectTypeRegistry projectTypeRegistry,
                            ProjectHandlerRegistry handlers) throws ServerException {
@@ -72,11 +69,12 @@ public class ProjectRegistry {
 
     @PostConstruct
     public void initProjects() throws ConflictException, NotFoundException, ServerException, ForbiddenException {
-        final Workspace workspace = workspaceHolder.getWorkspace();
+        //final Workspace workspace = workspaceHolder.getWorkspace();
 
-        List<? extends ProjectConfig> projectConfigs = new ArrayList<>(workspace.getConfig().getProjects());
+        List<? extends ProjectConfig> projectConfigs = workspaceHolder.getProjects();
+        //= new ArrayList<>(workspace.getConfig().getProjects());
 
-        // take all the projects from ws's config
+        // take all the getProjects from ws's config
         for (ProjectConfig projectConfig : projectConfigs) {
             final String path = projectConfig.getPath();
             final VirtualFile vf = vfs.getRoot().getChild(Path.of(path));
@@ -89,29 +87,16 @@ public class ProjectRegistry {
         initialized = true;
 
         for (RegisteredProject project : projects.values()) {
-            // only for projects with sources
+            // only for getProjects with sources
             if(project.getBaseFolder() != null) {
                 fireInitHandlers(project);
             }
         }
     }
 
-    /**
-     * @return id of workspace this project belongs to
-     */
-    public String getWorkspaceId() {
-        return workspaceHolder.getWorkspace().getId();
-    }
 
     /**
-     * @return id of workspace this project belongs to
-     */
-    public WorkspaceConfig getWorkspaceConfig() {
-        return workspaceHolder.getWorkspace().getConfig();
-    }
-
-    /**
-     * @return all the registered projects
+     * @return all the registered getProjects
      */
     public List<RegisteredProject> getProjects() {
         checkInitializationState();
@@ -137,7 +122,7 @@ public class ProjectRegistry {
     /**
      * @param parentPath
      *         parent path
-     * @return child projects
+     * @return child getProjects
      */
     public List<String> getProjects(String parentPath) {
         checkInitializationState();
@@ -201,38 +186,27 @@ public class ProjectRegistry {
                                  boolean detected) throws ServerException,
                                                           ConflictException,
                                                           NotFoundException {
-        final RegisteredProject project = new RegisteredProject(folder, config, updated, detected, this.projectTypeRegistry);
-        Optional<RegisteredProject> updatedProjectOptional = Optional.ofNullable(projects.put(project.getPath(), project));
 
-        // check whether it isn't during #initProjects()
-        if (initialized) {
-            if (updatedProjectOptional.isPresent()) {
-                workspaceHolder.updateProject(project);
-            } else {
-                workspaceHolder.addProject(project);
-            }
-        } else if (config == null) {
-            // initializing project from unconfigured folder during #initProjects()
-            workspaceHolder.addProject(project);
-        }
+        final RegisteredProject project = new RegisteredProject(folder, config, updated, detected, this.projectTypeRegistry);
+        projects.put(project.getPath(), project);
 
         return project;
     }
 
     /**
-     * Removes all projects on and under the incoming path.
+     * Removes all getProjects on and under the incoming path.
      *
      * @param path
      *         from where to remove
      * @throws ServerException
      */
     void removeProjects(String path) throws ServerException {
+
         List<RegisteredProject> removed = new ArrayList<>();
         Optional.ofNullable(projects.remove(path)).ifPresent(removed::add);
         getProjects(path).forEach(p -> Optional.ofNullable(projects.remove(p))
                                                .ifPresent(removed::add));
 
-        workspaceHolder.removeProjects(removed);
     }
 
     /*  ------------------------------------------ */
@@ -380,7 +354,7 @@ public class ProjectRegistry {
         return (path.startsWith("/")) ? path : "/".concat(path);
     }
 
-    /** Try to initialize projects from unconfigured folders on root. */
+    /** Try to initialize getProjects from unconfigured folders on root. */
     private void initUnconfiguredFolders() {
         try {
             for (FolderEntry folder : root.getChildFolders()) {
@@ -408,8 +382,6 @@ public class ProjectRegistry {
                                                             NotFoundException,
                                                             ServerException {
         // primary type
-        //ProjectTypeDef pt = project.getProjectType();
-        //pt.getAncestors();
         fireInit(project, project.getType());
 
         // mixins

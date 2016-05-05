@@ -13,6 +13,7 @@ package org.eclipse.che.api.project.server;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
@@ -28,22 +29,16 @@ import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
-import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.lang.IoUtil;
-import org.eclipse.che.dto.server.DtoFactory;
 
 import java.io.File;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author gazarenkov
@@ -118,50 +113,82 @@ public class WsAgentTestBase {
         fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
         pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
-                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder);
         pm.initWatcher();
     }
 
 
-    protected static class TestWorkspaceHolder extends WorkspaceHolder {
+    protected static class TestWorkspaceHolder extends WorkspaceProjectsSyncer {
 
-        //ArrayList <RegisteredProject> updatedProjects = new ArrayList<>();
+        private HashMap<String, ProjectConfig> projects = new HashMap<>();
 
         protected TestWorkspaceHolder() throws ServerException {
-            super(DtoFactory.newDto(WorkspaceDto.class).withId("id")
-                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
-                                                  .withName("name")));
+//            super(DtoFactory.newDto(WorkspaceDto.class).withId("id")
+//                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
+//                                                  .withName("name")));
         }
 
 
-        protected TestWorkspaceHolder(List<ProjectConfigDto> projects) throws ServerException {
-            super(DtoFactory.newDto(WorkspaceDto.class)
-                            .withId("id")
-                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
-                                                  .withName("name")
-                                                  .withProjects(projects)));
-        }
-
-        @Override
-        void addProject(RegisteredProject project) throws ServerException {
-            if (!project.isDetected()) {
-                workspace.addProject(project);
+        protected TestWorkspaceHolder(List<ProjectConfig> projects) throws ServerException {
+            for(ProjectConfig p : projects) {
+                this.projects.put(p.getPath(), p);
             }
+
+//            super(DtoFactory.newDto(WorkspaceDto.class)
+//                            .withId("id")
+//                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
+//                                                  .withName("name")
+//                                                  .withProjects(projects)));
         }
 
         @Override
-        public void updateProject(RegisteredProject project) throws ServerException {
-            if (!project.isDetected()) {
-                workspace.updateProject(project);
-            }
+        public List<? extends ProjectConfig> getProjects() {
+            return new ArrayList(projects.values());
         }
 
         @Override
-        void removeProjects(Collection<RegisteredProject> projects) throws ServerException {
-            projects.stream()
-                    .filter(project -> !project.isDetected())
-                    .forEach(workspace::removeProject);
+        public String getWorkspaceId() {
+            return "id";
         }
+
+        @Override
+        protected void addProject(ProjectConfig project) throws ServerException {
+
+            projects.put(project.getPath(), project);
+
+        }
+
+        @Override
+        protected void updateProject(ProjectConfig project) throws ServerException {
+            projects.put(project.getPath(), project);
+        }
+
+        @Override
+        protected void removeProject(ProjectConfig project) throws ServerException {
+
+            projects.remove(project.getPath());
+        }
+
+//        @Override
+//        void addProject(RegisteredProject project) throws ServerException {
+//            if (!project.isDetected()) {
+//                workspace.addProject(project);
+//            }
+//        }
+//
+//        @Override
+//        public void updateProject(RegisteredProject project) throws ServerException {
+//            if (!project.isDetected()) {
+//                workspace.updateProject(project);
+//            }
+//        }
+//
+//        @Override
+//        void removeProjects(Collection<RegisteredProject> getProjects) throws ServerException {
+//            getProjects.stream()
+//                    .filter(project -> !project.isDetected())
+//                    .forEach(workspace::removeProject);
+//        }
     }
 
     protected static class PT1 extends ProjectTypeDef {

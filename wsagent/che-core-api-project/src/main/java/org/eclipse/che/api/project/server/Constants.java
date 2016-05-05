@@ -13,7 +13,7 @@ package org.eclipse.che.api.project.server;
 /** @author andrew00x */
 public class Constants {
     // rels for known project links
-    public static final String LINK_REL_GET_PROJECTS   = "get projects";
+    public static final String LINK_REL_GET_PROJECTS   = "get getProjects";
     public static final String LINK_REL_CREATE_PROJECT = "create project";
     public static final String LINK_REL_UPDATE_PROJECT = "update project";
     public static final String LINK_REL_EXPORT_ZIP     = "zipball sources";

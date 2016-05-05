@@ -86,7 +86,6 @@ import java.net.URI;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -161,7 +160,7 @@ public class ProjectServiceTest {
     @BeforeMethod
     public void setUp() throws Exception {
 
-        WorkspaceHolder workspaceHolder = new TestWorkspaceHolder();
+        WorkspaceProjectsSyncer workspaceHolder = new WsAgentTestBase.TestWorkspaceHolder();
 
         File root = new File(FS_PATH);
 
@@ -212,7 +211,7 @@ public class ProjectServiceTest {
         FileTreeWatcher fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
         pm = new ProjectManager(vfsProvider, null, ptRegistry, projectRegistry, phRegistry,
-                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder);
         pm.initWatcher();
 
         HttpJsonRequest httpJsonRequest = mock(HttpJsonRequest.class, new SelfReturningAnswer());
@@ -287,35 +286,42 @@ public class ProjectServiceTest {
     }
 
 
-    private static class TestWorkspaceHolder extends WorkspaceHolder {
-        private TestWorkspaceHolder() throws ServerException {
-            super(DtoFactory.newDto(WorkspaceDto.class).withId("id")
-                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
-                                                  .withName("name")
-                                                  .withProjects(new ArrayList<>())));
-        }
-
-        @Override
-        void addProject(RegisteredProject project) throws ServerException {
-            if (!project.isDetected()) {
-                workspace.addProject(project);
-            }
-        }
-
-        @Override
-        public void updateProject(RegisteredProject project) throws ServerException {
-            if (!project.isDetected()) {
-                workspace.updateProject(project);
-            }
-        }
-
-        @Override
-        void removeProjects(Collection<RegisteredProject> projects) throws ServerException {
-            projects.stream()
-                    .filter(project -> !project.isDetected())
-                    .forEach(workspace::removeProject);
-        }
-    }
+//    private static class TestWorkspaceHolder extends WorkspaceHolder {
+//        private TestWorkspaceHolder() throws ServerException {
+//            super(DtoFactory.newDto(WorkspaceDto.class).withId("id")
+//                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
+//                                                  .withName("name")
+//                                                  .withProjects(new ArrayList<>())));
+//        }
+//
+//
+//        @Override
+//        public void sync(ProjectRegistry projectRegistry) throws ServerException {
+//
+//        }
+//
+//
+////        @Override
+////        void addProject(RegisteredProject project) throws ServerException {
+////            if (!project.isDetected()) {
+////                workspace.addProject(project);
+////            }
+////        }
+////
+////        @Override
+////        public void updateProject(RegisteredProject project) throws ServerException {
+////            if (!project.isDetected()) {
+////                workspace.updateProject(project);
+////            }
+////        }
+////
+////        @Override
+////        void removeProjects(Collection<RegisteredProject> getProjects) throws ServerException {
+////            getProjects.stream()
+////                    .filter(project -> !project.isDetected())
+////                    .forEach(workspace::removeProject);
+////        }
+//    }
 
     private static class TestSearcherProvider implements SearcherProvider {
 
@@ -1971,7 +1977,7 @@ public class ProjectServiceTest {
 //                                                           .withName("module1")
 //                                                           .withDescription("module description")
 //                                                           .withType("module_type");
-//        //projects.add(newProjectConfig);
+//        //getProjects.add(newProjectConfig);
 //        //modules.add(newModuleConfig);
 //
 //        Map<String, List<String>> headers = new HashMap<>();

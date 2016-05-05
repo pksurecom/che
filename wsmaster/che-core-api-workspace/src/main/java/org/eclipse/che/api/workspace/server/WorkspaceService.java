@@ -25,6 +25,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.core.rest.permission.PermissionManager;
@@ -81,19 +82,19 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.util.LinksHelper.createLink;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_REFERENCE;
 import static org.eclipse.che.api.machine.shared.Constants.WSAGENT_WEBSOCKET_REFERENCE;
+import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.shared.Constants.GET_ALL_USER_WORKSPACES;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_CREATE_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_SNAPSHOT;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACES;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_GET_WORKSPACE_EVENTS_CHANNEL;
+import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_IDE_URL;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_REMOVE_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_SELF;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_START_WORKSPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.LIN_REL_GET_WORKSPACE;
-import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_IDE_URL;
-import static org.eclipse.che.api.workspace.shared.Constants.START_WORKSPACE;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_STOP_WORKSPACE;
-import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
+import static org.eclipse.che.api.workspace.shared.Constants.LIN_REL_GET_WORKSPACE;
+import static org.eclipse.che.api.workspace.shared.Constants.START_WORKSPACE;
 import static org.eclipse.che.dto.server.DtoFactory.cloneDto;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
@@ -701,7 +702,7 @@ public class WorkspaceService extends Service {
         requiredNotNull(update, "Project config");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
         ensureUserIsWorkspaceOwner(workspace);
-        final List<ProjectConfigImpl> projects = workspace.getConfig().getProjects();
+        final List<ProjectConfig> projects = workspace.getConfig().getProjects();
         final String normalizedPath = path.startsWith("/") ? path : '/' + path;
         if (!projects.removeIf(project -> project.getPath().equals(normalizedPath))) {
             throw new NotFoundException(format("Workspace '%s' doesn't contain project with path '%s'",
