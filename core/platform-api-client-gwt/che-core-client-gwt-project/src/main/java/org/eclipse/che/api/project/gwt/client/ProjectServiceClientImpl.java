@@ -86,7 +86,7 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
         String requestUrl = devMachine.getWsAgentBaseUrl() + "/project/" + devMachine.getWorkspace();
         asyncRequestFactory.createGetRequest(requestUrl)
                            .header(ACCEPT, MimeType.APPLICATION_JSON)
-                           .loader(loaderFactory.newLoader("Getting projects..."))
+                           .loader(loaderFactory.newLoader("Getting getProjects..."))
                            .send(callback);
     }
 

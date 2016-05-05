@@ -8,7 +8,7 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.extension.maven.server.projecttype.handler;
+package org.eclipse.che.plugin.maven.server.projecttype.handler;
 
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.project.ProjectConfig;
@@ -23,11 +23,11 @@ import org.eclipse.che.api.vfs.VirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.ide.ext.java.server.projecttype.JavaProjectType;
-import org.eclipse.che.ide.ext.java.server.projecttype.JavaPropertiesValueProviderFactory;
-import org.eclipse.che.ide.extension.maven.server.projecttype.MavenProjectResolver;
-import org.eclipse.che.ide.extension.maven.server.projecttype.MavenProjectType;
-import org.eclipse.che.ide.extension.maven.server.projecttype.MavenValueProviderFactory;
+import org.eclipse.che.plugin.java.server.projecttype.JavaProjectType;
+import org.eclipse.che.plugin.java.server.projecttype.JavaValueProviderFactory;
+import org.eclipse.che.plugin.maven.server.projecttype.MavenProjectResolver;
+import org.eclipse.che.plugin.maven.server.projecttype.MavenProjectType;
+import org.eclipse.che.plugin.maven.server.projecttype.MavenValueProviderFactory;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -95,7 +95,7 @@ public class MavenProjectResolverTest {
 
         TestWorkspaceHolder workspaceHolder = new TestWorkspaceHolder(projects);
         ProjectTypeRegistry projectTypeRegistry = new ProjectTypeRegistry(new HashSet<>());
-        projectTypeRegistry.registerProjectType(new JavaProjectType(new JavaPropertiesValueProviderFactory()));
+        projectTypeRegistry.registerProjectType(new JavaProjectType(new JavaValueProviderFactory()));
         projectTypeRegistry.registerProjectType(new MavenProjectType(new MavenValueProviderFactory()));
 
         VirtualFileSystemProvider vfsProvider = new LocalVirtualFileSystemProvider(rootDirectory, null);
@@ -195,10 +195,27 @@ public class MavenProjectResolverTest {
 
         }
 
-        //        protected TestWorkspaceHolder(List<ProjectConfigDto> projects) throws ServerException {
-//            super(DtoFactory.newDto(WorkspaceDto.class).
-//                             withId("id").withConfig(DtoFactory.newDto(WorkspaceConfigDto.class).withName("name")
-//                            .withProjects(projects)));
-//        }
+
     }
+
+
+
+//
+//    protected static class TestWorkspaceHolder extends WorkspaceHolder {
+//
+//        protected TestWorkspaceHolder(List<ProjectConfigDto> projects) throws ServerException {
+//            super(DtoFactory.newDto(WorkspaceDto.class).
+//                    withId("id").withConfig(DtoFactory.newDto(WorkspaceConfigDto.class).withName("name")
+//                                                      .withProjects(projects)));
+//        }
+//
+////        @Override
+////        public void updateProjects(Collection<RegisteredProject> projects) throws ServerException {
+////            List<RegisteredProject> persistedProjects = projects.stream().filter(project -> !project.isDetected()).collect(toList());
+////            workspace.setProjects(persistedProjects);
+////        }
+//    }
 }
+
+
+

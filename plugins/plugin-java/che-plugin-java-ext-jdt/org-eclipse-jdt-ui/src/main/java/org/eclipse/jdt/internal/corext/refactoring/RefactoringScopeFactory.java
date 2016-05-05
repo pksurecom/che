@@ -35,7 +35,7 @@ import java.util.Set;
 public class RefactoringScopeFactory {
 
 	/*
-	 * Adds to <code> projects </code> IJavaProject objects for all projects directly or indirectly referencing focus. @param projects IJavaProjects will be added to this set
+	 * Adds to <code> getProjects </code> IJavaProject objects for all getProjects directly or indirectly referencing focus. @param getProjects IJavaProjects will be added to this set
 	 */
 	private static void addReferencingProjects(IJavaProject focus, Set<IJavaProject> projects) throws JavaModelException {
 		IProject[] referencingProjects= focus.getProject().getReferencingProjects();
@@ -175,7 +175,7 @@ public class RefactoringScopeFactory {
 	}
 
 	/**
-	 * Creates a new search scope with all projects possibly referenced
+	 * Creates a new search scope with all getProjects possibly referenced
 	 * from the given <code>javaElements</code>.
 	 *
 	 * @param javaElements the java elements
@@ -191,7 +191,7 @@ public class RefactoringScopeFactory {
 	}
 
 	/**
-	 * Creates a new search scope with all projects possibly referenced
+	 * Creates a new search scope with all getProjects possibly referenced
 	 * from the given <code>javaElements</code>.
 	 *
 	 * @param javaElements the java elements
@@ -208,7 +208,7 @@ public class RefactoringScopeFactory {
 	}
 
 	/**
-	 * Creates a new search scope containing all projects which reference or are referenced by the specified project.
+	 * Creates a new search scope containing all getProjects which reference or are referenced by the specified project.
 	 *
 	 * @param project the project
 	 * @param includeMask the include mask
@@ -221,8 +221,8 @@ public class RefactoringScopeFactory {
 	}
 
 	/*
-	 * @param projects a collection of IJavaProject
-	 * @return Array of IPackageFragmentRoot, one element for each packageFragmentRoot which lies within a project in <code> projects </code> .
+	 * @param getProjects a collection of IJavaProject
+	 * @return Array of IPackageFragmentRoot, one element for each packageFragmentRoot which lies within a project in <code> getProjects </code> .
 	 */
 	private static IPackageFragmentRoot[] getAllScopeElements(IJavaProject project, boolean onlySourceRoots) throws JavaModelException {
 		Collection<IJavaProject> referencingProjects= getReferencingProjects(project);

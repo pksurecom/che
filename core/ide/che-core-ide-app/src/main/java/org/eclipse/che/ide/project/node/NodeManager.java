@@ -249,7 +249,7 @@ public class NodeManager {
                     return Collections.emptyList();
                 }
 
-                //fill workspace projects with loaded actual configs, temporary solution that will be replaced after GA release
+                //fill workspace getProjects with loaded actual configs, temporary solution that will be replaced after GA release
                 appContext.getWorkspace().getConfig().withProjects(new ArrayList<>(projects));
 
                 final Iterable<ProjectConfigDto> rootProjects = filter(projects, new Predicate<ProjectConfigDto>() {

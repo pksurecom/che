@@ -75,8 +75,8 @@ public class ProjectUpdater {
                           @Override
                           public void apply(final ProjectConfigDto updated) throws OperationException {
 
-                              //dirty hack. here we have to load from server new list of projects, because after project configuring
-                              //they may appear, so we need to have actual projects configuration state, need to find better way to
+                              //dirty hack. here we have to load from server new list of getProjects, because after project configuring
+                              //they may appear, so we need to have actual getProjects configuration state, need to find better way to
                               //process it
                               projectService.getProjects(appContext.getDevMachine()).then(new Operation<List<ProjectConfigDto>>() {
                                   @Override

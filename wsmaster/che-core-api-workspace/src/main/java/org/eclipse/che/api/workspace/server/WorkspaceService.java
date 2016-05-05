@@ -25,6 +25,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.core.rest.annotations.GenerateLink;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
@@ -673,7 +674,7 @@ public class WorkspaceService extends Service {
                                                                       ForbiddenException {
         requiredNotNull(update, "Project config");
         final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
-        final List<ProjectConfigImpl> projects = workspace.getConfig().getProjects();
+        final List<ProjectConfig> projects = workspace.getConfig().getProjects();
         final String normalizedPath = path.startsWith("/") ? path : '/' + path;
         if (!projects.removeIf(project -> project.getPath().equals(normalizedPath))) {
             throw new NotFoundException(format("Workspace '%s' doesn't contain project with path '%s'",

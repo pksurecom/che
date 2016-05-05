@@ -47,7 +47,7 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
  * The workspace is provided by the Resources plug-in and is automatically
  * created when that plug-in is activated. The default workspace data area
  * (i.e., where its resources are stored) overlap exactly with the platform's
- * data area. That is, by default, the workspace's projects are found directly
+ * data area. That is, by default, the workspace's getProjects are found directly
  * in the platform's data area. Individual project locations can be specified
  * explicitly.
  * </p>
@@ -198,10 +198,10 @@ public interface IWorkspace extends IAdaptable {
 	public ISavedState addSaveParticipant(String pluginId, ISaveParticipant participant) throws CoreException;
 
 	/**
-	 * Builds all projects in this workspace. Projects are built in the order
+	 * Builds all getProjects in this workspace. Projects are built in the order
 	 * specified in this workspace's description. Projects not mentioned in the
 	 * order or for which the order cannot be determined are built in an
-	 * undefined order after all other projects have been built. If no order is
+	 * undefined order after all other getProjects have been built. If no order is
 	 * specified, the workspace computes an order determined by project
 	 * references.
 	 * <p>
@@ -313,27 +313,27 @@ public interface IWorkspace extends IAdaptable {
 	public void checkpoint(boolean build);
 
 	/**
-	 * Returns the prerequisite ordering of the given projects. The computation
-	 * is done by interpreting the projects' active build configuration references
+	 * Returns the prerequisite ordering of the given getProjects. The computation
+	 * is done by interpreting the getProjects' active build configuration references
 	 * as dependency relationships.
 	 * For example if A references B and C, and C references B, this method,
-	 * given the list A, B, C will return the order B, C, A. That is, projects
+	 * given the list A, B, C will return the order B, C, A. That is, getProjects
 	 * with no dependencies are listed first.
 	 * <p>
 	 * The return value is a two element array of project arrays. The first
-	 * project array is the list of projects which could be sorted (as outlined
+	 * project array is the list of getProjects which could be sorted (as outlined
 	 * above). The second element of the return value is an array of the
-	 * projects which are ambiguously ordered (e.g., they are part of a cycle).
+	 * getProjects which are ambiguously ordered (e.g., they are part of a cycle).
 	 * </p>
 	 * <p>
 	 * Cycles and ambiguities are handled by elimination. Projects involved in
 	 * cycles are simply cut out of the ordered list and returned in an
-	 * undefined order. Closed and non-existent projects are ignored and do not
+	 * undefined order. Closed and non-existent getProjects are ignored and do not
 	 * appear in the returned value at all.
 	 * </p>
 	 * 
-	 * @param projects the projects to order
-	 * @return the projects in sorted order and a list of projects which could
+	 * @param projects the getProjects to order
+	 * @return the getProjects in sorted order and a list of getProjects which could
 	 * not be ordered
 	 * @deprecated Replaced by <code>IWorkspace.computeProjectOrder</code>,
 	 * which produces a more usable result when there are cycles in project
@@ -359,7 +359,7 @@ public interface IWorkspace extends IAdaptable {
 		 * This class is not intended to be instantiated by clients.
 		 * </p>
 		 * 
-		 * @param projects initial value of <code>projects</code> field
+		 * @param projects initial value of <code>getProjects</code> field
 		 * @param hasCycles initial value of <code>hasCycles</code> field
 		 * @param knots initial value of <code>knots</code> field
 		 */
@@ -370,45 +370,45 @@ public interface IWorkspace extends IAdaptable {
 		}
 
 		/**
-		 * A list of projects ordered so as to honor the project reference, and
-		 * build configuration reference, relationships between these projects
+		 * A list of getProjects ordered so as to honor the project reference, and
+		 * build configuration reference, relationships between these getProjects
 		 * wherever possible.
-		 * The elements are a subset of the ones passed as the <code>projects</code>
+		 * The elements are a subset of the ones passed as the <code>getProjects</code>
 		 * parameter to <code>IWorkspace.computeProjectOrder</code>, where
-		 * inaccessible (closed or non-existent) projects have been omitted.
+		 * inaccessible (closed or non-existent) getProjects have been omitted.
 		 */
 		public IProject[] projects;
 		/**
-		 * Indicates whether any of the accessible projects in
-		 * <code>projects</code> are involved in non-trivial cycles.
+		 * Indicates whether any of the accessible getProjects in
+		 * <code>getProjects</code> are involved in non-trivial cycles.
 		 * <code>true</code> if the reference graph contains at least
-		 * one cycle involving two or more of the projects in
-		 * <code>projects</code>, and <code>false</code> if none of the
-		 * projects in <code>projects</code> are involved in cycles.
+		 * one cycle involving two or more of the getProjects in
+		 * <code>getProjects</code>, and <code>false</code> if none of the
+		 * getProjects in <code>getProjects</code> are involved in cycles.
 		 */
 		public boolean hasCycles;
 		/**
 		 * A list of knots in the project reference graph. This list is empty if
 		 * the project reference graph does not contain cycles. If the project
 		 * reference graph contains cycles, each element is a knot of two or
-		 * more accessible projects from <code>projects</code> that are
+		 * more accessible getProjects from <code>getProjects</code> that are
 		 * involved in a cycle of mutually dependent references.
 		 */
 		public IProject[][] knots;
 	}
 
 	/**
-	 * Computes a total ordering of the given projects based on both static and
+	 * Computes a total ordering of the given getProjects based on both static and
 	 * dynamic project references. If an existing and open project P references
 	 * another existing and open project Q also included in the list, then Q
 	 * should come before P in the resulting ordering. Closed and non-existent
-	 * projects are ignored, and will not appear in the result. References to
-	 * non-existent or closed projects are also ignored, as are any
+	 * getProjects are ignored, and will not appear in the result. References to
+	 * non-existent or closed getProjects are also ignored, as are any
 	 * self-references. The total ordering is always consistent with the global
-	 * total ordering of all open projects in the workspace.
+	 * total ordering of all open getProjects in the workspace.
 	 * <p>
 	 * When there are choices, the choice is made in a reasonably stable way.
-	 * For example, given an arbitrary choice between two projects, the one with
+	 * For example, given an arbitrary choice between two getProjects, the one with
 	 * the lower collating project name is usually selected.
 	 * </p>
 	 * <p>
@@ -427,7 +427,7 @@ public interface IWorkspace extends IAdaptable {
 	 * closing a project; adding or removing a project reference.
 	 * </p>
 	 * 
-	 * @param projects the projects to order
+	 * @param projects the getProjects to order
 	 * @return result describing the project order
 	 * @since 2.1
 	 */
@@ -488,7 +488,7 @@ public interface IWorkspace extends IAdaptable {
 	 * <li>The method fails if the resources are not all siblings.</li>
 	 * <li>The failure of an individual copy does not necessarily prevent the
 	 * method from attempting to copy other resources.</li>
-	 * <li>The method fails if there are projects among the resources.</li>
+	 * <li>The method fails if there are getProjects among the resources.</li>
 	 * <li>The method fails if the path of the resources is a prefix of the
 	 * destination path.</li>
 	 * <li>This method also fails if one or more of the individual resource
@@ -719,9 +719,9 @@ public interface IWorkspace extends IAdaptable {
 	 * Finds all dangling project references in this workspace. Projects which
 	 * are not open are ignored. Returns a map with one entry for each open
 	 * project in the workspace that has at least one dangling project
-	 * reference; the value of the entry is an array of projects which are
+	 * reference; the value of the entry is an array of getProjects which are
 	 * referenced by that project but do not exist in the workspace. Returns an
-	 * empty Map if there are no projects in the workspace.
+	 * empty Map if there are no getProjects in the workspace.
 	 * 
 	 * @return a map (key type: <code>IProject</code>, value type:
 	 * <code>IProject[]</code>) from project to dangling project references
@@ -897,7 +897,7 @@ public interface IWorkspace extends IAdaptable {
 	 * <li>This method also fails if one or more of the individual resource
 	 * moves fails; that is, if at least one of the resources in the list still
 	 * exists at the end of this method.</li>
-	 * <li>History is kept for moved files. When projects are moved, no history
+	 * <li>History is kept for moved files. When getProjects are moved, no history
 	 * is kept</li>
 	 * </ul>
 	 * </p>
@@ -969,7 +969,7 @@ public interface IWorkspace extends IAdaptable {
 	 * project.  The project need not exist.
 	 *<p>
 	 * This API can be used to create {@link IBuildConfiguration}s that will be used as references
-	 * to {@link IBuildConfiguration}s in other projects.  These references are set using
+	 * to {@link IBuildConfiguration}s in other getProjects.  These references are set using
 	 * {@link IProjectDescription#setBuildConfigReferences(String, IBuildConfiguration[])}
 	 * and may have a <code>null</code> configuration name which will resolve to the referenced
 	 * project's active configuration when the reference is used.
@@ -992,12 +992,12 @@ public interface IWorkspace extends IAdaptable {
 	/**
 	 * Creates and returns a new project description for a project with the
 	 * given name. This object is useful when creating, moving or copying
-	 * projects.
+	 * getProjects.
 	 * <p>
 	 * The project description is initialized to:
 	 * <ul>
 	 * <li>the given project name</li>
-	 * <li>no references to other projects</li>
+	 * <li>no references to other getProjects</li>
 	 * <li>an empty build spec</li>
 	 * <li>an empty comment</li>
 	 * </ul>
@@ -1147,7 +1147,7 @@ public interface IWorkspace extends IAdaptable {
 	 * The <code>full</code> parameter indicates whether a full save or a
 	 * snapshot is being requested. Snapshots save the workspace information
 	 * that is considered hard to be recomputed in the unlikely event of a
-	 * crash. It includes parts of the workspace tree, workspace and projects
+	 * crash. It includes parts of the workspace tree, workspace and getProjects
 	 * descriptions, markers and sync information. Full saves are heavy weight
 	 * operations which save the complete workspace state.
 	 * </p>
@@ -1500,7 +1500,7 @@ public interface IWorkspace extends IAdaptable {
 	 * <ul>
 	 * <li>must have a project as its immediate parent</li>
 	 * <li>project natures and the team hook may disallow linked resources on
-	 * projects they are associated with</li>
+	 * getProjects they are associated with</li>
 	 * <li>the global workspace preference to disable linking,
 	 * <code>ResourcesPlugin.PREF_DISABLE_LINKING</code> must not be set to
 	 * &quot;true&quot;</li>.
@@ -1544,7 +1544,7 @@ public interface IWorkspace extends IAdaptable {
 	 * <ul>
 	 * <li>must have a project as its immediate parent</li>
 	 * <li>project natures and the team hook may disallow linked resources on
-	 * projects they are associated with</li>
+	 * getProjects they are associated with</li>
 	 * <li>the global workspace preference to disable linking,
 	 * <code>ResourcesPlugin.PREF_DISABLE_LINKING</code> must not be set to
 	 * &quot;true&quot;</li>.

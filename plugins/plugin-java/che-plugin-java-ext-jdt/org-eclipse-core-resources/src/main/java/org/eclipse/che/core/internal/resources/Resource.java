@@ -445,7 +445,7 @@ public abstract class Resource implements IResource, IPathRequestor, ICoreConsta
             return (IProject)this;
         }
         final IProject[] projects = workspace.getRoot().getProjects();
-        //here we try to found project by path of resources. We will get all projects and select longest path of project that
+        //here we try to found project by path of resources. We will get all getProjects and select longest path of project that
         //start with path of resource.
         final Optional<IProject> max = Arrays.stream(projects)
                                              .filter(iProject -> path.toOSString().startsWith(iProject.getFullPath().toOSString()))

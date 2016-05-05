@@ -435,7 +435,7 @@ public class BreakpointManagerImpl implements BreakpointManager,
                     return;
                 }
 
-                // remove breakpoints which refer to un-existed projects
+                // remove breakpoints which refer to un-existed getProjects
                 List<Node> projects = event.getNodes();
                 Set<String> pathsToDelete = new HashSet<>(breakpoints.keySet());
 

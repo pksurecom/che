@@ -42,7 +42,7 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class CurrentProjectPathProviderTest {
 
-    private static final String PROJECTS_ROOT = "/projects";
+    private static final String PROJECTS_ROOT = "/getProjects";
     private static final String PROJECT_PATH  = "/my_project";
 
     @Mock

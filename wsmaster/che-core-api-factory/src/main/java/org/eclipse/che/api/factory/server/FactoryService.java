@@ -33,7 +33,6 @@ import org.eclipse.che.api.factory.shared.dto.Author;
 import org.eclipse.che.api.factory.shared.dto.Factory;
 import org.eclipse.che.api.user.server.dao.UserDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -597,7 +596,7 @@ public class FactoryService extends Service {
     private void excludeProjectsWithoutLocation(WorkspaceImpl usersWorkspace, String projectPath) throws BadRequestException {
         final boolean notEmptyPath = projectPath != null;
         //Condition for sifting valid project in user's workspace
-        Predicate<ProjectConfigImpl> predicate = projectConfig -> {
+        Predicate<ProjectConfig> predicate = projectConfig -> {
             // if project is a subproject (it's path contains another project) , then location can be null
             final boolean isSubProject = projectConfig.getPath().indexOf('/', 1) != -1;
             final boolean hasNotEmptySource = projectConfig.getSource() != null
@@ -609,7 +608,7 @@ public class FactoryService extends Service {
         };
 
         //Filtered out projects by path and source storage presence.
-        final List<ProjectConfigImpl> filtered = usersWorkspace.getConfig()
+        final List<ProjectConfig> filtered = usersWorkspace.getConfig()
                                                                .getProjects()
                                                                .stream()
                                                                .filter(predicate)
