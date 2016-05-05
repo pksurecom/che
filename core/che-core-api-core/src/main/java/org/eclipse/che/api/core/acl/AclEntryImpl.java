@@ -24,7 +24,7 @@ public class AclEntryImpl implements AclEntry {
     private final List<String> actions;
 
     public AclEntryImpl(String user, List<String> actions) {
-        checkArgument(actions != null && actions.isEmpty(), "Required at least one action");
+        checkArgument(actions != null && !actions.isEmpty(), "Required at least one action");
         this.user = user;
         this.actions = new ArrayList<>(actions);
     }
