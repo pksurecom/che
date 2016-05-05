@@ -16,7 +16,7 @@
     <parent>
         <artifactId>che-plugin-git-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>4.2.0-RC1-SNAPSHOT</version>
+        <version>4.3.0-RC1-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-git-ext-git</artifactId>
     <packaging>jar</packaging>
@@ -55,7 +55,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-git</artifactId>
+            <artifactId>che-core-api-git-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -63,7 +63,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace</artifactId>
+            <artifactId>che-core-api-workspace-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>

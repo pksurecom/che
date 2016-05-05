@@ -13,7 +13,6 @@ package org.eclipse.che.api.project.server;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.model.project.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.handlers.ProjectHandlerRegistry;
@@ -21,6 +20,8 @@ import org.eclipse.che.api.project.server.importer.ProjectImporterRegistry;
 import org.eclipse.che.api.project.server.type.AttributeValue;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ProjectTypeRegistry;
+import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
+import org.eclipse.che.api.project.server.type.SettableValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.api.project.server.type.ValueStorageException;
@@ -29,12 +30,17 @@ import org.eclipse.che.api.vfs.impl.file.FileTreeWatcher;
 import org.eclipse.che.api.vfs.impl.file.FileWatcherNotificationHandler;
 import org.eclipse.che.api.vfs.impl.file.LocalVirtualFileSystemProvider;
 import org.eclipse.che.api.vfs.search.impl.FSLuceneSearcherProvider;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.lang.IoUtil;
+import org.eclipse.che.dto.server.DtoFactory;
 
 import java.io.File;
 import java.nio.file.PathMatcher;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -113,82 +119,50 @@ public class WsAgentTestBase {
         fileTreeWatcher = new FileTreeWatcher(root, new HashSet<>(), fileWatcherNotificationHandler);
 
         pm = new ProjectManager(vfsProvider, eventService, projectTypeRegistry, projectRegistry, projectHandlerRegistry,
-                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher, workspaceHolder);
+                                importerRegistry, fileWatcherNotificationHandler, fileTreeWatcher);
         pm.initWatcher();
     }
 
 
-    protected static class TestWorkspaceHolder extends WorkspaceProjectsSyncer {
+    protected static class TestWorkspaceHolder extends WorkspaceHolder {
 
-        private HashMap<String, ProjectConfig> projects = new HashMap<>();
+        //ArrayList <RegisteredProject> updatedProjects = new ArrayList<>();
 
         protected TestWorkspaceHolder() throws ServerException {
-//            super(DtoFactory.newDto(WorkspaceDto.class).withId("id")
-//                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
-//                                                  .withName("name")));
+            super(DtoFactory.newDto(WorkspaceDto.class).withId("id")
+                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
+                                                  .withName("name")));
         }
 
 
-        protected TestWorkspaceHolder(List<ProjectConfig> projects) throws ServerException {
-            for(ProjectConfig p : projects) {
-                this.projects.put(p.getPath(), p);
+        protected TestWorkspaceHolder(List<ProjectConfigDto> projects) throws ServerException {
+            super(DtoFactory.newDto(WorkspaceDto.class)
+                            .withId("id")
+                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
+                                                  .withName("name")
+                                                  .withProjects(projects)));
+        }
+
+        @Override
+        void addProject(RegisteredProject project) throws ServerException {
+            if (!project.isDetected()) {
+                workspace.addProject(project);
             }
-
-//            super(DtoFactory.newDto(WorkspaceDto.class)
-//                            .withId("id")
-//                            .withConfig(DtoFactory.newDto(WorkspaceConfigDto.class)
-//                                                  .withName("name")
-//                                                  .withProjects(projects)));
         }
 
         @Override
-        public List<? extends ProjectConfig> getProjects() {
-            return new ArrayList(projects.values());
+        public void updateProject(RegisteredProject project) throws ServerException {
+            if (!project.isDetected()) {
+                workspace.updateProject(project);
+            }
         }
 
         @Override
-        public String getWorkspaceId() {
-            return "id";
+        void removeProjects(Collection<RegisteredProject> projects) throws ServerException {
+            projects.stream()
+                    .filter(project -> !project.isDetected())
+                    .forEach(workspace::removeProject);
         }
-
-        @Override
-        protected void addProject(ProjectConfig project) throws ServerException {
-
-            projects.put(project.getPath(), project);
-
-        }
-
-        @Override
-        protected void updateProject(ProjectConfig project) throws ServerException {
-            projects.put(project.getPath(), project);
-        }
-
-        @Override
-        protected void removeProject(ProjectConfig project) throws ServerException {
-
-            projects.remove(project.getPath());
-        }
-
-//        @Override
-//        void addProject(RegisteredProject project) throws ServerException {
-//            if (!project.isDetected()) {
-//                workspace.addProject(project);
-//            }
-//        }
-//
-//        @Override
-//        public void updateProject(RegisteredProject project) throws ServerException {
-//            if (!project.isDetected()) {
-//                workspace.updateProject(project);
-//            }
-//        }
-//
-//        @Override
-//        void removeProjects(Collection<RegisteredProject> getProjects) throws ServerException {
-//            getProjects.stream()
-//                    .filter(project -> !project.isDetected())
-//                    .forEach(workspace::removeProject);
-//        }
     }
 
     protected static class PT1 extends ProjectTypeDef {
@@ -247,7 +221,7 @@ public class WsAgentTestBase {
             @Override
             public ValueProvider newInstance(final FolderEntry projectFolder) {
 
-                return new ValueProvider() {
+                return new ReadonlyValueProvider() {
 
                     @Override
                     public List<String> getValues(String attributeName) throws ValueStorageException {
@@ -303,7 +277,7 @@ public class WsAgentTestBase {
             @Override
             public ValueProvider newInstance(final FolderEntry projectFolder) {
 
-                return new ValueProvider() {
+                return new ReadonlyValueProvider() {
 
                     @Override
                     public List<String> getValues(String attributeName) throws ValueStorageException {
@@ -328,5 +302,42 @@ public class WsAgentTestBase {
         }
 
     }
+
+
+    protected static class PTsettableVP extends ProjectTypeDef {
+
+        public PTsettableVP() {
+            super("settableVPPT", "settableVPPT", true, false);
+            addVariableDefinition("my", "my", false, new MySettableVPFactory());
+        }
+
+
+        private static class MySettableVPFactory implements ValueProviderFactory {
+
+            public static String value = "notset";
+
+
+            @Override
+            public ValueProvider newInstance(FolderEntry projectFolder) {
+                return new MySettableValueProvider();
+            }
+
+            public static class MySettableValueProvider extends SettableValueProvider {
+
+                @Override
+                public List<String> getValues(String attributeName) throws ValueStorageException {
+                    return Arrays.asList(value);
+                }
+
+                @Override
+                public void setValues(String attributeName, List<String> values) throws ValueStorageException {
+                    value = values.get(0);
+                }
+            }
+        }
+    }
+
+
+
 
 }

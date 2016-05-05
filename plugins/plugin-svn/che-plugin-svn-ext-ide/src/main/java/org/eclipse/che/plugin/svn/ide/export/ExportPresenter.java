@@ -13,7 +13,6 @@ package org.eclipse.che.plugin.svn.ide.export;
 import com.google.gwt.user.client.Window;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -34,6 +33,7 @@ import java.util.List;
 
 import static com.google.common.base.Strings.emptyToNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
@@ -96,7 +96,7 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
         final String projectPath = getCurrentProjectPath();
 
         if (projectPath == null) {
-            notificationManager.notify(constants.exportFailedNoProjectPath(), FAIL, true);
+            notificationManager.notify(constants.exportFailedNoProjectPath(), FAIL, FLOAT_MODE);
             return;
         }
 
@@ -104,7 +104,7 @@ public class ExportPresenter extends SubversionActionPresenter implements Export
         final String exportPath = (nullableExportPath != null ? nullableExportPath : ".");
         final String givenRevision = view.isRevisionSpecified() ? view.getRevision() : null;
 
-        final StatusNotification notification = new StatusNotification(constants.exportStarted(exportPath), PROGRESS, true);
+        final StatusNotification notification = new StatusNotification(constants.exportStarted(exportPath), PROGRESS, FLOAT_MODE);
         notificationManager.notify(notification);
 
         view.onClose();

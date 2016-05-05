@@ -16,6 +16,7 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
+
 import org.eclipse.che.api.machine.gwt.client.MachineServiceClient;
 import org.eclipse.che.api.machine.gwt.client.RecipeServiceClient;
 import org.eclipse.che.api.machine.shared.dto.LimitsDto;
@@ -41,8 +42,9 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 import org.eclipse.che.ide.ui.dialogs.CancelCallback;
 import org.eclipse.che.ide.ui.dialogs.ConfirmCallback;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
-import org.eclipse.che.ide.util.StringUtils;
 import org.eclipse.che.ide.util.loging.Log;
+import org.eclipse.che.ide.websocket.MessageBusProvider;
+import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,8 +52,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.eclipse.che.api.core.model.machine.MachineStatus.RUNNING;
-import org.eclipse.che.ide.websocket.MessageBusProvider;
-import org.eclipse.che.ide.websocket.rest.SubscriptionHandler;
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.PROGRESS;
+import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 
 /**
  * Targets manager presenter.
@@ -340,35 +344,75 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
             return;
         }
 
+        // Update text of Connect / Disconnect button
         if (selectedTarget.isConnected()) {
             view.setConnectButtonText("Disconnect");
         } else {
             view.setConnectButtonText("Connect");
         }
-        view.enableConnectButton(!selectedTarget.isDirty());
 
-        view.enableCancelButton(selectedTarget.isDirty());
-
-        if (StringUtils.isNullOrEmpty(view.getTargetName()) ||
-                StringUtils.isNullOrEmpty(view.getHost()) ||
-                StringUtils.isNullOrEmpty(view.getPort())) {
+        // Disable Save and Cancel buttons and enable Connect for non dirty target.
+        if (!selectedTarget.isDirty()) {
+            view.enableConnectButton(true);
+            view.enableCancelButton(false);
             view.enableSaveButton(false);
-        } else {
-            if (selectedTarget.isDirty()) {
-                for (Target target : targets) {
-                    if (target == selectedTarget) {
-                        continue;
-                    }
 
-                    if (target.getName().equals(view.getTargetName())) {
-                        view.enableSaveButton(false);
-                        return;
-                    }
+            view.unmarkTargetName();
+            view.unmarkHost();
+            view.unmarkPort();
+            return;
+        }
+
+        view.enableConnectButton(false);
+        view.enableCancelButton(true);
+
+        // target name must be not empty
+        if (view.getTargetName().isEmpty()) {
+            view.markTargetNameInvalid();
+            view.enableSaveButton(false);
+            return;
+        }
+
+        boolean enableSave = true;
+
+        // check target name to being not empty
+        if (view.getTargetName().isEmpty()) {
+            enableSave = false;
+            view.markTargetNameInvalid();
+        } else {
+            boolean targetAlreadyExists = false;
+            for (Target target : targets) {
+                if (target != selectedTarget && target.getName().equals(view.getTargetName())) {
+                    targetAlreadyExists = true;
+                    break;
                 }
             }
 
-            view.enableSaveButton(selectedTarget.isDirty());
+            if (targetAlreadyExists) {
+                enableSave = false;
+                view.markTargetNameInvalid();
+            } else {
+                view.unmarkTargetName();
+            }
         }
+
+        // check host to being not empty
+        if (view.getHost().isEmpty()) {
+            enableSave = false;
+            view.markHostInvalid();
+        } else {
+            view.unmarkHost();
+        }
+
+        // check port to being not empty
+        if (view.getPort().isEmpty()) {
+            enableSave = false;
+            view.markPortInvalid();
+        } else {
+            view.unmarkPort();
+        }
+
+        view.enableSaveButton(enableSave);
     }
 
     @Override
@@ -465,7 +509,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         view.showTargets(targets);
         view.selectTarget(selectedTarget);
 
-        notificationManager.notify(machineLocale.targetsViewSaveSuccess(), StatusNotification.Status.SUCCESS, true);
+        notificationManager.notify(machineLocale.targetsViewSaveSuccess(), SUCCESS, FLOAT_MODE);
     }
 
     @Override
@@ -508,7 +552,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
 
         view.setConnectButtonText(null);
 
-        connectNotification = notificationManager.notify(machineLocale.targetsViewConnectProgress(selectedTarget.getName()), StatusNotification.Status.PROGRESS, true);
+        connectNotification = notificationManager.notify(machineLocale.targetsViewConnectProgress(selectedTarget.getName()), PROGRESS, FLOAT_MODE);
 
         String recipeURL = selectedTarget.getRecipe().getLink("get recipe script").getHref();
 
@@ -570,13 +614,13 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
             @Override
             public void apply(Void arg) throws OperationException {
                 eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.DESTROYED));
-                notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(selectedTarget.getName()), StatusNotification.Status.SUCCESS, true);
+                notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(selectedTarget.getName()), SUCCESS, FLOAT_MODE);
                 updateTargets(selectedTarget.getName());
             }
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(machineLocale.targetsViewDisconnectError(selectedTarget.getName()), StatusNotification.Status.FAIL, true);
+                notificationManager.notify(machineLocale.targetsViewDisconnectError(selectedTarget.getName()), FAIL, FLOAT_MODE);
                 updateTargets(selectedTarget.getName());
             }
         });
@@ -611,7 +655,8 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         machineService.destroyMachine(machine.getId()).then(new Operation<Void>() {
             @Override
             public void apply(Void arg) throws OperationException {
-                notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(target.getName()), StatusNotification.Status.SUCCESS, true);
+                eventBus.fireEvent(new MachineStateEvent(machine, MachineStateEvent.MachineAction.DESTROYED));
+                notificationManager.notify(machineLocale.targetsViewDisconnectSuccess(target.getName()), SUCCESS, FLOAT_MODE);
                 new Timer() {
                     @Override
                     public void run() {
@@ -622,7 +667,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
         }).catchError(new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(machineLocale.targetsViewDisconnectError(target.getName()), StatusNotification.Status.FAIL, true);
+                notificationManager.notify(machineLocale.targetsViewDisconnectError(target.getName()), FAIL, FLOAT_MODE);
                 updateTargets(target.getName());
             }
         });
@@ -645,7 +690,7 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
                 view.selectTarget(null);
                 view.showHintPanel();
 
-                notificationManager.notify(machineLocale.targetsViewDeleteSuccess(target.getName()), StatusNotification.Status.SUCCESS, true);
+                notificationManager.notify(machineLocale.targetsViewDeleteSuccess(target.getName()), SUCCESS, FLOAT_MODE);
             }
         });
 
@@ -700,24 +745,32 @@ public class TargetsPresenter implements TargetsView.ActionDelegate {
      * Ensures machine is started.
      */
     private void onConnected(final String machineId) {
-        machineService.getMachine(machineId).then(new Operation<MachineDto>() {
+        // There is a little bug in machine service on the server side.
+        // The machine info is updated with a little delay after running a machine.
+        // Using timer must fix the problem.
+        new Timer() {
             @Override
-            public void apply(MachineDto machineDto) throws OperationException {
-                if (machineDto.getStatus() == RUNNING) {
-                    eventBus.fireEvent(new MachineStateEvent(machineDto, MachineStateEvent.MachineAction.RUNNING));
-                    connectNotification.setTitle(machineLocale.targetsViewConnectSuccess(machineDto.getConfig().getName()));
-                    connectNotification.setStatus(StatusNotification.Status.SUCCESS);
-                    updateTargets(machineDto.getConfig().getName());
-                } else {
-                    onConnectingFailed(null);
-                }
+            public void run() {
+                machineService.getMachine(machineId).then(new Operation<MachineDto>() {
+                    @Override
+                    public void apply(MachineDto machineDto) throws OperationException {
+                        if (machineDto.getStatus() == RUNNING) {
+                            eventBus.fireEvent(new MachineStateEvent(machineDto, MachineStateEvent.MachineAction.RUNNING));
+                            connectNotification.setTitle(machineLocale.targetsViewConnectSuccess(machineDto.getConfig().getName()));
+                            connectNotification.setStatus(StatusNotification.Status.SUCCESS);
+                            updateTargets(machineDto.getConfig().getName());
+                        } else {
+                            onConnectingFailed(null);
+                        }
+                    }
+                }).catchError(new Operation<PromiseError>() {
+                    @Override
+                    public void apply(PromiseError arg) throws OperationException {
+                        onConnectingFailed(null);
+                    }
+                });
             }
-        }).catchError(new Operation<PromiseError>() {
-            @Override
-            public void apply(PromiseError arg) throws OperationException {
-                onConnectingFailed(null);
-            }
-        });
+        }.schedule(500);
     }
 
     /**

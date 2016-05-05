@@ -17,31 +17,13 @@
        ng-href="#/projects"
        ng-click="createProjectCtrl.hideCreateProjectPanel()"></a>
   </div>
+  <che-button-primary class="create-project-header-button"
+                      che-button-title="{{createProjectCtrl.getCreateButtonTitle()}}"
+                      ng-click="!createProjectCtrl.checkValidFormState() || createProjectCtrl.create()"
+                      ng-disabled="!createProjectCtrl.checkValidFormState() || !createProjectCtrl.isReadyToCreate()"
+                      ng-show="!createProjectCtrl.isCreateProjectInProgress() || createProjectCtrl.getCurrentProgressStep() === (createProjectCtrl.getCreationSteps().length - 1)"
+  ></che-button-primary>
 </che-toolbar>
-
-<div ng-hide="createProjectCtrl.isCreateProjectInProgress()" id="create-project-header-steps" flex class="create-project-header-steps">
-  <div class="create-project-header-steps-panel" layout="row" layout-wrap layout-align="center center">
-    <div layout="row" layout-wrap>
-      <div ng-repeat="step in createProjectCtrl.headerSteps" layout="row" layout-align="center center">
-        <div class="create-project-header-steps-step"
-             ng-class="{'create-project-header-steps-step-active' : (createProjectCtrl.isElementVisible($index))}" layout="row"
-             layout-align="center center">
-          <div class="create-project-header-steps-step-title">{{step.name}}</div>
-        </div>
-        <div class="create-project-header-steps-link"
-             ng-class="{'create-project-header-steps-link-active' : (createProjectCtrl.isElementVisible($index + 1))}" ng-hide="$last">
-
-        </div>
-      </div>
-    </div>
-    <div flex class="create-project-header-steps-button" layout="row" layout-align="end end">
-      <che-button-primary che-button-title="Create"
-                          ng-click="!createProjectCtrl.checkValidFormState() || createProjectCtrl.create()"
-                          ng-disabled="!createProjectCtrl.checkValidFormState() || !createProjectCtrl.isReadyToCreate()"
-        ></che-button-primary>
-    </div>
-  </div>
-</div>
 
 <md-progress-linear md-mode="indeterminate" class="projects-list-projects-progress"
                     ng-hide="createProjectCtrl.stacksInitialized || createProjectCtrl.workspaces.length"></md-progress-linear>
@@ -66,24 +48,9 @@
           <div layout="column"
                layout-align="center center"
                flex="auto">
-            <div class="create-project-working-log">
-              <che-accordion ng-repeat="step in createProjectCtrl.getCreationSteps()"
-                             ng-hide="$index === createProjectCtrl.getCreationSteps().length-1"
-                             che-open-condition="($index === createProjectCtrl.getCurrentProgressStep())"
-                             che-close-condition="(0 === createProjectCtrl.getCurrentProgressStep())"
-                             ng-class="{'che-accordion-active': ($index === createProjectCtrl.getCurrentProgressStep()),
-                                        'che-accordion-error': createProjectCtrl.getCreationSteps()[$index].hasError}">
-                <div class="che-accordion-title">
-                  <span>{{createProjectCtrl.getCreationSteps()[$index].text}}{{$index < createProjectCtrl.getCurrentProgressStep() ? ' ... completed' : ''}}</span>
-                </div>
-                <div class="che-accordion-body" ng-show="createProjectCtrl.getCreationSteps()[$index].logs.length > 0">
-                  <che-logs-output che-title="{{createProjectCtrl.getCreationSteps()[$index].inProgressText}}"
-                                   che-text="createProjectCtrl.getCreationSteps()[$index].logs"
-                                   che-scrollback="100"
-                                   che-refresh-time="500"></che-logs-output>
-                </div>
-              </che-accordion>
-            </div>
+            <che-steps-container class="create-project-working-log"
+                                 che-all-steps="createProjectCtrl.getCreationSteps()"
+                                 che-current-step="createProjectCtrl.getCurrentProgressStep()"></che-steps-container>
           </div>
         </div>
         <!--bottom bar-->
@@ -154,6 +121,7 @@
                                        che-form="createProjectGitHubForm"
                                        che-repository-model="createProjectCtrl.selectedGitHubRepository"
                                        che-repository-select="createProjectCtrl.selectGitHubRepository(createProjectCtrl.selectedGitHubRepository)"
+                                       che-is-current-tab="createProjectCtrl.getCurrentTab() === 'github'"
                                        layout="column"></create-project-github>
               </form>
 
@@ -201,6 +169,7 @@
                      che-place-holder="Name of the workspace"
                      ng-model="createProjectCtrl.workspaceName"
                      required
+                     unique-workspace-name="createProjectCtrl.workspaceName"
                      ng-minlength="3"
                      ng-maxlength="20"
                      ng-pattern="/^[A-Za-z0-9_\-\.]+$/">
@@ -210,6 +179,7 @@
             </div>
             <div ng-message="minlength">The name has to be more then 3 characters long.</div>
             <div ng-message="maxlength">The name has to be less than 20 characters long.</div>
+            <div ng-message="uniqueWorkspaceName">This workspace name is already used.</div>
           </che-input>
         </che-label-container>
         <che-workspace-ram-allocation-slider ng-model="createProjectCtrl.workspaceRam"></che-workspace-ram-allocation-slider>
@@ -263,7 +233,7 @@
     </ng-form>
 
     <che-button-primary id="create-project-button-import"
-                        che-button-title="Create Project"
+                        che-button-title="{{createProjectCtrl.getCreateButtonTitle()}}"
                         ng-click="!createProjectCtrl.checkValidFormState() || createProjectCtrl.create()"
                         ng-disabled="!createProjectCtrl.checkValidFormState() || !createProjectCtrl.isReadyToCreate()"
                         class="projects-create-project-button"

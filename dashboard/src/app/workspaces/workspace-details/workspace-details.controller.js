@@ -52,6 +52,8 @@ export class WorkspaceDetailsCtrl {
 
     // show link 'Show more' if true
     this.showShowMore = false;
+
+    this.cheWorkspace.fetchWorkspaces();
   }
 
   //Update the workspace data to be displayed.
@@ -105,15 +107,14 @@ export class WorkspaceDetailsCtrl {
       .clickOutsideToClose(true)
       .targetEvent(event);
     this.$mdDialog.show(confirm).then(() => {
-      let stoppedStatusPromise = this.cheWorkspace.fetchStatusChange(this.workspaceId, 'STOPPED');
-
-      if (this.workspaceDetails.status === 'RUNNING') {
-        this.cheWorkspace.stopWorkspace(this.workspaceId);
-      }
-
-      stoppedStatusPromise.then(() => {
+      if (this.workspaceDetails.status === 'STOPPED' || this.workspaceDetails.status === 'ERROR') {
         this.removeWorkspace();
-      });
+      } else if (this.workspaceDetails.status === 'RUNNING') {
+        this.cheWorkspace.stopWorkspace(this.workspaceId);
+        this.cheWorkspace.fetchStatusChange(this.workspaceId, 'STOPPED').then(() => {
+          this.removeWorkspace();
+        });
+      }
     });
   }
 
@@ -132,20 +133,38 @@ export class WorkspaceDetailsCtrl {
 
   runWorkspace() {
     this.showShowMore = true;
+    delete this.errorMessage;
 
     this.ideSvc.init();
-    this.ideSvc.setSelectedWorkspace(this.workspaceDetails);
     this.$rootScope.loadingIDE = false;
-    let promise = this.ideSvc.startIde(true);
+    let promise = this.ideSvc.startIde(this.workspaceDetails, true);
     promise.then(() => {
       this.showShowMore = false;
     }, (error) => {
-      let errorMessage = 'Unable to start this workspace. ';
-      if (error.data && error.data.message !== null) {
-        errorMessage += error.data.message;
-      }
+        let errorMessage;
+
+        if (!error || !(error.data || error.error)) {
+          errorMessage = 'Unable to start this workspace.';
+        } else if (error.error) {
+            errorMessage = error.error;
+        } else if (error.data.errorCode === 10000 && error.data.attributes) {
+            let attributes = error.data.attributes;
+
+            errorMessage = 'Unable to start this workspace.' +
+            ' There are ' + attributes.workspaces_count + ' running workspaces consuming ' +
+            attributes.used_ram + attributes.ram_unit + ' RAM.' +
+            ' Your current RAM limit is ' + attributes.limit_ram + attributes.ram_unit +
+            '. This workspace requires an additional ' +
+            attributes.required_ram + attributes.ram_unit + '.' +
+            '  You can stop other workspaces to free resources.';
+        } else {
+            errorMessage = error.data.message;
+        }
+
       this.cheNotification.showError(errorMessage);
       this.$log.error(error);
+
+      this.errorMessage = errorMessage;
     });
   }
 

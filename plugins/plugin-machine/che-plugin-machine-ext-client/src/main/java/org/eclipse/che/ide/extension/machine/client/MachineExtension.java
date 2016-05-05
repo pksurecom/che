@@ -22,6 +22,7 @@ import org.eclipse.che.ide.actions.StopWorkspaceAction;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.api.icon.Icon;
@@ -81,6 +82,7 @@ public class MachineExtension {
     public MachineExtension(MachineResources machineResources,
                             final EventBus eventBus,
                             final WorkspaceAgent workspaceAgent,
+                            final AppContext   appContext,
                             final ConsolesPanelPresenter consolesPanelPresenter,
                             final Provider<ServerPortProvider> machinePortProvider,
                             final OutputsContainerPresenter outputsContainerPresenter,
@@ -94,11 +96,12 @@ public class MachineExtension {
             public void onWsAgentStarted(WsAgentStateEvent event) {
                 machinePortProvider.get();
                 perspectiveManager.setPerspectiveId(PROJECT_PERSPECTIVE_ID);
-
                 workspaceAgent.openPart(outputsContainerPresenter, PartStackType.INFORMATION);
                 workspaceAgent.openPart(consolesPanelPresenter, PartStackType.INFORMATION);
 
-                consolesPanelPresenter.newTerminal();
+                if (appContext.getFactory() == null) {
+                    consolesPanelPresenter.newTerminal();
+                }
             }
 
             @Override
@@ -192,15 +195,10 @@ public class MachineExtension {
         actionManager.registerAction(GROUP_COMMANDS_LIST, commandList);
         commandList.add(editCommandsAction, FIRST);
 
-        final DefaultActionGroup runContextGroup = (DefaultActionGroup)actionManager.getAction(IdeActions.GROUP_RUN_CONTEXT_MENU);
-        runContextGroup.add(machinesList);
-        runContextGroup.add(commandList);
-        runContextGroup.addSeparator();
-
         // Define hot-keys
         keyBinding.getGlobal().addKey(new KeyBuilder().alt().charCode(KeyCodeMap.F12).build(), "newTerminal");
 
-        iconRegistry.registerIcon(new Icon("che.runtime.icon", machineResources.devMachine()));
+        iconRegistry.registerIcon(new Icon("che.machine.icon", machineResources.devMachine()));
     }
 
     @Inject

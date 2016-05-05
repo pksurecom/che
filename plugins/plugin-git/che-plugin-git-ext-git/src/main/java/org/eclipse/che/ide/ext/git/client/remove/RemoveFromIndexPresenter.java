@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 
 import org.eclipse.che.api.git.gwt.client.GitServiceClient;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.app.CurrentProject;
 import org.eclipse.che.ide.api.editor.EditorAgent;
@@ -35,15 +36,14 @@ import org.eclipse.che.ide.project.node.FolderReferenceNode;
 import org.eclipse.che.ide.project.node.ResourceBasedNode;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.rest.AsyncRequestCallback;
+import org.eclipse.che.ide.upload.BasicUploadPresenter;
 
 import javax.validation.constraints.NotNull;
-
-import org.eclipse.che.commons.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 
 /**
@@ -51,7 +51,7 @@ import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAI
  *
  * @author Ann Zhuleva
  */
-public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDelegate {
+public class RemoveFromIndexPresenter extends BasicUploadPresenter implements RemoveFromIndexView.ActionDelegate {
     public static final String REMOVE_FROM_INDEX_COMMAND_NAME = "Git remove from index";
 
     private final RemoveFromIndexView      view;
@@ -89,6 +89,7 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
                                     ProjectExplorerPresenter projectExplorer,
                                     GitOutputConsoleFactory gitOutputConsoleFactory,
                                     ConsolesPanelPresenter consolesPanelPresenter) {
+        super(projectExplorer);
         this.view = view;
         this.eventBus = eventBus;
         this.projectExplorer = projectExplorer;
@@ -186,31 +187,6 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
         view.close();
     }
 
-    @Nullable
-    protected ResourceBasedNode<?> getResourceBasedNode() {
-        List<?> selection = projectExplorer.getSelection().getAllElements();
-        //we should be sure that user selected single element to work with it
-        if (selection != null && !selection.isEmpty()) {
-
-            Object o = selection.get(0);
-
-            if (o instanceof ResourceBasedNode<?>) {
-                ResourceBasedNode<?> node = (ResourceBasedNode<?>)o;
-                //it may be file node, so we should take parent node
-                if (node.isLeaf() && isResourceAndStorableNode(node.getParent())) {
-                    return (ResourceBasedNode<?>)node.getParent();
-                }
-
-                return isResourceAndStorableNode(node) ? node : null;
-            }
-        }
-        return null;
-    }
-
-    protected boolean isResourceAndStorableNode(@Nullable Node node) {
-        return node != null && node instanceof ResourceBasedNode<?> && node instanceof HasStorablePath;
-    }
-
     /**
      * Returns pattern of the items to be removed.
      *
@@ -243,7 +219,7 @@ public class RemoveFromIndexPresenter implements RemoveFromIndexView.ActionDeleg
         String errorMessage = (e.getMessage() != null && !e.getMessage().isEmpty()) ? e.getMessage() : constant.removeFilesFailed();
         console.printError(errorMessage);
         consolesPanelPresenter.addCommandOutput(appContext.getDevMachine().getId(), console);
-        notificationManager.notify(constant.removeFilesFailed(), FAIL, true, project.getRootProject());
+        notificationManager.notify(constant.removeFilesFailed(), FAIL, FLOAT_MODE, project.getRootProject());
     }
 
     /** {@inheritDoc} */
