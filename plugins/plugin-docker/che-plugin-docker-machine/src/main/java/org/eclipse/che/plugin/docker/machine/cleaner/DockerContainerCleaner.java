@@ -96,7 +96,7 @@ public class DockerContainerCleaner implements Runnable {
         try {
             if (containerStatus.startsWith("Up")) {
                 dockerConnector.killContainer(containerId);
-                LOG.warn("Container with 'id': '{}' and 'name': '{}' was killed ", containerId, containerName);
+                LOG.warn("Unused container with 'id': '{}' and 'name': '{}' was killed ", containerId, containerName);
             }
         } catch (IOException e) {
             LOG.error(format("Failed to kill unused container with 'id': '%s' and 'name': '%s'", containerId, containerName), e);
@@ -105,9 +105,8 @@ public class DockerContainerCleaner implements Runnable {
 
     private void removeContainer(String containerId, String containerName) {
         try {
-            //remove force with volumes
             dockerConnector.removeContainer(from(containerId).withForce(true).withRemoveVolumes(true));
-            LOG.warn("Container with 'id': '{}' and 'name': '{}' was removed", containerId, containerName);
+            LOG.warn("Unused container with 'id': '{}' and 'name': '{}' was removed", containerId, containerName);
         } catch (IOException e) {
             LOG.error(format("Failed to delete unused container with 'id': '%s' and 'name': '%s'", containerId, containerName), e);
         }

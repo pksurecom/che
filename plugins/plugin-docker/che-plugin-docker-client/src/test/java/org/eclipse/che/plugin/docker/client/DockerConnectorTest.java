@@ -11,6 +11,7 @@
 package org.eclipse.che.plugin.docker.client;
 
 import com.google.common.io.CharStreams;
+import com.google.common.reflect.TypeToken;
 
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.lang.ws.rs.ExtMediaType;
@@ -80,7 +81,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -232,7 +235,7 @@ public class DockerConnectorTest {
     public void shouldBeAbleToGetListImages() throws IOException, JsonParseException {
         List<Image> images = new ArrayList<>();
 
-        doReturn(images).when(dockerConnector).parseResponseStreamAsListAndClose(inputStream);
+        doReturn(images).when(dockerConnector).parseResponseStreamAsListAndClose(eq(inputStream), any());
 
         List<Image> returnedImages =
                 dockerConnector.listImages();
@@ -263,7 +266,7 @@ public class DockerConnectorTest {
         ContainerListEntry containerListEntry = mock(ContainerListEntry.class);
         List<ContainerListEntry> expectedListContainers = singletonList(containerListEntry);
 
-        doReturn(expectedListContainers).when(dockerConnector).parseResponseStreamAsListAndClose(inputStream);
+        doReturn(expectedListContainers).when(dockerConnector).parseResponseStreamAsListAndClose(eq(inputStream), any());
 
         List<ContainerListEntry> containers = dockerConnector.listContainers(listContainersParams);
 
@@ -273,7 +276,7 @@ public class DockerConnectorTest {
         verify(dockerConnection).request();
         verify(dockerResponse).getStatus();
         verify(dockerResponse).getInputStream();
-        verify(dockerConnector).parseResponseStreamAsListAndClose(inputStream);
+        verify(dockerConnector).parseResponseStreamAsListAndClose(eq(inputStream), any());
 
         assertEquals(containers, expectedListContainers);
     }
@@ -319,7 +322,7 @@ public class DockerConnectorTest {
         ImageInfo returnedImageInfo =
                 dockerConnector.inspectImage(IMAGE);
 
-        verify(dockerConnector).inspectImage((InspectImageParams) captor.capture());
+        verify(dockerConnector).inspectImage((InspectImageParams)captor.capture());
 
         assertEquals(captor.getValue(), inspectImageParams);
         assertEquals(returnedImageInfo, imageInfo);
@@ -391,7 +394,7 @@ public class DockerConnectorTest {
 
         dockerConnector.killContainer(CONTAINER);
 
-        verify(dockerConnector).killContainer((KillContainerParams) captor.capture());
+        verify(dockerConnector).killContainer((KillContainerParams)captor.capture());
 
         assertEquals(captor.getValue(), killContainerParams);
     }
@@ -459,7 +462,7 @@ public class DockerConnectorTest {
         int returnedExitCode =
                 dockerConnector.waitContainer(CONTAINER);
 
-        verify(dockerConnector).waitContainer((WaitContainerParams) captor.capture());
+        verify(dockerConnector).waitContainer((WaitContainerParams)captor.capture());
 
         assertEquals(captor.getValue(), waitContainerParams);
         assertEquals(returnedExitCode, CONTAINER_EXIT_CODE);
@@ -510,7 +513,7 @@ public class DockerConnectorTest {
         ContainerInfo returnedContainerInfo =
                 dockerConnector.inspectContainer(CONTAINER);
 
-        verify(dockerConnector).inspectContainer((InspectContainerParams) captor.capture());
+        verify(dockerConnector).inspectContainer((InspectContainerParams)captor.capture());
 
         assertEquals(captor.getValue(), inspectContainerParams);
         assertEquals(returnedContainerInfo, containerInfo);
@@ -657,7 +660,7 @@ public class DockerConnectorTest {
 
         dockerConnector.getExecInfo(EXEC_ID);
 
-        verify(dockerConnector).getExecInfo((GetExecInfoParams) captor.capture());
+        verify(dockerConnector).getExecInfo((GetExecInfoParams)captor.capture());
 
         assertEquals(captor.getValue(), getExecInfoParams);
     }
@@ -927,7 +930,7 @@ public class DockerConnectorTest {
 
         dockerConnector.removeImage(IMAGE);
 
-        verify(dockerConnector).removeImage((RemoveImageParams) captor.capture());
+        verify(dockerConnector).removeImage((RemoveImageParams)captor.capture());
 
         assertEquals(captor.getValue(), removeImageParams);
     }
@@ -1229,4 +1232,95 @@ public class DockerConnectorTest {
         assertEquals(parsedVersion, version);
     }
 
+    @Test
+    public void shouldAbilityParseResponseStreamListImagesAndClose() throws IOException, JsonParseException {
+        String response = "[\n" +
+                          "  {\n" +
+                          "     \"RepoTags\": [\n" +
+                          "       \"ubuntu:12.04\",\n" +
+                          "       \"ubuntu:precise\",\n" +
+                          "       \"ubuntu:latest\"\n" +
+                          "     ],\n" +
+                          "     \"Id\": \"8dbd9e392a964056420e5d58ca5cc376ef18e2de93b5cc90e868a1bbc8318c1c\",\n" +
+                          "     \"Created\": 1365714795,\n" +
+                          "     \"Size\": 131506275,\n" +
+                          "     \"VirtualSize\": 131506275,\n" +
+                          "     \"Labels\": {}\n" +
+                          "  },\n" +
+                          "  {\n" +
+                          "     \"RepoTags\": [\n" +
+                          "       \"ubuntu:12.10\",\n" +
+                          "       \"ubuntu:quantal\"\n" +
+                          "     ],\n" +
+                          "     \"ParentId\": \"27cf784147099545\",\n" +
+                          "     \"Id\": \"b750fe79269d2ec9a3c593ef05b4332b1d1a02a62b4accb2c21d589ff2f5f2dc\",\n" +
+                          "     \"Created\": 1364102658,\n" +
+                          "     \"Size\": 24653,\n" +
+                          "     \"VirtualSize\": 180116135,\n" +
+                          "     \"Labels\": {\n" +
+                          "        \"com.example.version\": \"v1\"\n" +
+                          "     }\n" +
+                          "  }\n" +
+                          "]\n";
+
+        List<Image> images = dockerConnector.parseResponseStreamAsListAndClose(new ByteArrayInputStream(response.getBytes()),
+                                                                               new TypeToken<List<Image>>() {}.getType());
+        assertEquals(images.size(), 2);
+        Image actualImage1 = images.get(0);
+        Image actualImage2 = images.get(1);
+
+        assertEquals(actualImage1.getRepoTags(), new String[] {"ubuntu:12.04", "ubuntu:precise", "ubuntu:latest"});
+        assertEquals(actualImage1.getId(), "8dbd9e392a964056420e5d58ca5cc376ef18e2de93b5cc90e868a1bbc8318c1c");
+        assertEquals(actualImage1.getCreated(), 1365714795);
+        assertEquals(actualImage1.getSize(), 131506275);
+        assertEquals(actualImage1.getVirtualSize(), 131506275);
+        assertEquals(actualImage1.getLabels(), emptyMap());
+
+        assertEquals(actualImage2.getRepoTags(), new String[] {"ubuntu:12.10", "ubuntu:quantal"});
+        assertEquals(actualImage2.getId(), "b750fe79269d2ec9a3c593ef05b4332b1d1a02a62b4accb2c21d589ff2f5f2dc");
+        assertEquals(actualImage2.getParentId(), "27cf784147099545");
+        assertEquals(actualImage2.getCreated(), 1364102658);
+        assertEquals(actualImage2.getSize(), 24653);
+        assertEquals(actualImage2.getVirtualSize(), 180116135);
+        assertEquals(actualImage2.getLabels(), singletonMap("com.example.version", "v1"));
+    }
+
+    @Test
+    public void shouldAbilityParseResponseStreamListContainersAndClose() throws IOException, JsonParseException {
+        String response = " [\n" +
+                          "         {\n" +
+                          "                 \"Id\": \"8dfafdbc3a40\",\n" +
+                          "                 \"Image\": \"ubuntu:latest\",\n" +
+                          "                 \"Command\": \"echo 1\",\n" +
+                          "                 \"Created\": 1367854155,\n" +
+                          "                 \"Status\": \"Exit 0\",\n" +
+                          "                 \"SizeRw\": 12288,\n" +
+                          "                 \"SizeRootFs\": 0\n" +
+                          "         }" +
+                          "]\n";
+
+        List<ContainerListEntry> containers = dockerConnector.parseResponseStreamAsListAndClose(new ByteArrayInputStream(response.getBytes()),
+                                                                                            new TypeToken<List<ContainerListEntry>>() {}
+                                                                                                    .getType());
+        assertEquals(containers.size(), 1);
+        ContainerListEntry actualContainer1 = containers.get(0);
+
+        assertEquals(actualContainer1.getId(), "8dfafdbc3a40");
+        assertEquals(actualContainer1.getImage(), "ubuntu:latest");
+        assertEquals(actualContainer1.getCommand(), "echo 1");
+        assertEquals(actualContainer1.getCreated(), 1367854155);
+        assertEquals(actualContainer1.getStatus(), "Exit 0");
+        assertEquals(actualContainer1.getSizeRw(), 12288);
+        assertEquals(actualContainer1.getSizeRootFs(), 0);
+    }
+
+    @Test
+    public void shouldAbilityParseResponseStreamListAndClose() throws IOException, JsonParseException {
+        String response = "[]";
+
+        List<ContainerListEntry> containers = dockerConnector.parseResponseStreamAsListAndClose(new ByteArrayInputStream(response.getBytes()),
+                                                                                                new TypeToken<List<ContainerListEntry>>() {}
+                                                                                                        .getType());
+        assertEquals(containers.size(), 0);
+    }
 }

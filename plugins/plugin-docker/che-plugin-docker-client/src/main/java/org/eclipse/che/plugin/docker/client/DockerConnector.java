@@ -83,6 +83,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.file.Files;
@@ -188,7 +189,7 @@ public class DockerConnector {
             if (OK.getStatusCode() != response.getStatus()) {
                 throw getDockerException(response);
             }
-            return parseResponseStreamAsListAndClose(response.getInputStream());
+            return parseResponseStreamAsListAndClose(response.getInputStream(), new TypeToken<List<Image>>() {}.getType());
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }
@@ -229,7 +230,7 @@ public class DockerConnector {
             if (OK.getStatusCode() != status) {
                 throw getDockerException(response);
             }
-            return parseResponseStreamAsListAndClose(response.getInputStream());
+            return parseResponseStreamAsListAndClose(response.getInputStream(), new TypeToken<List<ContainerListEntry>>() {}.getType());
         } catch (JsonParseException e) {
             throw new IOException(e.getLocalizedMessage(), e);
         }
@@ -1654,11 +1655,11 @@ public class DockerConnector {
 
     @VisibleForTesting
     @SuppressWarnings("unchecked")
-    <T> List<T> parseResponseStreamAsListAndClose(InputStream inputStream) throws IOException, JsonParseException {
+    <T> List<T> parseResponseStreamAsListAndClose(InputStream inputStream, Type type) throws IOException, JsonParseException {
         try (InputStream responseStream = inputStream) {
             return (List<T>)JsonHelper.fromJson(responseStream,
                                                 List.class,
-                                                new TypeToken<List<T>>() {}.getType(),
+                                                type,
                                                 FIRST_LETTER_LOWERCASE);
         }
     }
