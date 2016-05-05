@@ -685,18 +685,14 @@
       "defaultEnv": "default",
       "description": null
     },
-    "permissions": {
-      "groups": [
-        {
-          "acl": [
-            "read",
-            "search"
-          ],
-          "name": "public"
-        }
-      ],
-      "users": {}
-    }
+    "acl": [
+      {
+        "user": "*",
+        "actions": [
+          "read"
+        ]
+      }
+    ]
   },
   {
     "id": "java-centos",
@@ -991,18 +987,14 @@
       "defaultEnv": "default",
       "description": null
     },
-    "permissions": {
-      "groups": [
-        {
-          "acl": [
-            "read",
-            "search"
-          ],
-          "name": "public"
-        }
-      ],
-      "users": {}
-    }
+    "acl": [
+      {
+        "user": "*",
+        "actions": [
+          "read"
+        ]
+      }
+    ]
   },
   {
     "id": "tomee-default",
@@ -1126,17 +1118,13 @@
       "type": "dockerfile",
       "origin": "FROM codenvy/ubuntu_jre\nCMD tail -f /dev/null"
     },
-    "permissions": {
-      "groups": [
-        {
-          "acl": [
-            "read",
-            "search"
-          ],
-          "name": "public"
-        }
-      ],
-      "users": {}
-    }
+    "acl": [
+      {
+        "user": "*",
+        "actions": [
+          "read"
+        ]
+      }
+    ]
   }
 ]
