@@ -102,10 +102,9 @@ public abstract class FactoryBaseValidator {
      */
     protected void validateAccountId(Factory factory) throws ServerException, ForbiddenException {
         // TODO do we need check if user is temporary?
-        final String accountId = factory.getCreator() != null ? emptyToNull(factory.getCreator().getAccountId()) : null;
         final String userId = factory.getCreator() != null ? factory.getCreator().getUserId() : null;
 
-        if (accountId == null || userId == null) {
+        if (userId == null) {
             return;
         }
 
