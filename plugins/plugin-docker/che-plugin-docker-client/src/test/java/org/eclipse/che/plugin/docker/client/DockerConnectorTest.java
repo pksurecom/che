@@ -1233,7 +1233,7 @@ public class DockerConnectorTest {
     }
 
     @Test
-    public void shouldAbilityParseResponseStreamListImagesAndClose() throws IOException, JsonParseException {
+    public void shouldBeAbleToParseResponseStreamAsListOfImagesAndClose() throws IOException, JsonParseException {
         String response = "[\n" +
                           "  {\n" +
                           "     \"RepoTags\": [\n" +
@@ -1286,7 +1286,7 @@ public class DockerConnectorTest {
     }
 
     @Test
-    public void shouldAbilityParseResponseStreamListContainersAndClose() throws IOException, JsonParseException {
+    public void shouldBeAbleToParseResponseStreamAsListOfContainersAndClose() throws IOException, JsonParseException {
         String response = " [\n" +
                           "         {\n" +
                           "                 \"Id\": \"8dfafdbc3a40\",\n" +
@@ -1315,7 +1315,7 @@ public class DockerConnectorTest {
     }
 
     @Test
-    public void shouldAbilityParseResponseStreamListAndClose() throws IOException, JsonParseException {
+    public void shouldBeAbleToParseResponseStreamAsEmptyListOfContainersAndClose() throws IOException, JsonParseException {
         String response = "[]";
 
         List<ContainerListEntry> containers = dockerConnector.parseResponseStreamAsListAndClose(new ByteArrayInputStream(response.getBytes()),

@@ -35,7 +35,7 @@ public class Image {
     }
 
     /**
-     * Return randomly generated, 256-bit, hexadecimal encoded uniquely identifies the image.
+     * Return uniquely identifies the image.
      */
     public String getId() {
         return id;

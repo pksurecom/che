@@ -218,8 +218,10 @@ public class DockerInstanceProvider implements InstanceProvider {
                                    LineConsumer creationLogsOutput) throws MachineException, UnsupportedRecipeException {
         final Dockerfile dockerfile = parseRecipe(recipe);
 
+        final String userName = EnvironmentContext.getCurrent().getUser().getName();
         final String machineContainerName = containerNameGenerator.generateContainerName(machine.getWorkspaceId(),
                                                                                          machine.getId(),
+                                                                                         userName,
                                                                                          machine.getConfig().getName());
         final String machineImageName = "eclipse-che/" + machineContainerName;
         final long memoryLimit = (long)machine.getConfig().getLimits().getRam() * 1024 * 1024;
@@ -240,8 +242,10 @@ public class DockerInstanceProvider implements InstanceProvider {
 
         pullImage(dockerInstanceKey, creationLogsOutput);
 
+        final String userName = EnvironmentContext.getCurrent().getUser().getName();
         final String machineContainerName = containerNameGenerator.generateContainerName(machine.getWorkspaceId(),
                                                                                          machine.getId(),
+                                                                                         userName,
                                                                                          machine.getConfig().getName());
         final String machineImageName = "eclipse-che/" + machineContainerName;
         final String fullNameOfPulledImage = dockerInstanceKey.getFullName();

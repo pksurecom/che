@@ -12,7 +12,7 @@ package org.eclipse.che.plugin.docker.machine;
 
 import org.eclipse.che.api.core.model.machine.Machine;
 import org.eclipse.che.api.core.model.machine.MachineConfig;
-import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.user.User;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -25,10 +25,11 @@ import java.util.regex.Pattern;
  * @author Alexander Andrienko
  */
 public class DockerContainerNameGenerator {
+    private static final String NODE_HOST_GROUP    = "(/|(/[0-9a-z.]+/))?";
     private static final String WORKSPACE_ID_GROUP = "(?<workspaceId>workspace[0-9a-z]+)";
     private static final String MACHINE_ID_GROUP   = "(?<machineId>machine[0-9a-z]+)";
 
-    private static final String  CONTAINER_NAME_REGEX   = "^" + WORKSPACE_ID_GROUP + "_" + MACHINE_ID_GROUP + "_.+$";
+    private static final String  CONTAINER_NAME_REGEX   = "^" + NODE_HOST_GROUP + WORKSPACE_ID_GROUP + "_" + MACHINE_ID_GROUP + "_.+$";
     private static final Pattern CONTAINER_NAME_PATTERN = Pattern.compile(CONTAINER_NAME_REGEX);
 
     /**
@@ -40,11 +41,12 @@ public class DockerContainerNameGenerator {
      *         unique workspace id, see more (@link WorkspaceConfig#getId)
      * @param machineId
      *         unique machine id, see more {@link Machine#getId()}
+     * @param userName
+     *         name of the user who is docker container owner, see more {@link User#getName}
      * @param machineName
      *         name of the workspace machine, see more {@link MachineConfig#getName()}
      */
-    public String generateContainerName(String workspaceId, String machineId, String machineName) {
-        String userName = EnvironmentContext.getCurrent().getUser().getName();
+    public String generateContainerName(String workspaceId, String machineId, String userName, String machineName) {
         String containerName = workspaceId + '_' + machineId + '_' + userName + '_' + machineName;
         return containerName.toLowerCase().replaceAll("[^a-z0-9_-]+", "");
     }
@@ -52,16 +54,15 @@ public class DockerContainerNameGenerator {
     /**
      * Parse machine's {@code containerName} to get information about this container (like workspaceId, machineId).
      * Notice: method doesn't parse information about userName or machineName, because we do not give guarantees
-     * about the integrity of this data(see more {@link #generateContainerName(String, String, String)})
+     * about the integrity of this data(see more {@link #generateContainerName(String, String, String, String)})
+     * Notice: container name can contains node host (e.g. "/node-host.dev.box/workspacebbx2_machineic3_user321_ws-machine)
      *
      * @param containerName
      *         name of the container
      * @return information about container
      */
     public Optional<ContainerNameInfo> parse(String containerName) {
-        // Split container name, in case it contains node host (e.g. "/node-host.dev.box/workspacebbx2_machineic3_user321_ws-machine"
-        String[] containerNameParts = containerName.split("/");
-        Matcher matcher = CONTAINER_NAME_PATTERN.matcher(containerNameParts[containerNameParts.length - 1]);
+        Matcher matcher = CONTAINER_NAME_PATTERN.matcher(containerName);
         ContainerNameInfo containerNameInfo = null;
         if (matcher.matches()) {
             String workspaceId = matcher.group("workspaceId");

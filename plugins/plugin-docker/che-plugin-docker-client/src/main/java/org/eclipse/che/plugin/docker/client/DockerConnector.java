@@ -223,7 +223,7 @@ public class DockerConnector {
             addQueryParamIfNotNull(connection, "since", params.getSince());
             addQueryParamIfNotNull(connection, "before", params.getBefore());
             if (filters != null) {
-                connection.query("filters", urlPathSegmentEscaper().escape(JsonHelper.toJson(params.getFilters())));
+                connection.query("filters", urlPathSegmentEscaper().escape(JsonHelper.toJson(filters)));
             }
             DockerResponse response = connection.request();
             final int status = response.getStatus();

@@ -10,19 +10,15 @@
  *******************************************************************************/
 package org.eclipse.che.plugin.docker.machine;
 
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Pair;
-import org.eclipse.che.commons.user.UserImpl;
 import org.mockito.InjectMocks;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.Optional;
 
-import static java.util.Collections.emptyList;
 import static org.eclipse.che.plugin.docker.machine.DockerContainerNameGenerator.ContainerNameInfo;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertFalse;
@@ -42,21 +38,16 @@ public class DockerContainerNameGeneratorTest {
     @InjectMocks
     private DockerContainerNameGenerator nameGenerator;
 
-    @BeforeMethod
-    public void setUp() {
-        EnvironmentContext.getCurrent().setUser(new UserImpl(USER_NAME, "stub", "stub", emptyList(), false));
-    }
-
     @Test
     public void containerNameShouldBeGenerated() {
         String expectedResult = "workspacebbbx2ree3iykn8gc_machineic131ppamujngv6y_some_user_ws-machine";
-        String actualResult = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, MACHINE_NAME);
+        String actualResult = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
         assertEquals(expectedResult, actualResult);
     }
 
     @Test
     public void machineNameShouldBeReturnedByGeneratedContainerName() {
-        String generatedName = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, MACHINE_NAME);
+        String generatedName = nameGenerator.generateContainerName(WORKSPACE_ID, MACHINE_ID, USER_NAME, MACHINE_NAME);
 
         Optional<ContainerNameInfo> containerNameInfoParser = nameGenerator.parse(generatedName);
 
@@ -66,77 +57,83 @@ public class DockerContainerNameGeneratorTest {
 
     @DataProvider(name = "validContainerNames")
     public static Object[][] validContainerNames() {
-        return new Object[][] {{"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+        return new Object[][]{{"/host.node.com/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/FF/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art",
+                              new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/nod/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machineri6bxnoj5jq7ll98",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_u_a",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_-_-",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j____",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machineri6bxnoj5jq7ll98",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j__tfdfd_klk",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_u_a",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j__",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_-_-",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_tfdf_dKlk",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j____",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_a_",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j__tfdfd_klk",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j__o_",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j__",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_tfdfdklk____",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_tfdf_dKlk",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacep_machiner_user-name_ws-machine-name",
-                                new Pair<>("machiner", "workspacep")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_a_",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspace1_machine2_user-name_ws-machine-name",
-                                new Pair<>("machine2", "workspace1")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j__o_",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspace1_machinea_user-name_ws-machine-name",
-                                new Pair<>("machinea", "workspace1")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_tfdfdklk____",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"/workspacea_machine1_user-name_ws-machine-name",
-                                new Pair<>("machine1", "workspacea")},
+                              {"/workspacep_machiner_user-name_ws-machine-name",
+                               new Pair<>("machiner", "workspacep")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_a",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/workspace1_machine2_user-name_ws-machine-name",
+                               new Pair<>("machine2", "workspace1")},
 
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/workspace1_machinea_user-name_ws-machine-name",
+                               new Pair<>("machinea", "workspace1")},
 
-                               {"/host.node.com/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art",
-                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
+                              {"/workspacea_machine1_user-name_ws-machine-name",
+                               new Pair<>("machine1", "workspacea")},
 
-                               {"workspace1_machinea_USER_ws-machine-name",
-                                new Pair<>("machinea", "workspace1")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_a",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"workspace1_machinea_user%100%_ws-machine-name",
-                                new Pair<>("machinea", "workspace1")},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art",
+                               new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                               {"workspace1_machinea_user_ws-machine-name$workspace1_machinea_user_ws-machine-name",
-                                new Pair<>("machinea", "workspace1")}};
+                              {"workspace1_machinea_USER_ws-machine-name",
+                               new Pair<>("machinea", "workspace1")},
+
+                              {"workspace1_machinea_user%100%_ws-machine-name",
+                               new Pair<>("machinea", "workspace1")},
+
+                              {"workspace1_machinea_user_ws-machine-name$workspace1_machinea_user_ws-machine-name",
+                               new Pair<>("machinea", "workspace1")}};
     }
 
     @Test(dataProvider = "validContainerNames")
@@ -149,40 +146,45 @@ public class DockerContainerNameGeneratorTest {
 
     @DataProvider(name = "invalidContainerNames")
     public static Object[][] inValidContainerNames() {
-        return new Object[][] {{"/host.node.com/Workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac5ciwohmachineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9juser-name_ws-machine-name"},
-                               {"/workspacep2bivvctac5ciwoh__machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/1orkspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctac%ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"/workspacep2bivvctackciwoh_machineri6%xnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"workspacep2bivvctackciwoh_machineri6o*noj5jq7ll9j_user-name_ws-machine-name"},
-                               {"workspacep2bivvctac5ciWoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_ws-machine-name"},
-                               {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_WS-maChineName"},
-                               {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_ws-mac%ine-name"},
-                               {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_workspACEMachineName"},
-                               {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_workspace"},
-                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j"},
-                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"},
-                               {"workspacep2bivvctac5ciwoh_"},
-                               {"pong"},
-                               {"workspace"},
-                               {"machine"},
-                               {"workspace"},
-                               {"machine"},
-                               {"workspace_machine"},
-                               {"workspace_machine_user-name_ws-machine-name"},
-                               {"workspace5r_workspace5r_machine_user-name_ws-machine-name"},
-                               {"workspace_workspace_machine_user-name_ws-machine-name"},
-                               {"work_machinetyy_user-name_ws-machine-name"},
-                               {"workspacedfdf_machin_user-name_ws-machine-name"},
-                               {"workspaceid"},
-                               {"machineid"},
-                               {"workspacerere_machinedfdf"},
-                               {"workspacerere_machinedfdf"},
-                               {"someusercontainer"},
-                               {"machineri6bxnoj5jq7ll9j_workspacep2bivvctac5ciwoh_user-name_ws-machine-name"}};
+        return new Object[][]{{"/host.node.com/Workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
+                              {"//workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art"},
+                              {"//fgfgf/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art"},
+                              {"nodehost/workspacep2bivvctac5ciwohmachineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
+                              {"/host.node.Com/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art"},
+                              {"/host.no%%%de.com/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art"},
+                              {"/workspacep2bivvctac5ciwohmachineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
+                              {"/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9juser-name_ws-machine-name"},
+                              {"/workspacep2bivvctac5ciwoh__machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
+                              {"/1orkspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
+                              {"/workspacep2bivvctac%ciwoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
+                              {"/workspacep2bivvctackciwoh_machineri6%xnoj5jq7ll9j_user-name_ws-machine-name"},
+                              {"workspacep2bivvctackciwoh_machineri6o*noj5jq7ll9j_user-name_ws-machine-name"},
+                              {"workspacep2bivvctac5ciWoh_machineri6bxnoj5jq7ll9j_user-name_ws-machine-name"},
+                              {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_ws-machine-name"},
+                              {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_WS-maChineName"},
+                              {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_ws-mac%ine-name"},
+                              {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_workspACEMachineName"},
+                              {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_workspace"},
+                              {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j"},
+                              {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"},
+                              {"workspacep2bivvctac5ciwoh_"},
+                              {"pong"},
+                              {"workspace"},
+                              {"machine"},
+                              {"workspace"},
+                              {"machine"},
+                              {"workspace_machine"},
+                              {"workspace_machine_user-name_ws-machine-name"},
+                              {"workspace5r_workspace5r_machine_user-name_ws-machine-name"},
+                              {"workspace_workspace_machine_user-name_ws-machine-name"},
+                              {"work_machinetyy_user-name_ws-machine-name"},
+                              {"workspacedfdf_machin_user-name_ws-machine-name"},
+                              {"workspaceid"},
+                              {"machineid"},
+                              {"workspacerere_machinedfdf"},
+                              {"workspacerere_machinedfdf"},
+                              {"someusercontainer"},
+                              {"machineri6bxnoj5jq7ll9j_workspacep2bivvctac5ciwoh_user-name_ws-machine-name"}};
     }
 
     @Test(dataProvider = "invalidContainerNames")
