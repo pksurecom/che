@@ -29,7 +29,8 @@ public class ListContainersParams {
     private Boolean size;
     private Filters filters;
 
-    private ListContainersParams() {}
+    private ListContainersParams() {
+    }
 
     /**
      * Creates and returns arguments holder.
@@ -100,7 +101,7 @@ public class ListContainersParams {
      * Adds parameter filters for filter list containers. See more {@link Filters}
      *
      * @param filters
-     *         json object with filter parameters.
+     *         parameters for filter list containers.
      *         Filter values:
      *         <li>exited=<int>; -- containers with exit code of <int>;</li>
      *         <li>status=(created|restarting|running|paused|exited|dead)</li>

@@ -34,7 +34,7 @@ public class DockerContainerNameGenerator {
     /**
      * Return generated name for docker container. Method generate name for docker container in format:
      * <br><p>workspaceId + "_" + machineId + "_" + userName +"_" + machineName</p>
-     * <b>Notice: if userName or machineName contains incorrect symbols for creation docker container, then we skip this symbols</b>
+     * <b>Notice: if generated container name contains incorrect symbols for creation docker container, then we skip this symbols</b>
      *
      * @param workspaceId
      *         unique workspace id, see more (@link WorkspaceConfig#getId)

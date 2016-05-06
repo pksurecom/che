@@ -83,7 +83,7 @@ public class MachineRegistry {
      * @param machineId
      *         unique machine identifier
      */
-    public synchronized boolean contains(String machineId) {
+    public synchronized boolean isExist(String machineId) {
         return machines.containsKey(machineId) || instances.containsKey(machineId);
     }
 
