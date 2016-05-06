@@ -41,7 +41,7 @@ export class CheWorkspace {
     // per Id
     this.workspacesById = new Map();
 
-    //Workspace agents per workspace id:s
+    //Workspace agents per workspace id:
     this.workspaceAgents = new Map();
 
     // listeners if workspaces are changed/updated
@@ -58,6 +58,7 @@ export class CheWorkspace {
         deleteWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId'},
         updateWorkspace: {method: 'PUT', url : '/api/workspace/:workspaceId'},
         addProject: {method: 'POST', url : '/api/workspace/:workspaceId/project'},
+        deleteProject: {method: 'DELETE', url : '/api/workspace/:workspaceId/project/:path'},
         stopWorkspace: {method: 'DELETE', url : '/api/workspace/:workspaceId/runtime'},
         startWorkspace: {method: 'POST', url : '/api/workspace/:workspaceId/runtime?environment=:envName'},
         addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'}
@@ -71,17 +72,21 @@ export class CheWorkspace {
     }
 
     let runtimeConfig = this.getWorkspaceById(workspaceId).runtime;
-    let wsAgentLink;
     if (runtimeConfig) {
-      wsAgentLink = this.lodash.find(runtimeConfig.links, (link) => {
+      let wsAgentLink = this.lodash.find(runtimeConfig.links, (link) => {
         return link.rel === 'wsagent';
       });
+
+      if (!wsAgentLink) {
+        return null;
+      }
+
+      let workspaceAgentData = {path : wsAgentLink.href};
+      let wsagent = new CheWorkspaceAgent(this.$resource, this.$q, this.cheWebsocket, workspaceAgentData);
+      this.workspaceAgents.set(workspaceId, wsagent);
+      return wsagent;
     }
-    //TODO
-    let workspaceAgentData = {path : wsAgentLink.href};
-    let wsagent = new CheWorkspaceAgent(this.$resource, this.$q, this.cheWebsocket, workspaceAgentData);
-    this.workspaceAgents.set(workspaceId, wsagent);
-    return wsagent;
+    return null;
   }
 
   /**
@@ -191,6 +196,17 @@ export class CheWorkspace {
     return promise;
   }
 
+  /**
+   * Deletes a project of the workspace by it's path
+   * @param workspaceId the workspace ID required to delete a project
+   * @param path path to project to be deleted
+   * @returns {*}
+   */
+  deleteProject(workspaceId, path) {
+    let promise = this.remoteWorkspaceAPI.deleteProject({workspaceId : workspaceId, path: path}).$promise;
+    return promise;
+  }
+
 
   createWorkspace(accountId, workspaceName, recipeUrl, ram, attributes) {
     let data = {
@@ -285,6 +301,30 @@ export class CheWorkspace {
       });
 
     return defer.promise;
+  }
+
+  /**
+   * Gets the map of projects by workspace id.
+   * @returns
+   */
+  getWorkspaceProjects() {
+    let workspaceProjects = {};
+    this.workspacesById.forEach((workspace) => {
+      let projects = workspace.config.projects;
+      projects.forEach((project) => {
+        project.workspaceId = workspace.id;
+        project.workspaceName = workspace.config.name;
+      });
+
+      workspaceProjects[workspace.id] = projects;
+    });
+
+    return workspaceProjects;
+  }
+
+  getAllProjects() {
+    let projects = this.lodash.pluck(this.workspaces, 'config.projects');
+    return [].concat.apply([], projects);
   }
 
   /**

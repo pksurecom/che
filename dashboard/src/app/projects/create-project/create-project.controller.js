@@ -472,7 +472,7 @@ export class CreateProjectCtrl {
       let deferredResolve = this.$q.defer();
       let deferredResolvePromise = deferredResolve.promise;
 
-      let importPromise = this.cheAPI.getProject().importProject(workspaceId, projectName, projectData.source);
+      let importPromise = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject().importProject(workspaceId, projectName, projectData.source);
 
       importPromise.then(() => {
         // add commands if there are some that have been defined
@@ -522,21 +522,23 @@ export class CreateProjectCtrl {
       projectDetails.attributes = {};
     }
 
+    let projectService = this.cheAPI.getWorkspace().getWorkspaceAgent(workspaceId).getProject();
+
     if (projectDetails.type) {
-      let updateProjectPromise = this.cheAPI.getProject().updateProject(workspaceId, projectName, projectDetails);
+      let updateProjectPromise = projectService.updateProject(workspaceId, projectName, projectDetails);
       updateProjectPromise.then(() => {
         deferredResolve.resolve();
       });
       return;
     }
 
-    let resolvePromise = this.cheAPI.getProject().fetchResolve(workspaceId, projectName);
+    let resolvePromise = projectService.fetchResolve(workspaceId, projectName);
     resolvePromise.then(() => {
-      let resultResolve = this.cheAPI.getProject().getResolve(workspaceId, projectName);
+      let resultResolve = projectService.getResolve(workspaceId, projectName);
       // get project-types
-      let fetchTypePromise = this.cheAPI.getProjectType().fetchTypes(workspaceId);
+      let fetchTypePromise = projectService.fetchTypes(workspaceId);
       fetchTypePromise.then(() => {
-        let projectTypesByCategory = this.cheAPI.getProjectType().getProjectTypesIDs(workspaceId);
+        let projectTypesByCategory = projectService.getProjectTypesIDs(workspaceId);
         // now try the estimate for each source
         let deferredEstimate = this.$q.defer();
         let deferredEstimatePromise = deferredResolve.promise;
@@ -554,7 +556,7 @@ export class CreateProjectCtrl {
           let projectType = projectTypesByCategory.get(sourceResolve.type);
           if (projectType.primaryable) {
             // call estimate
-            let estimatePromise = this.cheAPI.getProject().fetchEstimate(workspaceId, projectName, sourceResolve.type);
+            let estimatePromise = projectService.fetchEstimate(workspaceId, projectName, sourceResolve.type);
             estimatePromises.push(estimatePromise);
             estimateTypes.push(sourceResolve.type);
           }
@@ -568,7 +570,7 @@ export class CreateProjectCtrl {
             var firstMatchingType;
             var firstMatchingResult;
             estimateTypes.forEach((type) => {
-              let resultEstimate = this.cheAPI.getProject().getEstimate(workspaceId, projectName, type);
+              let resultEstimate = projectService.getEstimate(workspaceId, projectName, type);
               // add attributes
               // there is a matching estimate
               if (Object.keys(resultEstimate.attributes).length > 0 && 'java' !== type && !firstMatchingType) {
@@ -580,7 +582,7 @@ export class CreateProjectCtrl {
           if (firstMatchingType) {
             projectDetails.attributes = firstMatchingResult;
             projectDetails.type = firstMatchingType;
-            let updateProjectPromise = this.cheAPI.getProject().updateProject(workspaceId, projectName, projectDetails);
+            let updateProjectPromise = projectService.updateProject(workspaceId, projectName, projectDetails);
             updateProjectPromise.then(() => {
               deferredResolve.resolve();
             });
@@ -841,7 +843,7 @@ export class CreateProjectCtrl {
       this.checkExistingWorkspaceState(this.workspaceSelected);
     }
     // do we have projects ?
-    let projects = this.cheAPI.getProject().getAllProjects();
+    let projects = this.cheAPI.getWorkspace().getAllProjects();
     if (projects.length > 1) {
       // we have projects, show notification first and redirect to the list of projects
       this.createProjectSvc.showPopup();

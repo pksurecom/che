@@ -29,7 +29,7 @@ export class CheWorkspaceAgent {
    /* this.projectTypeService = new CheProjectType();
     this.gitService = new CheGit();*/
     //TODO
-    this.cheWorkspace.addListener(this.project);
+   // this.cheWorkspace.addListener(this.project);
   }
 
   getWebsocketUrl() {

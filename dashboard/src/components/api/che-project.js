@@ -31,9 +31,6 @@ export class CheProject {
     this.$q = $q;
 
     // projects per workspace id
-    this.projectsPerWorkspace = {};
-
-    // projects per workspace id
     this.projectsPerWorkspaceMap = new Map();
 
     // projects per workspace id
@@ -117,10 +114,6 @@ export class CheProject {
 
   }
 
-  onDeleteWorkspace(workspaceId) {
-    delete this.projectsPerWorkspace[workspaceId];
-  }
-
   /**
    * Fetch the projects for the given workspace
    * @param workspace
@@ -135,18 +128,10 @@ export class CheProject {
 
       // add the map key
       this.projectsPerWorkspaceMap.set(workspaceId, remoteProjects);
-      this.projectsPerWorkspace[workspaceId] = remoteProjects;
 
       // refresh global projects list
       this.projects.length = 0;
-
-
-      for (var member in this.projectsPerWorkspace) {
-        let projects = this.projectsPerWorkspace[member];
-        projects.forEach((project) => {
-          this.projects.push(project);
-        });
-      }
+      //TODO this.projects =
     }, (error) => {
       if (error.status !== 304) {
         console.log(error);
@@ -175,18 +160,11 @@ export class CheProject {
 
     // add the map key
     this.projectsPerWorkspaceMap.set(workspaceId, remoteProjects);
-    this.projectsPerWorkspace[workspaceId] = remoteProjects;
 
     // refresh global projects list
     this.projects.length = 0;
 
-
-    for (var member in this.projectsPerWorkspace) {
-      let projects = this.projectsPerWorkspace[member];
-      projects.forEach((project) => {
-        this.projects.push(project);
-      });
-    }
+    //TODO this.projects =
 
     // needs to return a promise
     var deferred = this.$q.defer();
@@ -243,22 +221,6 @@ export class CheProject {
     }
 
     return firstName + ' ' + lastName;
-  }
-
-  /**
-   * Gets all projects that are currently monitored
-   * @returns {Array}
-   */
-  getAllProjects() {
-    return this.projects;
-  }
-
-  /**
-   * The projects per workspace id
-   * @returns {CheProject.projectsPerWorkspace|*}
-   */
-  getProjectsByWorkspace() {
-    return this.projectsPerWorkspace;
   }
 
   /**
@@ -329,13 +291,7 @@ export class CheProject {
 
   remove(workspaceId, projectName) {
     let promiseDelete = this.remoteProjectsAPI.remove({workspaceId: workspaceId, path: projectName}).$promise;
-    // update list of projects
-    let promiseUpdateProjects = promiseDelete.then(() => {
-      this.fetchProjectsForWorkspaceId(workspaceId);
-    });
-
-
-    return promiseUpdateProjects;
+    return promiseDelete;
   }
 
   /**
