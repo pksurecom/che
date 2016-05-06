@@ -176,7 +176,7 @@ public class RecipeServiceClientImpl implements RecipeServiceClient {
             tagsParam.deleteCharAt(tagsParam.length() - 1); // delete last ampersand
         }
 
-        final String url = baseHttpUrl + "/list?" + tagsParam.toString() +
+        final String url = baseHttpUrl + "?" + tagsParam.toString() +
                            (tagsParam.length() > 0 ? '&' : "") +
                            "type=" + type +
                            "&skipCount=" + skipCount +
