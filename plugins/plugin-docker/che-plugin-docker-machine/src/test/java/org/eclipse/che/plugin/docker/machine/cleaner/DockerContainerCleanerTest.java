@@ -94,7 +94,7 @@ public class DockerContainerCleanerTest {
 
     @BeforeMethod
     public void setUp() throws MachineException, IOException {
-        when(machineRegistry.machineIsExist(machineId1)).thenReturn(true);
+        when(machineRegistry.contains(machineId1)).thenReturn(true);
         when(machineImpl1.getId()).thenReturn(machineId1);
         when(machineImpl1.getWorkspaceId()).thenReturn(workspaceId1);
 
@@ -131,7 +131,7 @@ public class DockerContainerCleanerTest {
         verify(dockerConnector).listContainers();
 
         verify(nameGenerator, times(3)).parse(anyString());
-        verify(machineRegistry, times(3)).machineIsExist(anyString());
+        verify(machineRegistry, times(3)).contains(anyString());
 
         verify(dockerConnector, times(2)).killContainer(anyString());
         verify(dockerConnector, times(2)).removeContainer(Matchers.<RemoveContainerParams>anyObject());
@@ -151,7 +151,7 @@ public class DockerContainerCleanerTest {
 
     @Test
     public void cleanerShouldNotKillAndRemoveContainerIfMachineManagerDetectedExistingThisContainerInTheAPI() throws IOException {
-        when(machineRegistry.machineIsExist(anyString())).thenReturn(true);
+        when(machineRegistry.contains(anyString())).thenReturn(true);
 
         cleaner.run();
 
