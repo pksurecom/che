@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.che.api.vfs.search;
 
-/** Container for parameters of query that executed by Searcher.*/
+/** Container for parameters of query that executed by Searcher. */
 public class QueryExpression {
-    private String name;
-    private String path;
-    private String text;
-    private int    skipCount;
-    private int    maxItems;
+    private String  name;
+    private String  path;
+    private String  text;
+    private int     skipCount;
+    private int     maxItems;
+    private boolean isPhraseQuery;
 
     /** Optional file path parameter. Only file with the specified path or children are included in result. */
     public String getPath() {
@@ -65,6 +66,20 @@ public class QueryExpression {
 
     public QueryExpression setMaxItems(int maxItems) {
         this.maxItems = maxItems;
+        return this;
+    }
+
+    /** Returns {@code true} if text for searching should be handled as Phrase query and {@code false} - otherwise. */
+    public boolean isPhraseQuery() {
+        return isPhraseQuery;
+    }
+
+    /**
+     * Set to {@code true} if text for searching should be handled as Phrase query and {@code false} - otherwise.
+     * Default: false.
+     */
+    public QueryExpression setPhraseQuery(boolean isPhraseQuery) {
+        this.isPhraseQuery = isPhraseQuery;
         return this;
     }
 

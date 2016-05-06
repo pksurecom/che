@@ -12,11 +12,12 @@ package org.eclipse.che.api.project.gwt.client;
 
 /** @author Artem Zatsarynnyi */
 public class QueryExpression {
-    private String name;
-    private String path;
-    private String text;
-    private int    maxItems;
-    private int    skipCount;
+    private String  name;
+    private String  path;
+    private String  text;
+    private int     maxItems;
+    private int     skipCount;
+    private boolean isPhraseQuery;
 
     /**
      * Get path to start search.
@@ -126,6 +127,20 @@ public class QueryExpression {
      */
     public QueryExpression setSkipCount(int skipCount) {
         this.skipCount = skipCount;
+        return this;
+    }
+
+    /** Returns {@code true} if text for searching should be handled as Phrase query and {@code false} - otherwise. */
+    public boolean isPhraseQuery() {
+        return isPhraseQuery;
+    }
+
+    /**
+     * Set to {@code true} if text for searching should be handled as Phrase query and {@code false} - otherwise.
+     * Default: false.
+     */
+    public QueryExpression setPhraseQuery(boolean isPhraseQuery) {
+        this.isPhraseQuery = isPhraseQuery;
         return this;
     }
 }

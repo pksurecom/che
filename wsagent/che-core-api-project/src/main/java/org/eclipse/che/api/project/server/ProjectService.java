@@ -863,6 +863,8 @@ public class ProjectService extends Service {
                                       @QueryParam("name") String name,
                                       @ApiParam(value = "Search keywords")
                                       @QueryParam("text") String text,
+                                      @ApiParam(value = "Phrase query. {@code true} if text for searching should be handled as Phrase query")
+                                      @QueryParam("phraseQuery") @DefaultValue("false") boolean phraseQuery,
                                       @ApiParam(value = "Maximum items to display. If this parameter is dropped, there are no limits")
                                       @QueryParam("maxItems") @DefaultValue("-1") int maxItems,
                                       @ApiParam(value = "Skip count")
@@ -885,19 +887,19 @@ public class ProjectService extends Service {
         final QueryExpression expr = new QueryExpression()
                 .setPath(path.startsWith("/") ? path : ('/' + path))
                 .setName(name)
-                .setText(text);
+                .setText(text)
+                .setPhraseQuery(phraseQuery);
 
         final SearchResult result = searcher.search(expr);
 
-        if (skipCount > 0) {
-            if (skipCount > result.getTotalHits()) {
-                throw new ConflictException(
-                        String.format("'skipCount' parameter: %d is greater then total number of items in result: %d.",
-                                      skipCount, result.getTotalHits()));
-            }
+        int numberResults = result.getResults().size();
+        if (skipCount > 0 && skipCount > numberResults) {
+            throw new ConflictException(
+                    String.format("'skipCount' parameter: %d is greater then total number of items in result: %d.", skipCount,
+                                  numberResults));
         }
 
-        final int length = maxItems > 0 ? Math.min(result.getTotalHits(), maxItems) : result.getTotalHits();
+        final int length = maxItems > 0 ? Math.min(numberResults, maxItems) : numberResults;
         final List<ItemReference> items = new ArrayList<>(length);
         final FolderEntry root = projectManager.getProjectsRoot();
 

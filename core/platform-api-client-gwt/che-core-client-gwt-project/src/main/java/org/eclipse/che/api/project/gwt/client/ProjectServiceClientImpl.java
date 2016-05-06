@@ -426,6 +426,9 @@ public class ProjectServiceClientImpl implements ProjectServiceClient {
         if (expression.getSkipCount() != 0) {
             queryParameters.append("&skipCount=").append(expression.getSkipCount());
         }
+        if (expression.isPhraseQuery()) {
+            queryParameters.append("&searchMode=").append(expression.isPhraseQuery());
+        }
 
         return asyncRequestFactory.createGetRequest(requestUrl.toString() + queryParameters.toString().replaceFirst("&", "?"))
                                   .header(ACCEPT, MimeType.APPLICATION_JSON)

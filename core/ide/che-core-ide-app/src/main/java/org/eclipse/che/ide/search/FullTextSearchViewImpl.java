@@ -49,17 +49,19 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
     CoreLocalizationConstant locale;
     private final AppContext appContext;
     @UiField
-    TextBox  text;
+    TextBox     text;
     @UiField
-    TextBox  filesMask;
+    TextBox     filesMask;
     @UiField
-    CheckBox isUseFileMask;
+    CheckBox    isUseFileMask;
     @UiField
-    CheckBox isUseDirectory;
+    CheckBox    isUseDirectory;
     @UiField
-    TextBox  directory;
+    TextBox     directory;
     @UiField
-    Button   selectPathButton;
+    Button      selectPathButton;
+    @UiField
+    CheckBox    phraseMode;
 
     Button cancelButton;
     Button acceptButton;
@@ -137,6 +139,11 @@ public class FullTextSearchViewImpl extends Window implements FullTextSearchView
     @Override
     public String getPathToSearch() {
         return isUseDirectory.getValue() ? directory.getText() : "";
+    }
+
+    @Override
+    public boolean isPhraseMode() {
+        return phraseMode.getValue();
     }
 
     @Override

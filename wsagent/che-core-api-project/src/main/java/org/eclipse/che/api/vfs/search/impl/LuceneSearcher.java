@@ -24,7 +24,7 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.queryparser.complexPhrase.ComplexPhraseQueryParser;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.PrefixQuery;
@@ -60,6 +60,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.apache.lucene.queryparser.classic.QueryParser.Operator.AND;
+import static org.apache.lucene.search.BooleanClause.Occur.MUST;
 
 /**
  * Lucene based searcher.
@@ -240,17 +242,30 @@ public abstract class LuceneSearcher implements Searcher {
         final BooleanQuery luceneQuery = new BooleanQuery();
         final String name = query.getName();
         final String path = query.getPath();
-        final String text = query.getText();
+        String text = query.getText();
         if (path != null) {
-            luceneQuery.add(new PrefixQuery(new Term("path", path)), BooleanClause.Occur.MUST);
+            luceneQuery.add(new PrefixQuery(new Term("path", path)), MUST);
         }
+
         if (name != null) {
-            luceneQuery.add(new WildcardQuery(new Term("name", name)), BooleanClause.Occur.MUST);
+            luceneQuery.add(new WildcardQuery(new Term("name", name)), MUST);
         }
+
         if (text != null) {
-            QueryParser qParser = new QueryParser("text", makeAnalyzer());
+            text = ComplexPhraseQueryParser.escape(text);
+            if (!text.endsWith(" ")) {
+                text = text + '*';
+            }
+
             try {
-                luceneQuery.add(qParser.parse(text), BooleanClause.Occur.MUST);
+                if (query.isPhraseQuery()) {
+                    ComplexPhraseQueryParser complexPhraseQueryParser = new ComplexPhraseQueryParser("text", makeAnalyzer());
+                    complexPhraseQueryParser.setDefaultOperator(AND);
+                    luceneQuery.add(complexPhraseQueryParser.parse(text), MUST);
+                } else {
+                    QueryParser qParser = new QueryParser("text", makeAnalyzer());
+                    luceneQuery.add(qParser.parse(text), MUST);
+                }
             } catch (ParseException e) {
                 throw new ServerException(e.getMessage());
             }

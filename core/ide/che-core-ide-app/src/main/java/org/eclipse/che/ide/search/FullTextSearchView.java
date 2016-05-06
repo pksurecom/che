@@ -73,4 +73,7 @@ public interface FullTextSearchView extends View<FullTextSearchView.ActionDelega
 
     /** Returns path to start search */
     String getPathToSearch();
+
+    /** Returns {@code true} if 'Phrase' mode is chosen and {@code false} - otherwise. */
+    boolean isPhraseMode();
 }

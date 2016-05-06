@@ -69,13 +69,14 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
     @Override
     public void search(final String text) {
         QueryExpression queryExpression = new QueryExpression();
-        queryExpression.setText(text + '*');
+        queryExpression.setText(text);
         if (!view.getFileMask().isEmpty()) {
             queryExpression.setName(view.getFileMask());
         }
         if (!view.getPathToSearch().isEmpty()) {
             queryExpression.setPath(view.getPathToSearch());
         }
+        queryExpression.setPhraseQuery(view.isPhraseMode());
 
         projectServiceClient.search(appContext.getDevMachine(), queryExpression).then(new Operation<List<ItemReference>>() {
             @Override
