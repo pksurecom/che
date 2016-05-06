@@ -62,11 +62,7 @@ public class DockerContainerCleaner implements Runnable {
             List<ContainerListEntry> dockerContainers = dockerConnector.listContainers();
             for (ContainerListEntry container : dockerContainers) {
                 Optional<ContainerNameInfo> optional = nameGenerator.parse(container.getNames()[0]);
-                if (!optional.isPresent()) {
-                    continue;
-                }
-                boolean machineIsUsed = machineRegistry.contains(optional.get().getMachineId());
-                if (!machineIsUsed) {
+                if (optional.isPresent() && !machineRegistry.contains(optional.get().getMachineId())) {
                     cleanUp(container);
                 }
             }
