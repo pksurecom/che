@@ -285,6 +285,8 @@ class IdeSvc {
   }
 
   openIde(workspaceId, skipLoader) {
+    this.$rootScope.lockNavbar = true;
+
     this.$timeout(() => {
       this.currentStep = 3;
     }, 0);

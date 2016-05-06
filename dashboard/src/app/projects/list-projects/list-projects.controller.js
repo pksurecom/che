@@ -22,7 +22,7 @@ export class ListProjectsCtrl {
    * Default constructor that is using resource
    * @ngInject for Dependency injection
    */
-  constructor($mdDialog, cheAPI, cheNotification) {
+  constructor($mdDialog, cheAPI, cheNotification, $rootScope) {
     this.$mdDialog = $mdDialog;
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
@@ -73,6 +73,8 @@ export class ListProjectsCtrl {
 
     // projects on all workspaces
     this.projects = [];
+
+    $rootScope.showIDE = false;
   }
 
   updateData() {

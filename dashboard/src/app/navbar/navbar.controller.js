@@ -16,7 +16,7 @@ export class CheNavBarCtrl {
    * Default constructor
    * @ngInject for Dependency injection
    */
-  constructor($mdSidenav, $scope, $location, $route, userDashboardConfig, cheAPI, onBoarding) {
+  constructor($mdSidenav, $scope, $location, $route, userDashboardConfig, cheAPI, onBoarding, $rootScope) {
     this.mdSidenav = $mdSidenav;
     this.$scope = $scope;
     this.$location = $location;
@@ -25,6 +25,8 @@ export class CheNavBarCtrl {
     this.onBoarding = onBoarding;
     this.cheUser = cheAPI.getUser();
     this.links = [{href: '#/create-workspace', name: 'New Workspace'}];
+
+    $rootScope.lockNavbar = true;
 
     this.displayLoginItem = userDashboardConfig.developmentMode;
 
