@@ -60,9 +60,6 @@ public class DockerContainerNameGeneratorTest {
         return new Object[][]{{"/host.node.com/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art",
                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
-                              {"/FF/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art",
-                              new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
-
                               {"/nod/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art",
                                new Pair<>("machineri6bxnoj5jq7ll9j", "workspacep2bivvctac5ciwoh")},
 
@@ -167,6 +164,7 @@ public class DockerContainerNameGeneratorTest {
                               {"workspacep2bivvctac5ciwoh_machineri6bXnoj5jq7ll9j_user-name_workspace"},
                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j"},
                               {"workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_"},
+                              {"/FF/workspacep2bivvctac5ciwoh_machineri6bxnoj5jq7ll9j_art"},
                               {"workspacep2bivvctac5ciwoh_"},
                               {"pong"},
                               {"workspace"},

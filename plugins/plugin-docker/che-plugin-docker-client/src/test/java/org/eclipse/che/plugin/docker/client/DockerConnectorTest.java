@@ -33,6 +33,7 @@ import org.eclipse.che.plugin.docker.client.json.ContainerProcesses;
 import org.eclipse.che.plugin.docker.client.json.Event;
 import org.eclipse.che.plugin.docker.client.json.ExecCreated;
 import org.eclipse.che.plugin.docker.client.json.ExecInfo;
+import org.eclipse.che.plugin.docker.client.json.Filters;
 import org.eclipse.che.plugin.docker.client.json.Image;
 import org.eclipse.che.plugin.docker.client.json.ImageInfo;
 import org.eclipse.che.plugin.docker.client.json.SystemInfo;
@@ -86,6 +87,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -262,7 +264,7 @@ public class DockerConnectorTest {
 
     @Test
     public void shouldBeAbleToGetListContainersWithListContainersParams() throws IOException, JsonParseException {
-        ListContainersParams listContainersParams = ListContainersParams.from();
+        ListContainersParams listContainersParams = ListContainersParams.from().withAll(true).withSize(true);
         ContainerListEntry containerListEntry = mock(ContainerListEntry.class);
         List<ContainerListEntry> expectedListContainers = singletonList(containerListEntry);
 
@@ -273,11 +275,28 @@ public class DockerConnectorTest {
         verify(dockerConnectionFactory).openConnection(any(URI.class));
         verify(dockerConnection).method(REQUEST_METHOD_GET);
         verify(dockerConnection).path("/containers/json");
+        verify(dockerConnection).query("all", 1);
+        verify(dockerConnection).query("size", 1);
         verify(dockerConnection).request();
         verify(dockerResponse).getStatus();
         verify(dockerResponse).getInputStream();
         verify(dockerConnector).parseResponseStreamAsListAndClose(eq(inputStream), any());
 
+        assertEquals(containers, expectedListContainers);
+    }
+
+    @Test
+    public void shouldBeAbleToGetListContainersByFiltersInTheListContainersParams() throws IOException, JsonParseException {
+        Filters filters = new Filters().withFilter("testKey", "testValue");
+        ListContainersParams listContainersParams = ListContainersParams.from().withFilters(filters);
+        ContainerListEntry containerListEntry = mock(ContainerListEntry.class);
+        List<ContainerListEntry> expectedListContainers = singletonList(containerListEntry);
+
+        doReturn(expectedListContainers).when(dockerConnector).parseResponseStreamAsListAndClose(eq(inputStream), any());
+
+        List<ContainerListEntry> containers = dockerConnector.listContainers(listContainersParams);
+
+        verify(dockerConnection).query(eq("filters"), anyObject());
         assertEquals(containers, expectedListContainers);
     }
 

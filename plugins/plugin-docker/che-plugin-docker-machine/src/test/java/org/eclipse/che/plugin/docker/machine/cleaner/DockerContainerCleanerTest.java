@@ -124,7 +124,7 @@ public class DockerContainerCleanerTest {
     }
 
     @Test
-    public void cleanerShouldKillAndRemoveContainerIfThisContainerIsRunningContainerNameInfoIsNotEmptyAndContainerIsExistInTheAPI()
+    public void cleanerShouldKillAndRemoveContainerIfThisContainerIsRunningAndContainerNameInfoIsNotEmptyAndContainerIsNotExistInTheAPI()
             throws MachineException, IOException {
         cleaner.run();
 
