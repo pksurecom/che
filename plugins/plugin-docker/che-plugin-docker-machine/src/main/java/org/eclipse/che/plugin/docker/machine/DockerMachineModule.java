@@ -24,7 +24,6 @@ import org.eclipse.che.api.core.model.machine.ServerConf;
 public class DockerMachineModule extends AbstractModule {
     @Override
     protected void configure() {
-        install(new org.eclipse.che.commons.schedule.executor.ScheduleModule());
         bind(org.eclipse.che.plugin.docker.machine.cleaner.DockerContainerCleaner.class);
 
         Multibinder<org.eclipse.che.api.machine.server.spi.InstanceProvider> machineImageProviderMultibinder =
